@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import jwt, { TokenExpiredError } from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import { User } from '../models/users.models';
@@ -6,8 +6,9 @@ import { Deactivation } from '../models/deactivation.models'; // Ensure this mod
 import { UserRole } from '../types/enum';
 import { AuthenticatedRequest } from '../types';
 import { Socket } from "socket.io";
+import { asyncHandler } from './helper';
 
-export const authMiddleware = async (
+export const authMiddleware: RequestHandler = asyncHandler( async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
@@ -97,7 +98,7 @@ export const authMiddleware = async (
     console.error('Authorization Middleware Error:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
-};
+});
 
 
 
