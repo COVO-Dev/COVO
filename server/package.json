@@ -8,7 +8,8 @@
     "start": "ts-node --transpile-only src/index.ts",
     "test": "node ./node_modules/jest/bin/jest.js --runInBand --detectOpenHandles --forceExit",
     "test:watch": "node --max-old-space-size=4096 ./node_modules/jest/bin/jest.js --runInBand --detectOpenHandles --forceExit --watchAll --no-cache",
-    "typeorm": "typeorm-ts-node-commonjs"
+    "typeorm": "typeorm-ts-node-commonjs",
+    "ngrok": "ngrok http --domain=intent-tortoise-premium.ngrok-free.app 8080"
   },
   "keywords": [],
   "author": "Adeola",
