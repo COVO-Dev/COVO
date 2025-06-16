@@ -19,5 +19,7 @@ yarn.lock
 /src/services/just.ts
 /src/cus
 /src/services/platformData.service.ts
+/src/tests/test/*
+
 
 

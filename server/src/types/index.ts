@@ -624,26 +624,48 @@ export interface ISubscription {
 }
 
 export interface IPlan {
-  name: string;
-  price: number;
-  planCode: string;
-  interval: "monthly" | "weekly";
+	name: string;
+	price: number;
+	planCode: string;
+	interval: "monthly" | "weekly";
 }
 
 export interface PaystackPlan {
-  name: string;
-  amount: number;
-  interval: string;
-  plan_code?: string;
+	name: string;
+	amount: number;
+	interval: string;
+	plan_code?: string;
 }
 
 export interface PaystackSubscription {
-  customer: string;
-  plan: string;
-  authorization?: string;
+	customer: string;
+	plan: string;
+	authorization?: string;
 }
 
 export interface WebhookPayload {
-  event: string;
-  data: any;
+	event: string;
+	data: any;
+}
+
+export interface ICovoSurvey {
+	campaignId: mongoose.Schema.Types.ObjectId;
+	influencerId: mongoose.Schema.Types.ObjectId;
+	brandId: mongoose.Schema.Types.ObjectId;
+	type: "creator_feedback" | "brand_feedback";
+	reviews?: string;
+
+	// Ratings filled by the brand about the creator
+	engagementPerception?: number;
+	deliveryConsistency?: number;
+	brandFeedback?: number;
+	audienceFit?: number;
+
+	// Ratings filled by the creator about the brand
+	communication?: number;
+	paymentTimeliness?: number;
+	respect?: number;
+
+	createdAt?: Date;
+	updatedAt?: Date;
 }
