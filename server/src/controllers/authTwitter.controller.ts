@@ -9,6 +9,7 @@ import {
   validateTwitterAccessToken,
   isTwitterConnected,
 } from "../services/twitter/authTwitter.service";
+import { asyncHandler } from "../middleware/helper";
 
 export const getAuthUrl = async (
   req: AuthenticatedRequest,
@@ -43,7 +44,7 @@ export const getAuthUrl = async (
   }
 };
 
-export const handleCallback = async (
+export const handleCallback = asyncHandler ( async(
   req: Request,
   res: Response
 ): Promise<Response> => {
@@ -95,7 +96,7 @@ export const handleCallback = async (
       message: error.message,
     });
   }
-};
+});
 
 export const checkTwitterConnection = async (
   req: AuthenticatedRequest,

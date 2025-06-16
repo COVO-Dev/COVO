@@ -4,6 +4,7 @@ import { config } from '../config/configuration';
 import { redisSave, redisRetrieve } from '../app';
 import { AuthenticatedRequest } from '../types';
 import { getTokens } from '../services/instagram/authInstagram.service';
+import { asyncHandler } from '../middleware/helper';
 
 const validateConfig = () => {
   const required = ['INSTAGRAM_APP_ID', 'INSTAGRAM_APP_SECRET', 'INSTAGRAM_REDIRECT_URL'];
@@ -56,7 +57,7 @@ export const getAuthUrl = async (req: AuthenticatedRequest, res: Response) => {
   }
 };
 
-export const handleCallback = async (req: Request, res: Response) => {
+export const handleCallback = asyncHandler(async (req: Request, res: Response) => {
   try {
     const { code, state } = req.query;
 
@@ -82,4 +83,4 @@ export const handleCallback = async (req: Request, res: Response) => {
     console.error('Callback handling error:', error);
     //res.redirect(`${config.FRONTEND_URL}/settings?connection=error`);
   }
-};
+});

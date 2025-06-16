@@ -69,7 +69,7 @@ export function isAdmin(req: Request): boolean {
   return user && user.role.includes(UserRole.Admin);
 }
 
-export const isAdminAndHasPermission = (req: Request, res: Response, next: NextFunction) => {
+export const isAdminAndHasPermission = asyncHandler( async ( req: Request, res: Response, next: NextFunction) => {
   const user = getUserData(req);
   if (!user || !user.role.includes(UserRole.Admin)) {
     throw new Error("You are not authorized to perform this action.");
@@ -82,7 +82,7 @@ export const isAdminAndHasPermission = (req: Request, res: Response, next: NextF
     message: "You are not authorized to perform this action.",
     status_code: 403,
   }
-};
+});
 
 export const getPlatformModel = (platform: string) => {
   switch (platform.toLocaleLowerCase()) {
