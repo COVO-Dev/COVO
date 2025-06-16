@@ -1,4 +1,5 @@
 import { z } from "zod";
+import mongoose from "mongoose";
 import { UserRole } from "../types/enum";
 
 const platformMetricsSchema = z.object({
@@ -143,17 +144,27 @@ export const loginSchema = z.object({
 	password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
+const objectIdValidator = z.string().refine(val => mongoose.Types.ObjectId.isValid(val), {
+  message: "Each influencerId must be a valid ObjectId",
+});
+
 export const CampaignValidationSchema = z.object({
-	brandId: z.string().refine((id) => /^[a-fA-F0-9]{24}$/.test(id), {
-		message: "Invalid brand ID format",
-	}),
+	influencerId: z.array(objectIdValidator).optional(),
 	title: z.string().min(1, { message: "Title is required" }),
-	startDate: z.string().refine((date) => !isNaN(Date.parse(date)), {
-		message: "Invalid start date format",
-	}),
-	endDate: z.string().refine((date) => !isNaN(Date.parse(date)), {
-		message: "Invalid end date format",
-	}),
+	startDate: z.preprocess((val) => {
+		return typeof val === "string" || val instanceof Date ? new Date(val) : val;
+	}, z.date({
+		required_error: "Start date is required",
+		invalid_type_error: "Invalid start date format"
+	})),
+
+	endDate: z.preprocess((val) => {
+		return typeof val === "string" || val instanceof Date ? new Date(val) : val;
+	}, z.date({
+		required_error: "End date is required",
+		invalid_type_error: "Invalid end date format"
+	})),
+
 	budgetRange: z
 		.number()
 		.min(0, { message: "Budget range must be a positive number" }),
@@ -182,13 +193,6 @@ export const CampaignValidationSchema = z.object({
 			.string()
 			.min(1, { message: "Report frequency is required" }),
 	}),
-	influencerId: z
-		.array(
-			z.string().refine((id) => /^[a-fA-F0-9]{24}$/.test(id), {
-				message: "Invalid influencer ID format",
-			})
-		)
-		.optional(),
 	status: z.enum(["active", "completed", "pending"]).default("pending"),
 });
 
@@ -198,3 +202,42 @@ export const deactivateRequestSchema = z.object({
 		.string()
 		.min(1, { message: "Deactivation reason is required" }),
 });
+
+export const subscriptionSchema = z.object({
+  userId: z.string().nonempty("userId is required"),
+  planId: z.string().nonempty("planId is required"),
+  planName: z.string().nonempty("planName is required"),
+  planPrice: z.number().nonnegative("planPrice must be >= 0"),
+  startDate: z.preprocess((arg) => (arg ? new Date(arg as string) : undefined), z.date().optional()),
+  endDate: z.preprocess((arg) => new Date(arg as string), z.date({
+    required_error: "endDate is required",
+  })),
+  status: z.enum(["active", "inactive", "cancelled"]),
+  paymentStatus: z.enum(["paid", "pending", "failed"]),
+  providerSubscriptionId: z.string().nonempty("providerSubscriptionId is required"),
+  provider: z.string().nonempty("provider is required"),
+  cancelledAt: z.preprocess((arg) => (arg ? new Date(arg as string) : undefined), z.date().optional()),
+  billingType: z.enum(["recurring", "one-time"]),
+  createdAt: z.preprocess((arg) => (arg ? new Date(arg as string) : undefined), z.date().optional()),
+  updatedAt: z.preprocess((arg) => (arg ? new Date(arg as string) : undefined), z.date().optional()),
+});
+
+export const CovoSurveySchema = z.object({
+  campaignId: z.string().min(1),
+  influencerId: z.string().min(1),
+  brandId: z.string().min(1),
+  type: z.enum(["creator_feedback", "brand_feedback"]),
+  reviews: z.string().optional(),
+
+  // Brand submits about creator
+  engagementPerception: z.number().min(1).max(5).optional(),
+  deliveryConsistency: z.number().min(1).max(5).optional(),
+  brandFeedback: z.number().min(1).max(5).optional(),
+  audienceFit: z.number().min(1).max(5).optional(),
+
+  // Creator submits about brand
+  communication: z.number().min(1).max(5).optional(),
+  paymentTimeliness: z.number().min(1).max(5).optional(),
+  respect: z.number().min(1).max(5).optional(),
+});
+

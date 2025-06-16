@@ -27,12 +27,11 @@ const CampaignSchema: Schema = new Schema(
 		budgetRange: { type: Number, required: true },
 		targetAudience: { type: String, required: true },
 		primaryGoals: { type: [String], required: true },
-		influencerType: { type: String, required: true },
 		geographicFocus: { type: String, required: true },
 		collaborationPreferences: {
 			hasWorkedWithInfluencers: { type: Boolean, required: true },
 			exclusiveCollaborations: { type: Boolean, required: true },
-			type: { type: String, required: true },
+			type: { type: String, enum: [ "Nano", "Micro", "Macro", "Mega" ], required: true },
 			styles: { type: [String], required: true },
 		},
 		recommendedInfluencers: [
@@ -56,13 +55,22 @@ const CampaignSchema: Schema = new Schema(
 		],
 		status: {
 			type: String,
-			enum: ["active", "completed", "pending"],
-			default: "pending",
+			enum: ["active", "inactive", "pending", "ongoing", "completed"],
+			default: "active",
 		},
 		isDeleted: { type: Boolean, default: false },
 	},
 	{ timestamps: true }
 );
+
+CampaignSchema.virtual("milestones", {
+  ref: "Milestone",
+  localField: "_id",
+  foreignField: "campaignId",
+});
+
+CampaignSchema.set("toObject", { virtuals: true });
+CampaignSchema.set("toJSON", { virtuals: true });
 
 CampaignSchema.pre("find", function (next) {
 	this.where({ isDeleted: { $ne: true } });

@@ -2,12 +2,13 @@ import { Request, Response } from "express";
 import {
   getFacebookTokens,
   validateFacebookAccessToken,
-} from "../services/authFacebook.service";
+  generateFacebookAuthUrl,
+} from "../services/facebook/authFacebook.service";
 import { config } from "../config/configuration";
 import { randomBytes } from "crypto";
 import { redisSave, redisRetrieve } from "../app";
 import { AuthenticatedRequest } from "../types";
-import { generateFacebookAuthUrl } from "../services/authFacebook.service";
+
 
 /**
  * Redirect user to Facebook login

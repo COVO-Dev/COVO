@@ -2,7 +2,7 @@ import { ChatRoom } from "../models/chat.model";
 import { uploadFileToAws } from "./upload.service";
 import { Message } from "../models/message.model";
 import { IChat, IMessage, IUser, ServiceResponse } from "../types/index";
-import { Schema } from "mongoose";
+import { Schema, Types } from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 import { HttpError } from "../middleware/errors";
 
@@ -17,8 +17,12 @@ export class ChatService {
     participants: Schema.Types.ObjectId[]
   ): Promise<ServiceResponse<IChat>> {
     try {
+      if (!participants || participants.length === 0) {
+        throw new Error("Participants array is empty");
+      }
       const chatRoom = new ChatRoom({ participants });
       const newChat = await chatRoom.save();
+
       return {
         status_code: 201,
         message: "Chat room created successfully",
@@ -198,6 +202,9 @@ export class ChatService {
 
       const mediaUrls: { url: string; type: "image" | "video" }[] = [];
       for (const file of media) {
+        if (typeof file !== "string" && !file.buffer) {
+          throw new Error("Invalid media file");
+        }
         if (typeof file === "string") {
           const fileType = (file as string).endsWith(".mp4")
             ? "video"
@@ -245,23 +252,30 @@ export class ChatService {
 
   // Get messages for a chat room
   public async getMessages(
-    chatId: string
+    chatId: string,
+    userId: string
   ): Promise<ServiceResponse<IMessage[]>> {
     try {
-      const message = await Message.find({ chatId });
-      // .populate("sender");
-      // .populate({ path: "sender", select: "_id" });
-      if (message.length === 0) {
+
+      const messages = await Message.find({ chatId }).sort({ createdAt: 1 });
+
+      if (!messages || messages.length === 0) {
         return {
           status_code: 404,
           message: "No messages found",
           data: [],
         };
       }
+
+      const enhanced = messages.map((msg) => ({
+        ...msg.toObject(),
+        isUnread: !msg.readBy.some((id) => id.toString() === userId),
+      }));
+
       return {
         status_code: 200,
         message: "Messages retrieved successfully",
-        data: message,
+        data: enhanced,
       };
     } catch (error) {
       console.error(`Error getting messages: ${error}`);
@@ -293,22 +307,52 @@ export class ChatService {
         },
       ]);
 
-      if (chatroom.length === 0) {
-        return {
-          status_code: 404,
-          message: "No chat rooms found",
-          data: [],
-        };
-      }
+      const chatRoomsWithUnread = await Promise.all(
+        chatroom.map(async (room) => {
+          const unreadCount = await Message.countDocuments({
+            chatId: room._id,
+            sender: { $ne: userId },
+            readBy: { $ne: userId },
+          });
+          return {
+            ...room.toObject(),
+            unreadCount,
+          };
+        })
+      );
 
       return {
         status_code: 200,
         message: "Chat rooms retrieved successfully",
-        data: chatroom,
+        data: chatRoomsWithUnread as unknown as IChat[],
       };
     } catch (error) {
       console.error(`Error getting chat rooms: ${error}`);
       throw new Error(`Error getting chat rooms: ${error}`);
     }
   }
+
+  /**
+   * Mark a message as read
+   * @param chatId the chat id
+   * @param userId the user id
+   */
+  // chat.service.ts
+public async markMessagesAsRead(chatId: string, userId: string): Promise<void> {
+  try {
+    await Message.updateMany(
+      {
+        chatId,
+        readBy: { $ne: userId },
+        sender: { $ne: userId },
+      },
+      {
+        $addToSet: { readBy: userId },
+      }
+    );
+  } catch (err) {
+    throw new Error(`Failed to mark messages as read: ${err.message}`);
+  }
+}
+
 }

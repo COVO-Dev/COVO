@@ -26,9 +26,14 @@ export class AuthController {
       console.log("registerInfluencer service response: ", response);
       return res.status(response.status_code).json(response);
     } catch (error) {
+      console.log("registerInfluencer error: ", error);
       return res
         .status(error.status_code || 500)
-        .json({ message: error.message || "Internal Server Error" });
+        .json({ 
+          status: "error",
+          message: error.message || "Internal Server Error",
+          status_code: error.status_code || 500
+        });
     }
   }
 
@@ -109,8 +114,19 @@ export class AuthController {
     req: Request,
     res: Response
   ): Promise<Response> {
+    console.log("Reset password request body:", req.body);
     const { token, newPassword, confirmPassword }: { token: string; newPassword: string; confirmPassword: string; } = req.body;
+    
+    console.log("Extracted params:", {
+      tokenProvided: !!token,
+      tokenLength: token?.length,
+      newPasswordProvided: !!newPassword,
+      confirmPasswordProvided: !!confirmPassword,
+      passwordsMatch: newPassword === confirmPassword
+    });
+    
     try {
+      console.log("Calling auth service resetPassword...");
       const response: AuthServiceResponse<Partial<IUser>> =
         await authProvider.resetPassword(token, newPassword, confirmPassword);
       return res.status(response.status_code).json(response);

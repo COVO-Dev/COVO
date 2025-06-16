@@ -8,7 +8,7 @@ import {
   getTwitterTokens,
   validateTwitterAccessToken,
   isTwitterConnected,
-} from "../services/authTwitter.service";
+} from "../services/twitter/authTwitter.service";
 
 export const getAuthUrl = async (
   req: AuthenticatedRequest,

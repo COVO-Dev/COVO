@@ -11,6 +11,7 @@ const UserSchema: Schema = new Schema(
       required: true,
       unique: true,
       match: /\S+@\S+\.\S+/,
+      select: false
     },
     password: {
       type: String,
@@ -50,6 +51,14 @@ const UserSchema: Schema = new Schema(
     discriminatorKey: "role",
   }
 );
+
+UserSchema.set("toJSON", {
+  transform: (_doc, ret) => {
+    delete ret.email;
+    return ret;
+  },
+});
+
 
 const User = mongoose.model<IUser>("User", UserSchema);
 

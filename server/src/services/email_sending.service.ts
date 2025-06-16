@@ -5,20 +5,88 @@ import { emailQueue } from '../utils/redis';
 import handlebars from 'handlebars';
 import fs from 'fs';
 import path from 'path';
+import { createTestEmailService } from '../utils/dev-email-service';
 
-const transporter = nodemailer.createTransport({
-    service: config.SMTP_SERVICE,
-    host: config.SMTP_HOST,
-    port: config.SMTP_PORT,
-    secure: false,
-    auth: {
+// Check if we should use development email service
+const useDevEmailService = process.env.NODE_ENV !== 'production' && process.env.USE_DEV_EMAIL === 'true';
+
+// Emergency override - if we're having issues with the dev email service
+const useConsoleLoggingOnly = false; // Set to true to bypass file-based dev emails
+
+interface EmailTransporter {
+    sendMail(mailOptions: nodemailer.SendMailOptions): Promise<{response: string}>;
+    verify?(callback: (error: Error | null, success: boolean) => void): void;
+}
+
+let transporter: EmailTransporter;
+
+if (useConsoleLoggingOnly) {
+    console.log('Using console-only email logging (emergency override)');
+    transporter = {
+        sendMail: async (options: any) => {
+            console.log('EMAIL (CONSOLE ONLY):', {
+                to: options.to,
+                subject: options.subject,
+                text: options.text || 'No text content',
+                html: options.html ? 'HTML content available, not shown in console' : 'No HTML content'
+            });
+            return { response: 'console-log-only' };
+        }
+    };
+} else if (useDevEmailService) {
+    console.log('Using development email service (emails will be saved to files instead of being sent)');
+    try {
+        transporter = createTestEmailService();
+        console.log('Development email service created successfully');
+    } catch (error) {
+        console.error('Error creating development email service:', error);
+        // Fall back to console logging emails
+        transporter = {
+            sendMail: async (options: any) => {
+                console.log('EMAIL (DEV MODE):', {
+                    to: options.to,
+                    subject: options.subject,
+                    text: options.text || 'No text content',
+                    html: options.html ? 'HTML content available, not shown in console' : 'No HTML content'
+                });
+                return { response: 'dev-mode-console-log' };
+            }
+        };
+    }
+} else if (!useConsoleLoggingOnly) {
+    // Use real SMTP transport
+    console.log('Setting up real SMTP transport with:', {
+        service: config.SMTP_SERVICE,
+        host: config.SMTP_HOST,
+        port: Number(config.SMTP_PORT) || 587,
         user: config.SMTP_USER,
-        pass: config.SMTP_PASSWORD,
-    },
-});
-
+    });
+    
+    transporter = nodemailer.createTransport({
+        service: config.SMTP_SERVICE,
+        host: config.SMTP_HOST,
+        port: Number(config.SMTP_PORT) || 587,
+        secure: false,
+        auth: {
+            user: config.SMTP_USER,
+            pass: config.SMTP_PASSWORD,
+        },
+        // Adding debug to help troubleshoot email issues
+        debug: true,
+        logger: true,
+    });
+    
+    // Verify connection configuration
+    transporter.verify(function(error, success) {
+        if (error) {
+            console.error('SMTP connection error:', error);
+        } else {
+            console.log('SMTP server is ready to take our messages');
+        }
+    });
+}
 // Helper to compile a Handlebars template
-const compileTemplate = (templateName: string, data: object): string => {
+export const compileTemplate = (templateName: string, data: object): string => {
     const filePath = path.join(__dirname, '..', 'views/templates', `${templateName}.html`);
     if (!fs.existsSync(filePath)) {
         throw new Error(`Template file ${templateName}.html not found at ${filePath}`);

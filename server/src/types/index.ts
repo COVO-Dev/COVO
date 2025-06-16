@@ -47,6 +47,11 @@ export interface IInfluencer extends IUser {
 		paidCollaborationsOnly: boolean;
 		mediaKitUpload?: string;
 	};
+	followers: number;
+	covoScore: {
+		overall: number;
+		ratings: mongoose.Types.ObjectId[];
+	}
 	profilePicture?: string;
 	personalBio?: string;
 	location: {
@@ -86,9 +91,9 @@ export interface IAdmin extends IUser {
 	// permissions: string[];
 }
 
-export interface ICampaign extends Document {
-	brandId: mongoose.Schema.Types.ObjectId;
-	influencerId: mongoose.Schema.Types.ObjectId[];
+export interface ICampaign {
+	brandId: mongoose.Types.ObjectId;
+	influencerId: mongoose.Types.ObjectId[];
 	title: string;
 	startDate: Date;
 	endDate: Date;
@@ -96,12 +101,11 @@ export interface ICampaign extends Document {
 	currency: string;
 	targetAudience: string;
 	primaryGoals: string[];
-	influencerType: string;
 	geographicFocus: string;
 	collaborationPreferences: {
 		hasWorkedWithInfluencers: boolean;
 		exclusiveCollaborations: boolean;
-		type: string;
+		type: "Nano" | "Micro" | "Macro" | "Mega";
 		styles: string[];
 	};
 	trackingAndAnalytics: {
@@ -131,11 +135,34 @@ export interface IRecommendedInfluencer {
 	[key: string]: any;
 }
 
+/**
+ * Represents the response structure from an authentication service.
+ * 
+ * @template T - The type of the data payload.
+ * @property {("success" | "error")} [status] - Indicates the outcome of the authentication request.
+ * @property {number} status_code - HTTP status code or custom status code.
+ * @property {string} message - Descriptive message about the response.
+ * @property {T | T[]} data - The payload returned by the service, either a single item or an array.
+ * @property {string} [access_token] - JWT or similar token for authenticated sessions.
+ * @property {Object} [resetInfo] - Information related to password reset.
+ * @property {string} resetInfo.resetUrl - URL where user can reset their password.
+ * @property {string} resetInfo.token - Token to validate the password reset request.
+ * @property {string} resetInfo.id - Identifier for the user requesting password reset.
+ */
 export interface AuthServiceResponse<T> {
+	status?: "success" | "error";
 	status_code: number;
 	message: string;
 	data: T | T[];
 	access_token?: string;
+	/**
+	 * Information related to password reset, such as reset URL, token, and user ID.
+	 */
+	resetInfo?: {
+		resetUrl: string;
+		token: string;
+		id: string;
+	};
 }
 
 export interface ServiceResponse<T> {
@@ -148,11 +175,11 @@ export interface SearchResponse<T> {
 	status_code: number;
 	message: string;
 	data: {
-				data: T[];
-				totalCount: number;
-				totalPages: number;
-				currentPage: number;
-		  };
+		data: T[];
+		totalCount: number;
+		totalPages: number;
+		currentPage: number;
+	};
 }
 
 export interface AuthenticatedRequest extends Request {
@@ -175,7 +202,7 @@ export interface EmailData {
 	html: string;
 }
 
-export interface INotification extends Document {
+export interface INotification {
 	recipientId: mongoose.Types.ObjectId;
 	senderId: mongoose.Types.ObjectId;
 	role: UserRole;
@@ -188,7 +215,7 @@ export interface INotification extends Document {
 	timestamp: Date;
 }
 
-export interface INotificationSettings extends Document {
+export interface INotificationSettings {
 	recipient: mongoose.Types.ObjectId;
 	isEnabled: boolean;
 	preferences: NotificationPreferenceType;
@@ -200,25 +227,25 @@ export interface INotificationSettings extends Document {
 	updatedAt?: Date;
 }
 
-export interface IDeactivation extends Document {
+export interface IDeactivation {
 	userId: mongoose.Types.ObjectId;
 	deactivationReason: string;
 	deactivatedAt: Date;
 	userData: Record<string, any>;
 }
 
-export interface IChat extends Document {
+export interface IChat {
 	participants: mongoose.Types.ObjectId[];
 	lastMessage: mongoose.Types.ObjectId | null;
 }
 
-export interface IMessage extends Document {
+export interface IMessage {
 	chatId: mongoose.Types.ObjectId;
 	sender: mongoose.Types.ObjectId;
 	content?: string;
 	media?: { url: string; type: "image" | "video" };
 	timestamp: Date;
-	read: boolean;
+	readBy: mongoose.Types.ObjectId[];
 }
 
 export interface IPlatformData {
@@ -258,7 +285,7 @@ export interface PlatformDataResponses {
 	data: any;
 }
 
-export interface ISearchLog extends Document {
+export interface ISearchLog {
 	brandId: mongoose.Schema.Types.ObjectId;
 	filters: {
 		// Influencer Profile Filters
@@ -287,7 +314,7 @@ export interface Tokens {
 	expires_in?: number;
 }
 
-export interface ITwitterMetrics extends Document {
+export interface ITwitterMetrics {
 	influencerId: mongoose.Types.ObjectId;
 
 	metrics: {
@@ -448,7 +475,7 @@ export interface IInstagramMetrics {
 	updatedAt?: Date;
 }
 
-export interface IYoutubeMetrics extends Document {
+export interface IYoutubeMetrics {
 	influencerId: mongoose.Types.ObjectId;
 	metrics: {
 		followers: number;
@@ -509,7 +536,7 @@ export interface IYoutubeMetrics extends Document {
 	}[];
 }
 
-export interface IFacebookMetrics extends Document {
+export interface IFacebookMetrics {
 	influencerId: string;
 
 	metrics: {
@@ -588,4 +615,50 @@ export interface IFacebookMetrics extends Document {
 
 	createdAt?: Date;
 	updatedAt?: Date;
+}
+
+export interface ISubscription {
+	userId: string;
+	planId: string;
+	planName: string;
+	planPrice: number;
+	startDate?: Date;
+	endDate: Date;
+	status: "active" | "inactive" | "cancelled";
+	paymentStatus: "paid" | "pending" | "failed";
+	providerSubscriptionId: string;
+	provider: string;
+	cancelledAt?: Date;
+	billingType: "recurring" | "one-time";
+	createdAt?: Date;
+	updatedAt?: Date;
+}
+
+
+export interface IMilestone {
+	description: string;
+	influencerChecked: boolean;
+	brandChecked: boolean;
+	notes?: string;
+	dueDate: Date;
+	completedAt?: Date | null;
+	influencerId: mongoose.Types.ObjectId;
+	campaignId: mongoose.Types.ObjectId;
+}
+
+export interface ICovoSurvey {
+	brandId: mongoose.Types.ObjectId;
+	influencerId: mongoose.Types.ObjectId;
+	campaignId: mongoose.Types.ObjectId;
+	type: "creator_feedback" | "brand_feedback";
+	reviews?: string;
+	engagementPerception?: number;
+	deliveryConsistency?: number;
+	brandFeedback: Number,
+	audienceFit: Number,
+
+	// Ratings filled by the creator about the brand
+	communication: Number,
+	paymentTimeliness: Number,
+	respect: Number,
 }

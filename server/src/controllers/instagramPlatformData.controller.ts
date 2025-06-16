@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { AuthenticatedRequest } from '../types';
-import { updateInstagramMetrics } from '../services/instagramPlatformData.service';
+import { updateInstagramMetrics } from '../services/instagram/instagramPlatformData.service';
 
 export const getInstagramAnalytics = async (req: AuthenticatedRequest, res: Response) => {
   try {

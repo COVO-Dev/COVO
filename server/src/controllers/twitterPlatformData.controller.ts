@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { AuthenticatedRequest } from '../types';
-import { updateTwitterMetrics } from "../services/twitterPlatformData.service";
+import { updateTwitterMetrics } from "../services/twitter/twitterPlatformData.service";
 
 export const getTwitterAnalytics = async (req: AuthenticatedRequest, res: Response) => {
   try {

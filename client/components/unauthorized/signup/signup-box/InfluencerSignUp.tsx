@@ -5,7 +5,6 @@ import { signIn } from "next-auth/react";
 import { useState } from "react";
 import TermsCheckBoxes from "../terms-check-boxs/TermsCheckBoxes.component";
 import { useRouter } from "next/navigation";
-import ILogin from "@/lib/api/login/login.validation";
 
 export default function InfluencerSignUp() {
 	const [error, setError] = useState("");
@@ -28,30 +27,55 @@ export default function InfluencerSignUp() {
 	const router = useRouter();
 
 	const handleSignUp = async () => {
-		const response = await influencerRegisterRoute({
-			...influencerData,
-			consentAndAgreements,
-		});
+		// Clear previous errors
+		setError("");
+		
+		// Validate required fields
+		if (!influencerData.firstName || !influencerData.lastName || 
+			!influencerData.email || !influencerData.password || 
+			!influencerData.username) {
+			setError("Please fill in all required fields");
+			return;
+		}
 
-		console.log(response, "Influencer SignUpBox");
-		if (response.status === "error") {
-			setError(response.message as string);
-			console.error(response.message, "Influencer SignUpBox");
-		} else if (response.status === "success") {
-			const signInResponse = await signIn("credentials", {
-				redirect: false,
-				email: influencerData.email,
-				password: influencerData.password,
+		if (!consentAndAgreements.termsAccepted) {
+			setError("Please accept the terms and conditions");
+			return;
+		}
+
+		if (!consentAndAgreements.dataComplianceConsent) {
+			setError("Please accept the data compliance consent");
+			return;
+		}
+
+		try {
+			const response = await influencerRegisterRoute({
+				...influencerData,
+				consentAndAgreements,
 			});
 
-			if (signInResponse?.error) {
-				setError(signInResponse.error);
-			} else if (signInResponse?.ok) {
-				setLoggedInSuccessfully("User registered successfully");
+			console.log("Full response:", response);
+			
+			if (response.status === "error") {
+				setError(response.message as string);
+				console.error("Registration error:", response.message);
+			} else if (response.status === "success") {
+				const signInResponse = await signIn("credentials", {
+					redirect: false,
+					email: influencerData.email,
+					password: influencerData.password,
+				});
 
-				router.push("/influencer/additional");
+				if (signInResponse?.error) {
+					setError(signInResponse.error);
+				} else if (signInResponse?.ok) {
+					setLoggedInSuccessfully("User registered successfully");
+					router.push("/influencer/additional");
+				}
 			}
-			console.log(loggedInSuccessfully);
+		} catch (error) {
+			console.error("Network or unexpected error:", error);
+			setError("Registration failed. Please try again.");
 		}
 	};
 
@@ -138,6 +162,18 @@ export default function InfluencerSignUp() {
 				consentAndAgreements={consentAndAgreements}
 				setConsentAndAgreements={setConsentAndAgreements}
 			/>
+
+			{error && (
+				<div className="mb-4 p-3 rounded-md bg-red-100 border border-red-400 text-red-700">
+					{error}
+				</div>
+			)}
+
+			{loggedInSuccessfully && (
+				<div className="mb-4 p-3 rounded-md bg-green-100 border border-green-400 text-green-700">
+					{loggedInSuccessfully}
+				</div>
+			)}
 
 			<button
 				onClick={handleSignUp}

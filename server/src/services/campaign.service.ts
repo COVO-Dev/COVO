@@ -17,10 +17,18 @@ import mongoose from "mongoose";
 import { isValidObjectId } from "../utils/valid";
 import { CampaignValidationSchema } from "../schema/auth.schema";
 import { ZodSchema } from "zod";
-import { CampaignPerformance } from "../models/campaignAnalytics.models";
 import { Influencer } from "../models/influencers.models";
 
 export class CampaignProvider {
+
+  private isFollowerCountValidForType(followers: number): string {
+    if (followers >= 1000 && followers < 10000) return 'Nano';
+    if (followers >= 10000 && followers < 100000) return 'Micro';
+    if (followers >= 100000 && followers < 1000000) return 'Macro';
+    if (followers >= 1000000) return 'Mega';
+    return 'Unknown';
+  }
+
   /**
    * Reusable method to validate payload using Zod schema.
    */
@@ -55,6 +63,7 @@ export class CampaignProvider {
           path: "brandId",
           select: "firstName lastName -role",
         })
+        .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
 
@@ -157,11 +166,12 @@ export class CampaignProvider {
 
       const skip = (page - 1) * limit;
 
-      const campaigns = await Campaign.find({ brandId: brandId })
+      const campaigns = await Campaign.find({ brandId: brandId, status: "active" })
         .populate({
           path: "brandId",
           select: "firstName lastName -role",
         })
+        .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
       if (campaigns.length === 0) {
@@ -184,7 +194,7 @@ export class CampaignProvider {
         },
       };
     } catch (error) {
-      if (error instanceof ResourceNotFound) {
+      if (error instanceof ResourceNotFound || error instanceof BadRequest || error instanceof InvalidInput) {
         throw error;
       }
       throw new Error(`Error retrieving campaigns: ${error.message}`);
@@ -241,7 +251,7 @@ export class CampaignProvider {
         data: campaign,
       };
     } catch (error) {
-      if (error instanceof ResourceNotFound || error instanceof InvalidInput) {
+      if (error instanceof ResourceNotFound || error instanceof BadRequest || error instanceof InvalidInput) {
         throw error;
       }
       throw new Error(`Error retrieving campaign: ${error.message}`);
@@ -274,11 +284,9 @@ export class CampaignProvider {
         {
           $pull: {
             applications: {
-              influencerId: new mongoose.Types.ObjectId(
-                ...payload.influencerId!.toString()
-              ),
-            },
-          },
+              influencerId: { $in: payload.influencerId!.map(id => new mongoose.Types.ObjectId(id)) }
+            }
+          }
         },
         { new: true }
       ).populate("brandId influencerId");
@@ -293,7 +301,7 @@ export class CampaignProvider {
         data: campaign,
       };
     } catch (error) {
-      if (error instanceof ResourceNotFound || error instanceof InvalidInput) {
+      if (error instanceof ResourceNotFound || error instanceof BadRequest || error instanceof InvalidInput) {
         throw error;
       }
       throw new Error(`Error updating campaign: ${error.message}`);
@@ -360,10 +368,9 @@ export class CampaignProvider {
         data: campaign,
       };
     } catch (error) {
-      if (error instanceof ResourceNotFound || error instanceof InvalidInput) {
+      if (error instanceof ResourceNotFound || error instanceof BadRequest || error instanceof InvalidInput) {
         throw error;
       }
-      console.log("acceptInfluencer", error);
       throw new Error(`Error updating campaign: ${error.message}`);
     }
   }
@@ -404,7 +411,7 @@ export class CampaignProvider {
         data: campaign,
       };
     } catch (error) {
-      if (error instanceof ResourceNotFound || error instanceof InvalidInput) {
+      if (error instanceof ResourceNotFound || error instanceof BadRequest || error instanceof InvalidInput) {
         throw error;
       }
       throw new Error(`Error updating campaign: ${error.message}`);
@@ -451,7 +458,7 @@ export class CampaignProvider {
         data: campaign,
       };
     } catch (error) {
-      if (error instanceof ResourceNotFound || error instanceof InvalidInput) {
+      if (error instanceof ResourceNotFound || error instanceof InvalidInput || error instanceof BadRequest) {
         throw error;
       }
       throw new Error(`Error deleting campaign: ${error.message}`);
@@ -487,6 +494,22 @@ export class CampaignProvider {
       if (!influencer) {
         throw new ResourceNotFound("Influencer not found");
       }
+
+      const computedType = this.isFollowerCountValidForType(influencer.followers);
+
+      // Validate campaign expects a valid type
+      const allowedTypes = ['Nano', 'Micro', 'Macro', 'Mega'];
+      if (!allowedTypes.includes(campaign.collaborationPreferences.type)) {
+        throw new BadRequest("Campaign has invalid influencer type criteria");
+      }
+
+      // Compare computed type to campaign requirement
+      if (campaign.collaborationPreferences.type !== computedType) {
+        throw new BadRequest(
+          `This campaign is only open to ${campaign.collaborationPreferences.type} influencers. You are categorized as ${computedType}.`
+        );
+      }
+
 
       const hasApplied = await campaign.applications.some(
         (application) =>
@@ -534,7 +557,7 @@ export class CampaignProvider {
         data: responseResult,
       };
     } catch (error) {
-      if (error instanceof ResourceNotFound || error instanceof InvalidInput) {
+      if (error instanceof ResourceNotFound || error instanceof InvalidInput || error instanceof BadRequest) {
         throw error;
       }
       throw new Error(`Error sending application: ${error.message}`);
@@ -553,26 +576,33 @@ export class CampaignProvider {
     brandId: string
   ): Promise<ServiceResponse<any>> {
     // Validate the IDs
-    if (!isValidObjectId(brandId)) throw new BadRequest("Invalid Campaign ID");
-    if (!isValidObjectId(influencerId))
-      throw new BadRequest("Invalid influencer ID");
+    try {
+      if (!isValidObjectId(brandId)) throw new BadRequest("Invalid Campaign ID");
+      if (!isValidObjectId(influencerId))
+        throw new BadRequest("Invalid influencer ID");
 
-    const campaigns = await Campaign.find({
-      brandId: brandId,
-      "applications.influencerId": influencerId,
-    });
+      const campaigns = await Campaign.find({
+        brandId: brandId,
+        "applications.influencerId": influencerId,
+      });
 
-    if (!campaigns || campaigns.length === 0) {
-      throw new ResourceNotFound(
-        "No campaigns found that the influencer applied for under this brand"
-      );
+      if (!campaigns || campaigns.length === 0) {
+        throw new ResourceNotFound(
+          "No campaigns found that the influencer applied for under this brand"
+        );
+      }
+
+      return {
+        status_code: 200,
+        message: "Campaigns retrieved successfully",
+        data: campaigns,
+      };
+    } catch (error) {
+      if (error instanceof ResourceNotFound || error instanceof InvalidInput || error instanceof BadRequest) {
+        throw error;
+      }
+      throw new Error(`Error retrieving campaigns: ${error.message}`);
     }
-
-    return {
-      status_code: 200,
-      message: "Campaigns retrieved successfully",
-      data: campaigns,
-    };
   }
 
   /**
@@ -620,7 +650,7 @@ export class CampaignProvider {
         data: recommendedInfluencers,
       };
     } catch (error) {
-      if (error instanceof ResourceNotFound || error instanceof InvalidInput) {
+      if (error instanceof ResourceNotFound || error instanceof InvalidInput || error instanceof BadRequest) {
         throw error;
       }
       throw new Error(`Error retrieving influencers: ${error.message}`);
@@ -662,7 +692,7 @@ export class CampaignProvider {
         data: campaigns,
       };
     } catch (error) {
-      if (error instanceof ResourceNotFound || error instanceof InvalidInput) {
+      if (error instanceof ResourceNotFound || error instanceof InvalidInput || error instanceof BadRequest) {
         throw error;
       }
       throw new Error(`Error retrieving campaigns: ${error.message}`);
@@ -697,7 +727,7 @@ export class CampaignProvider {
         data: campaigns,
       };
     } catch (error) {
-      if (error instanceof ResourceNotFound || error instanceof InvalidInput) {
+      if (error instanceof ResourceNotFound || error instanceof InvalidInput || error instanceof BadRequest) {
         throw error;
       }
       throw new Error(`Error retrieving campaigns: ${error.message}`);

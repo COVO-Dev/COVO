@@ -13,7 +13,7 @@ import {
 } from "../middleware/errors";
 import { sendNotification } from "../utils/sendNotification";
 
-const connectedClients = new Map<string, WebSocket>();
+export const connectedClients = new Map<string, WebSocket>();
 
 export class NotificationService {
   /**
@@ -170,6 +170,13 @@ export class NotificationService {
         data: notifications,
       };
     } catch (error) {
+      if (
+        error instanceof BadRequest ||
+        error instanceof ResourceNotFound ||
+        error instanceof InvalidInput
+      ) {
+        throw error;
+      }
       throw new Error(`Failed to retrieve notifications: ${error.message}`);
     }
   }
@@ -213,6 +220,13 @@ export class NotificationService {
         data: notifications,
       };
     } catch (error) {
+      if (
+        error instanceof BadRequest ||
+        error instanceof ResourceNotFound ||
+        error instanceof InvalidInput
+      ) {
+        throw error;
+      }
       throw new Error(`Error retrieving notifications: ${error.message}`);
     }
   }
@@ -260,6 +274,13 @@ export class NotificationService {
         data: notification,
       };
     } catch (error) {
+      if (
+        error instanceof BadRequest ||
+        error instanceof ResourceNotFound ||
+        error instanceof InvalidInput
+      ) {
+        throw error;
+      }
       throw new Error(`Error deleting notification: ${error.message}`);
     }
   }

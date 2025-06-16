@@ -25,6 +25,8 @@ import { facebookRoute } from "./routes/authFacebook.routes";
 import { facebookPlatformData } from "./routes/facebookPlatformData.routes";
 import { searchLogRoute } from "./routes/searchLog.routes";
 import { instagramPlatformData } from "./routes/instagramPlatformData.routes";
+import { milestoneRouter } from "./routes/campaignMilestone.routes";
+import { surveyRouters } from "./routes/covoSurvey.route";
 
 dotenv.config();
 
@@ -126,6 +128,8 @@ app.use("/api", deactivationRoute);
 app.use("/api", chatRoute);
 app.use("/api", adminRoute);
 app.use("/api", searchLogRoute);
+app.use("/api", milestoneRouter);
+app.use("/api", surveyRouters);
 
 // Youtube routes (Google OAuth)
 app.use("/api", youtubeRoute);

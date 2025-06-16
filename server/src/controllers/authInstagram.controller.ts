@@ -3,7 +3,7 @@ import { randomBytes } from 'crypto';
 import { config } from '../config/configuration';
 import { redisSave, redisRetrieve } from '../app';
 import { AuthenticatedRequest } from '../types';
-import { getTokens } from '../services/authInstagram.service';
+import { getTokens } from '../services/instagram/authInstagram.service';
 
 const validateConfig = () => {
   const required = ['INSTAGRAM_APP_ID', 'INSTAGRAM_APP_SECRET', 'INSTAGRAM_REDIRECT_URL'];

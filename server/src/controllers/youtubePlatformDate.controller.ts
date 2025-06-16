@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { AuthenticatedRequest } from '../types';
-import { updateYoutubeMetrics } from '../services/YoutubePlatformData.service';
+import { updateYoutubeMetrics } from '../services/youtube/YoutubePlatformData.service';
 
 export const getYoutubeAnalytics = async (req: AuthenticatedRequest, res: Response) => {
   try {

@@ -1,10 +1,8 @@
 import NotificationSettings from "../models/notificationSettings.models";
-import { isValidObjectId } from "../utils/valid";
 import mongoose from "mongoose";
 import { INotificationSettings } from "../types";
 import { ServiceResponse } from "../types";
-import { BadRequest, ResourceNotFound } from "../middleware/errors";
-import { UserRole } from "../types/enum";
+import { BadRequest } from "../middleware/errors";
 
 export class NotificationSettingsService {
   /**
@@ -38,6 +36,9 @@ export class NotificationSettingsService {
         data: settings,
       };
     } catch (error) {
+      if (error instanceof BadRequest) {
+        throw error;
+      }
       throw new Error(
         `Failed to retrieve notification settings: ${error.message}`
       );
@@ -80,6 +81,9 @@ export class NotificationSettingsService {
         data: updatedSettings,
       };
     } catch (error) {
+      if (error instanceof BadRequest) {
+        throw error;
+      }
       throw new Error(
         `Failed to update notification settings: ${error.message}`
       );

@@ -93,15 +93,29 @@ export class SearchLogService {
                 throw new Error("Invalid platform specified");
             }
 
+            // const influencerMap = new Map(influencers.map((inf) => [inf._id.toString(), inf.toObject()]));
+
+            // const mergedResults = platformData.map((platformEntry) => {
+            //     const influencer = influencerMap.get(platformEntry.influencerId.toString());
+            //     return {
+            //         ...influencer,
+            //         platformData: platformEntry,
+            //     };
+            // });
+
             const influencerMap = new Map(influencers.map((inf) => [inf._id.toString(), inf.toObject()]));
 
-            const mergedResults = platformData.map((platformEntry) => {
-                const influencer = influencerMap.get(platformEntry.influencerId.toString());
+            const mergedResults = influencers.map((influencer) => {
+                const platformEntry = platformData.find(
+                    (p) => p.influencerId.toString() === influencer._id.toString()
+                );
                 return {
-                    ...influencer,
-                    platformData: platformEntry,
+                    ...influencer.toObject(),
+                    platformData: platformEntry || null,
                 };
             });
+
+
 
             const { brandId: temp, ...logFilters } = filters;
             await new SearchLog({ brandId, filters: logFilters }).save();

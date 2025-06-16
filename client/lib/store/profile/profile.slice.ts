@@ -18,8 +18,8 @@ const initialState: IInitialState = {
   isDeleted: false,
   selectedPlatforms: [],
   deactivated: false,
-  createdAt: new Date(),
-  updatedAt: new Date(),
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
   platforms: {},
 };
 

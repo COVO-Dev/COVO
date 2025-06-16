@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/phone-input";
 import useControlledField from "@/utils/useControlledField"
 
-export default function StepThreeAdditionalInfo({ control, setValue, getValues, resetField, platformAuthUrl }) {
+export default function StepThreeAdditionalInfo({ control, setValue, getValues, resetField }) {
   // const { selectedPlatforms } = useAppSelector(state => state.influencerAdditionalInfo)
   // const [platformAuthUrl, setPlatformAuthUrl] = useState([])
   const [countryName, setCountryName] = useState<string>('')

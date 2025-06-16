@@ -49,8 +49,8 @@ export interface IInitialState {
   };
   selectedPlatforms?: string[];
   deactivated?: boolean;
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt?: string;
+  updatedAt?: string;
   personalBio?: string;
   location?: {
     country: string;
@@ -60,10 +60,9 @@ export interface IInitialState {
     [key: string]: {
       auth: {
         accessToken: string;
-        refreshToken: string;
-        tokenExpiry: Date;
-        connected: boolean;
-        lastConnected: Date;
+        refreshToken: string;      tokenExpiry: string;
+      connected: boolean;
+      lastConnected: string;
       };
       platformUsername: string;
       platformId: string;
@@ -86,7 +85,7 @@ export interface IInitialState {
           };
         };
         brandMentions: string[];
-        lastUpdated: Date;
+        lastUpdated: string;
       };
       topPosts: string[];
     };

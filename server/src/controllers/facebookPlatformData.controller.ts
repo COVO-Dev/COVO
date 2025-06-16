@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { AuthenticatedRequest } from '../types';
-import { updateFacebookMetrics } from '../services/facebookPlaformData.service';
+import { updateFacebookMetrics } from '../services/facebook/facebookPlaformData.service';
 
 export const getFacebookAnalytics = async (req: AuthenticatedRequest, res: Response) => {
   try {

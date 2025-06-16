@@ -128,8 +128,11 @@ export class ChatController {
    */
   public getMessages = asyncHandler(async (req: Request, res: Response) => {
     const { chatId } = req.params;
+    const userData = getUserData(req);
+
     const { status_code, message, data } = await chatService.getMessages(
-      chatId
+      chatId,
+      userData?.userId || ""
     );
     sendJsonResponse(res, status_code, message, data);
   });
@@ -153,6 +156,31 @@ export class ChatController {
       const { status_code, message, data } =
         await chatService.getChatRoomsForUser(userId);
       sendJsonResponse(res, status_code, message, data);
+    }
+  );
+
+  /**
+   * Mark messages as read in a chat room
+   */
+  public markMessagesAsRead = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { chatId } = req.params;
+      const userData = getUserData(req);
+
+      if (!userData) {
+        throw new BadRequest("You are not authenticated");
+      }
+
+      await chatService.markMessagesAsRead(
+        chatId,
+        userData.userId
+      );
+      sendJsonResponse(
+        res,
+        200,
+        "Messages marked as read successfully",
+        null
+      );
     }
   );
 }

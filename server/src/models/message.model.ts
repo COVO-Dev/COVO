@@ -14,7 +14,7 @@ const MessageSchema: Schema = new Schema(
       },
     ],
     timestamp: { type: Date, default: Date.now },
-    read: { type: Boolean, default: false },
+    readBy: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
   },
   { timestamps: true }
 );

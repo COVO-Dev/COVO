@@ -103,7 +103,6 @@ export default function AdditionalInformationForm() {
           setValue={setValue}
           getValues={getValues}
           resetField={resetField}
-          platformAuthUrl={platformAuthUrl}
           // values={getValues()}
         />
       ),

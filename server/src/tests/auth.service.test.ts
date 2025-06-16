@@ -63,6 +63,7 @@ describe("AuthProvider - registerInfluencer", () => {
       marketingOptIn: false,
       dataComplianceConsent: true,
     },
+    privacyPolicy: true,
   };
 
   beforeEach(() => {
@@ -106,6 +107,7 @@ describe("AuthProvider - registerInfluencer", () => {
         marketingOptIn: false,
         dataComplianceConsent: true,
       },
+      privacyPolicy: true,
     };
 
     await expect(authProvider.registerInfluencer(incompletePayload as any))
@@ -129,6 +131,7 @@ describe("AuthProvider - registerInfluencer", () => {
         marketingOptIn: false,
         dataComplianceConsent: true,
       },
+      privacyPolicy: true,
     };
 
     // Mock User.findOne to simulate existing user
@@ -156,6 +159,7 @@ describe("AuthProvider - registerInfluencer", () => {
         marketingOptIn: false,
         dataComplianceConsent: true,
       },
+      privacyPolicy: true,
     };
 
     // Mock User.findOne to simulate a soft-deleted account
@@ -185,6 +189,7 @@ describe("AuthProvider - registerInfluencer", () => {
         marketingOptIn: true,
         dataComplianceConsent: true,
       },
+      privacyPolicy: true,
     };
 
     // Mock User.findOne to simulate no existing user
@@ -220,11 +225,11 @@ describe("AuthProvider - registerInfluencer", () => {
 
     // Try registering influencer with missing consent
     await expect(authProvider.registerInfluencer(payload as any)).rejects.toThrow(
-      new HttpError(400, "You must accept the terms and data compliance consent to register.")
+      new HttpError(400, "You must accept the privacy policy terms and data compliance consent to register.")
     );
   });
 
-  test("should throw an error if termsAccepted or dataComplianceConsent are false", async () => {
+  test("should throw an error if privacy policy, termsAccepted or dataComplianceConsent are false", async () => {
     const payload = {
       firstName: "Emily",
       lastName: "Davis",
@@ -232,10 +237,11 @@ describe("AuthProvider - registerInfluencer", () => {
       username: "emilydavis",
       password: "password123",
       consentAndAgreements: {
-        termsAccepted: false, // terms not accepted
+        termsAccepted: false,
         marketingOptIn: true,
-        dataComplianceConsent: false, // data consent not given
+        dataComplianceConsent: false,
       },
+      privacyPolicy: false,
     };
 
     // Mock User.findOne to simulate no existing user
@@ -243,7 +249,7 @@ describe("AuthProvider - registerInfluencer", () => {
 
     // Try registering influencer with invalid consent
     await expect(authProvider.registerInfluencer(payload as any)).rejects.toThrow(
-      new HttpError(400, "You must accept the terms and data compliance consent to register.")
+      new HttpError(400, "You must accept the privacy policy terms and data compliance consent to register.")
     );
   });
 });
@@ -262,6 +268,7 @@ describe("AuthProvider - registerBrand", () => {
       marketingOptIn: true,
       dataComplianceConsent: true,
     },
+    privacyPolicy: true,
   };
 
   beforeEach(() => {
@@ -302,6 +309,7 @@ describe("AuthProvider - registerBrand", () => {
         marketingOptIn: true,
         dataComplianceConsent: true,
       },
+      privacyPolicy: true,
     };
 
     // Try registering brand with missing fields
@@ -324,6 +332,7 @@ describe("AuthProvider - registerBrand", () => {
         marketingOptIn: true,
         dataComplianceConsent: true,
       },
+      privacyPolicy: true,
     };
 
     (User.findOne as jest.Mock).mockResolvedValueOnce({ email: payload.email });
@@ -351,6 +360,7 @@ describe("AuthProvider - registerBrand", () => {
         marketingOptIn: true,
         dataComplianceConsent: true,
       },
+      privacyPolicy: true,
     };
 
     // Mock User.findOne to simulate existing brand, but isDeleted is true
@@ -378,6 +388,7 @@ describe("AuthProvider - registerBrand", () => {
         marketingOptIn: true,
         dataComplianceConsent: true,
       },
+      privacyPolicy: true,
     };
 
     (User.findOne as jest.Mock).mockResolvedValueOnce(null);
@@ -397,7 +408,7 @@ describe("AuthProvider - registerBrand", () => {
       .toThrow("Internal Server Error");
   });
 
-  test("should throw an error if termsAccepted or dataComplianceConsent are false", async () => {
+  test("should throw an error if privacy policy, termsAccepted or dataComplianceConsent are false", async () => {
     const payload = {
       firstName: "Emily",
       lastName: "Davis",
@@ -411,6 +422,7 @@ describe("AuthProvider - registerBrand", () => {
         marketingOptIn: true,
         dataComplianceConsent: false,
       },
+      privacyPolicy: false,
     };
 
     // Mock User.findOne to simulate no existing user
@@ -418,11 +430,11 @@ describe("AuthProvider - registerBrand", () => {
 
     // Try registering influencer with invalid consent
     await expect(authProvider.registerBrand(payload as any)).rejects.toThrow(
-      new HttpError(400, "You must accept the terms and data compliance consent to register.")
+      new HttpError(400, "You must accept the privacy policy, terms and data compliance consent to register.")
     );
   });
 
-  test("should throw an error if consent and agreements are invalid", async () => {
+  test("should throw an error if privacy policy, consent and agreements are invalid", async () => {
     const payload = {
       firstName: "John",
       lastName: "Doe",
@@ -436,12 +448,13 @@ describe("AuthProvider - registerBrand", () => {
         marketingOptIn: true,
         dataComplianceConsent: true,
       },
+      privacyPolicy: false,
     };
 
     (User.findOne as jest.Mock).mockResolvedValueOnce(null);
 
     await expect(authProvider.registerBrand(payload as any)).rejects.toThrow(
-      new HttpError(400, "You must accept the terms and data compliance consent to register.")
+      new HttpError(400, "You must accept the privacy policy, terms and data compliance consent to register.")
     );
   });
 });
@@ -460,6 +473,7 @@ describe("AuthProvider - registerAdmin", () => {
       marketingOptIn: true,
       dataComplianceConsent: true,
     },
+    privacyPolicy: true,
   };
 
   beforeEach(() => {
@@ -502,6 +516,7 @@ describe("AuthProvider - registerAdmin", () => {
         marketingOptIn: true,
         dataComplianceConsent: true,
       },
+      privacyPolicy: true,
     };
   
     // Mock User.findOne to simulate existing admin
@@ -552,6 +567,7 @@ describe("AuthProvider - registerAdmin", () => {
         marketingOptIn: true,
         dataComplianceConsent: true,
       },
+      privacyPolicy: true,
     };
   
     // Mock User.findOne to simulate no existing admin
@@ -578,6 +594,7 @@ describe("AuthProvider - registerAdmin", () => {
         marketingOptIn: true,
         dataComplianceConsent: true,
       },
+      privacyPolicy: true,
     };
   
     // Try registering admin with an invalid email
@@ -587,7 +604,7 @@ describe("AuthProvider - registerAdmin", () => {
   });  
 
 
-  test("should throw an error if termsAccepted or dataComplianceConsent are false", async () => {
+  test("should throw an error if privacy policy, termsAccepted or dataComplianceConsent are false", async () => {
     const payload = {
       firstName: "Emily",
       lastName: "Davis",
@@ -599,6 +616,7 @@ describe("AuthProvider - registerAdmin", () => {
         marketingOptIn: true,
         dataComplianceConsent: false,
       },
+      privacyPolicy: false,
     };
 
     // Mock User.findOne to simulate no existing user
@@ -606,7 +624,7 @@ describe("AuthProvider - registerAdmin", () => {
 
     // Try registering influencer with invalid consent
     await expect(authProvider.registerAdmin(payload as any)).rejects.toThrow(
-      new HttpError(400, "You must accept the terms and data compliance consent to register.")
+      new HttpError(400, "You must accept the privacy policy, terms and data compliance consent to register.")
     );
   });
 
@@ -627,7 +645,7 @@ describe("AuthProvider - registerAdmin", () => {
     (User.findOne as jest.Mock).mockResolvedValueOnce(null);
 
     await expect(authProvider.registerAdmin(payload as any)).rejects.toThrow(
-      new HttpError(400, "You must accept the terms and data compliance consent to register.")
+      new HttpError(400, "You must accept the privacy policy, terms and data compliance consent to register.")
     );
   });
 
@@ -643,6 +661,7 @@ describe("AuthProvider - registerAdmin", () => {
         marketingOptIn: false,
         dataComplianceConsent: true,
       },
+      privacyPolicy: true,
     };
 
     // Mock User.findOne to simulate existing admin, but isDeleted is true

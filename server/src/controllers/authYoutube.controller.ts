@@ -3,7 +3,7 @@ import {
   generateAuthUrl,
   getYoutubeTokens,
   validateYoutubeAccessToken,
-} from "../services/authYoutube.service";
+} from "../services/youtube/authYoutube.service";
 import { AuthenticatedRequest } from "../types";
 import { randomBytes } from "crypto";
 import { redisSave, redisRetrieve } from "../app";

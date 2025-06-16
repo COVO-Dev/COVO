@@ -23,5 +23,5 @@ const CampaignPerformance: Schema = new Schema(
   { timestamps: true }
 );
 
-const CampaignPerformances = mongoose.model<Document>("CampaignPerformance", CampaignPerformance);
-export { CampaignPerformance };
+export const CampaignPerformances = mongoose.model<Document>("CampaignPerformance", CampaignPerformance);
+

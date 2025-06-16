@@ -65,6 +65,6 @@ export interface IBrand extends IUser {
 	};
 	bio: string;
 	campaigns: string[];
-	createdAt: Date;
-	updatedAt: Date;
+	createdAt: string;
+	updatedAt: string;
 }

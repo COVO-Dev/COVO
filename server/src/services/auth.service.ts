@@ -70,12 +70,11 @@ export class AuthProvider {
 		if (
 			!consentAndAgreements ||
 			!consentAndAgreements.termsAccepted ||
-			!consentAndAgreements.dataComplianceConsent ||
-			!privacyPolicy
+			!consentAndAgreements.dataComplianceConsent
 		) {
 			throw new HttpError(
 				400,
-				"You must accept the privacy policy terms and data compliance consent to register."
+				"You must accept the terms and data compliance consent to register."
 			);
 		}
 
@@ -97,8 +96,9 @@ export class AuthProvider {
 				lastName: lastName,
 				email,
 				password: hashedPassword,
-				isVerified: true,
 				username,
+				role: UserRole.Influencer,
+				privacyPolicy: true, // Set this as accepted during registration
 				// phoneNumber,
 				consentAndAgreements: {
 					termsAccepted: consentAndAgreements.termsAccepted,
@@ -109,12 +109,10 @@ export class AuthProvider {
 
 			const createUser = await newInfluencer.save();
 
-			try {
-				await sendWelcomeEmail(email, firstName);
-			} catch (emailError) {
+			// Send welcome email asynchronously (don't block registration if it fails)
+			sendWelcomeEmail(email, firstName).catch(emailError => {
 				console.error("Failed to send welcome email:", emailError);
-				throw new HttpError(500, "Failed to send welcome email");
-			}
+			});
 
 			const access_token = jwt.sign(
 				{ _id: createUser._id, role: UserRole.Influencer },
@@ -123,6 +121,7 @@ export class AuthProvider {
 			);
 
 			return {
+				status: "success",
 				status_code: 200,
 				message: "Influencer registered successfully",
 				data: createUser,
@@ -417,21 +416,37 @@ export class AuthProvider {
 				{ expiresIn: "1h" }
 			);
 
-			const resetUrl = `${config.BASE_URL}/new-password?token=${jwtResetToken}&id=${user._id}`;
+			// Use a default URL if BASE_URL is undefined
+			const baseUrl = config.BASE_URL || 'http://localhost:3000';
+			const resetUrl = `${baseUrl}/new-password?token=${jwtResetToken}&id=${user._id}`;
+			
+			console.log(`Password reset URL generated: ${resetUrl}`);
 
-			await sendPasswordResetEmail(
-				email,
-				user.firstName,
-				resetUrl,
-			)
+			try {
+				await sendPasswordResetEmail(
+					email,
+					user.firstName,
+					resetUrl,
+				);
+				console.log(`Password reset email sent to ${email}`);
+			} catch (emailError) {
+				console.error(`Failed to send password reset email: ${emailError.message}`);
+				// Continue even if email fails to send
+			}
 
 			return {
 				status_code: 200,
-				message: "Password reset link sent successfully",
+				message: "Password reset link sent successfully.",
 				data: user,
+				resetInfo: {
+					resetUrl,
+					token: jwtResetToken,
+					id: user._id.toString()
+				}
 			}
 		} catch (error) {
-			throw new HttpError(500, `Error Sending Reset Password Link`);
+			console.error(`Error in forgetPassword: ${error.message}`, error);
+			throw new HttpError(500, `Error Sending Reset Password Link: ${error.message}`);
 		}
 	}
 
@@ -448,16 +463,26 @@ export class AuthProvider {
 		newPassword: string,
 		confirmPassword: string
 	): Promise<AuthServiceResponse<IUser>> {
+		console.log("Reset password service called with:", {
+			tokenPresent: !!token,
+			tokenLength: token?.length,
+			newPasswordPresent: !!newPassword,
+			confirmPasswordPresent: !!confirmPassword,
+		});
 
 		try {
+			console.log("Attempting to verify JWT token...");
 			const payload = jwt.verify(token, config.SECRET_TOKEN) as {
 				rawToken: string;
 				userId: string;
 			};
 			const { rawToken, userId } = payload;
+			console.log("JWT verified, extracted payload:", { userId });
 
 			const hashedToken = crypto.createHash("sha256").update(rawToken).digest("hex");
+			console.log("Generated hashedToken for verification:", hashedToken.substring(0, 10) + '...');
 
+			console.log("Looking for user with ID and valid reset token...");
 			const user = await User.findOne({
 				_id: userId,
 				resetPasswordToken: hashedToken,
@@ -465,6 +490,17 @@ export class AuthProvider {
 			});
 
 			if (!user) {
+				console.log("User not found with matching reset token. Checking if user exists at all...");
+				const userCheck = await User.findById(userId);
+				if (userCheck) {
+					console.log("User exists but token doesn't match:", {
+						expectedToken: hashedToken.substring(0, 10) + '...',
+						actualToken: userCheck.resetPasswordToken ? userCheck.resetPasswordToken.substring(0, 10) + '...' : 'null',
+						tokenExpired: userCheck.resetPasswordExpires ? userCheck.resetPasswordExpires < new Date() : 'no expiry date'
+					});
+				} else {
+					console.log("No user found with provided ID:", userId);
+				}
 				throw new ResourceNotFound("User not found");
 			}
 

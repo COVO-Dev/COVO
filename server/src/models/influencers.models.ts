@@ -10,6 +10,18 @@ const InfluencerSchema: Schema = new Schema(
       match: /^[a-zA-Z0-9_-]+$/
     },
     age: { type: Number, min: 18, max: 65 },
+    covoScore: {
+      overall: { type: Number, min: 0, max: 100 },
+      ratings: [{ type: mongoose.Schema.Types.ObjectId, ref: 'CovoSurvey' }],
+    },
+    followers: {
+      type: Number,
+      min: 0,
+    },
+    type: {
+      type: String,
+      enum: ['Nano', 'Micro', 'Macro', 'Mega', 'Unknown'],
+    },
     contentAndAudience: {
       primaryNiche: { type: String },
       secondaryNiche: { type: String },
