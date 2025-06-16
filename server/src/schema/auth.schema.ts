@@ -144,8 +144,16 @@ export const loginSchema = z.object({
 	password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
-const objectIdValidator = z.string().refine(val => mongoose.Types.ObjectId.isValid(val), {
-  message: "Each influencerId must be a valid ObjectId",
+const objectIdValidator = z.custom<mongoose.Types.ObjectId>((val) => {
+	if (typeof val === "string") {
+		return mongoose.Types.ObjectId.isValid(val);
+	}
+	if (val instanceof mongoose.Types.ObjectId) {
+		return true;
+	}
+	return false;
+}, {
+	message: "Invalid ObjectId format"
 });
 
 export const CampaignValidationSchema = z.object({
@@ -172,7 +180,6 @@ export const CampaignValidationSchema = z.object({
 	primaryGoals: z
 		.array(z.string().min(1, { message: "Goal cannot be empty" }))
 		.min(1),
-	influencerType: z.string().min(1, { message: "Influencer type is required" }),
 	geographicFocus: z
 		.string()
 		.min(1, { message: "Geographic focus is required" }),
@@ -186,9 +193,9 @@ export const CampaignValidationSchema = z.object({
 	}),
 	trackingAndAnalytics: z.object({
 		performanceTracking: z.boolean(),
-		// metrics: z
-		// 	.array(z.string().min(1, { message: "Metric cannot be empty" }))
-		// 	.min(1),
+		metrics: z
+			.array(z.string().min(1, { message: "Metric cannot be empty" }))
+			.min(1),
 		reportFrequency: z
 			.string()
 			.min(1, { message: "Report frequency is required" }),

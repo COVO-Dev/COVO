@@ -110,7 +110,7 @@ export interface ICampaign {
 	};
 	trackingAndAnalytics: {
 		performanceTracking: boolean;
-		// metrics: string[];
+		metrics: string[];
 		reportFrequency: string;
 	};
 	status: "active" | "completed" | "pending";
@@ -135,34 +135,11 @@ export interface IRecommendedInfluencer {
 	[key: string]: any;
 }
 
-/**
- * Represents the response structure from an authentication service.
- * 
- * @template T - The type of the data payload.
- * @property {("success" | "error")} [status] - Indicates the outcome of the authentication request.
- * @property {number} status_code - HTTP status code or custom status code.
- * @property {string} message - Descriptive message about the response.
- * @property {T | T[]} data - The payload returned by the service, either a single item or an array.
- * @property {string} [access_token] - JWT or similar token for authenticated sessions.
- * @property {Object} [resetInfo] - Information related to password reset.
- * @property {string} resetInfo.resetUrl - URL where user can reset their password.
- * @property {string} resetInfo.token - Token to validate the password reset request.
- * @property {string} resetInfo.id - Identifier for the user requesting password reset.
- */
 export interface AuthServiceResponse<T> {
-	status?: "success" | "error";
 	status_code: number;
 	message: string;
 	data: T | T[];
 	access_token?: string;
-	/**
-	 * Information related to password reset, such as reset URL, token, and user ID.
-	 */
-	resetInfo?: {
-		resetUrl: string;
-		token: string;
-		id: string;
-	};
 }
 
 export interface ServiceResponse<T> {
@@ -193,6 +170,7 @@ export interface AuthenticatedRequest extends Request {
 		firstName: string;
 		lastName: string;
 	};
+	// subscription?: any
 }
 
 export interface EmailData {
@@ -617,6 +595,17 @@ export interface IFacebookMetrics {
 	updatedAt?: Date;
 }
 
+export interface IMilestone {
+	description: string;
+	influencerChecked: boolean;
+	brandChecked: boolean;
+	notes?: string;
+	dueDate: Date;
+	completedAt?: Date | null;
+	influencerId: mongoose.Types.ObjectId;
+	campaignId: mongoose.Types.ObjectId;
+}
+
 export interface ISubscription {
 	userId: string;
 	planId: string;
@@ -634,31 +623,27 @@ export interface ISubscription {
 	updatedAt?: Date;
 }
 
-
-export interface IMilestone {
-	description: string;
-	influencerChecked: boolean;
-	brandChecked: boolean;
-	notes?: string;
-	dueDate: Date;
-	completedAt?: Date | null;
-	influencerId: mongoose.Types.ObjectId;
-	campaignId: mongoose.Types.ObjectId;
+export interface IPlan {
+  name: string;
+  price: number;
+  planCode: string;
+  interval: "monthly" | "weekly";
 }
 
-export interface ICovoSurvey {
-	brandId: mongoose.Types.ObjectId;
-	influencerId: mongoose.Types.ObjectId;
-	campaignId: mongoose.Types.ObjectId;
-	type: "creator_feedback" | "brand_feedback";
-	reviews?: string;
-	engagementPerception?: number;
-	deliveryConsistency?: number;
-	brandFeedback: Number,
-	audienceFit: Number,
+export interface PaystackPlan {
+  name: string;
+  amount: number;
+  interval: string;
+  plan_code?: string;
+}
 
-	// Ratings filled by the creator about the brand
-	communication: Number,
-	paymentTimeliness: Number,
-	respect: Number,
+export interface PaystackSubscription {
+  customer: string;
+  plan: string;
+  authorization?: string;
+}
+
+export interface WebhookPayload {
+  event: string;
+  data: any;
 }

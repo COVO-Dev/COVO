@@ -7,6 +7,7 @@ import {
 import { AuthenticatedRequest } from "../types";
 import { randomBytes } from "crypto";
 import { redisSave, redisRetrieve } from "../app";
+import { asyncHandler } from "../middleware/helper";
 
 
 export const getAuthUrl = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -32,7 +33,7 @@ export const getAuthUrl = async (req: AuthenticatedRequest, res: Response): Prom
   }
 };
 
-export const handleCallback = async (
+export const handleCallback = asyncHandler ( async (
   req: Request,
   res: Response
 ): Promise<Response> => {
@@ -85,7 +86,7 @@ export const handleCallback = async (
       message: error.message,
     });
   }
-};
+});
 
 export const checkYoutubeConnection = async (
   req: AuthenticatedRequest,
