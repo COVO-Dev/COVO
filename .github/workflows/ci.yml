@@ -7,39 +7,63 @@ on:
     branches: [main, staging]
 
 jobs:
-  build-and-test:
+  build-client:
+    name: 🔧 Build Client
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: 📦 Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
+      - name: 🧰 Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
 
-      - name: Install dependencies
+      - name: 📥 Install client dependencies
         run: npm install
+        working-directory: client
 
-      - name: Run TypeScript checks
-        run: npx tsc --noEmit
+      - name: 🛠️ Build client
+        run: npm run build
+        working-directory: client
 
-      - name: Run tests
-        run: npm test
-
-  # Optional: deployment job
-  # You can add this to deploy to staging/production based on the branch
-  deploy:
-    needs: build-and-test
+  build-server:
+    name: ✅ Build & Test Server
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
 
     steps:
-      - name: Checkout code
+      - name: 📦 Checkout code
         uses: actions/checkout@v3
 
-      # Example: deploy script or integration (e.g., Vercel/Render/Heroku CLI)
-      - name: Deploy to Server
-        run: echo "Deploying to ${{ github.ref == 'refs/heads/main' && 'Production' || 'Staging' }} server..."
-        # Replace this with your real deploy script
+      - name: 🧰 Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: 📥 Install server dependencies
+        run: npm install
+        working-directory: server
+
+      - name: 🧪 TypeScript check
+        run: npx tsc --noEmit
+        working-directory: server
+
+      - name: ✅ Run tests
+        run: npm test
+        working-directory: server
+
+  # deploy:
+  #   name: 🚀 Deploy
+  #   needs: [build-client, build-server]
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
+
+  #   steps:
+  #     - name: 📦 Checkout code
+  #       uses: actions/checkout@v3
+
+  #     - name: 🚀 Deploy to Server
+  #       run: |
+  #         echo "Deploying to ${{ github.ref == 'refs/heads/main' && 'Production' || 'Staging' }}..."
+  #         # Add your real deploy command here
