@@ -7,6 +7,7 @@ import {
   IAdmin,
   AuthServiceResponse,
 } from "../types";
+import { asyncHandler } from "../middleware/helper";
 
 const authProvider = new AuthProvider();
 
@@ -14,10 +15,11 @@ export class AuthController {
   /**
    * Register Influencer
    */
-  public async registerInfluencer(
+
+  public registerInfluencer = asyncHandler( async (
     req: Request,
     res: Response
-  ): Promise<Response> {
+  ): Promise<Response> => {
     try {
       const payload: Partial<IInfluencer> = req.body;
       console.log("registerInfluencer request body: ", payload);
@@ -35,12 +37,12 @@ export class AuthController {
           status_code: error.status_code || 500
         });
     }
-  }
+  })
 
   /**
    * Register Brand
    */
-  public async registerBrand(req: Request, res: Response): Promise<Response> {
+  public registerBrand = asyncHandler( async (req: Request, res: Response): Promise<Response> => {
     try {
       const payload: IBrand = req.body;
       console.log("registerBrand request body: ", payload);
@@ -52,12 +54,12 @@ export class AuthController {
         .status(error.status_code || 500)
         .json({ message: error.message || "Internal Server Error" });
     }
-  }
+  })
 
   /**
    * Register Admin
    */
-  public async registerAdmin(req: Request, res: Response): Promise<Response> {
+  public registerAdmin = asyncHandler( async( req: Request, res: Response): Promise<Response> => {
     try {
       const payload: IAdmin = req.body;
       const response: AuthServiceResponse<Partial<IAdmin>> =
@@ -68,12 +70,12 @@ export class AuthController {
         .status(error.status_code || 500)
         .json({ message: error.message || "Internal Server Error" });
     }
-  }
+  })
 
   /**
    * Login
    */
-  public async login(req: Request, res: Response): Promise<Response> {
+  public login = asyncHandler( async (req: Request, res: Response): Promise<Response> => {
     const { email, password }: { email: string; password: string } = req.body;
     try {
       const response: AuthServiceResponse<Partial<IUser>> =
@@ -85,16 +87,16 @@ export class AuthController {
         .status(error.status_code || 500)
         .json({ message: error.message || "Internal Server Error" });
     }
-  }
+  })
 
   /**
    * Forget Password
    */
 
-  public async forgetPassword(
+  public forgetPassword = asyncHandler( async (
     req: Request,
     res: Response
-  ): Promise<Response> {
+  ): Promise<Response> => {
     const { email }: { email: string } = req.body;
     try {
       const response: AuthServiceResponse<Partial<IUser>> =
@@ -106,14 +108,14 @@ export class AuthController {
         .status(error.status_code || 500)
         .json({ message: error.message || "Internal Server Error" });
     }
-  }
+  })
   /**
    * Reset Password
    */
-  public async resetPassword(
+  public resetPassword = asyncHandler( async (
     req: Request,
     res: Response
-  ): Promise<Response> {
+  ): Promise<Response> =>  {
     console.log("Reset password request body:", req.body);
     const { token, newPassword, confirmPassword }: { token: string; newPassword: string; confirmPassword: string; } = req.body;
     
@@ -136,5 +138,5 @@ export class AuthController {
         .status(error.status_code || 500)
         .json({ message: error.message || "Internal Server Error" });
     }
-  }
+  })
 }

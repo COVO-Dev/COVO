@@ -2,6 +2,7 @@ import axios from "axios";
 import { Influencer } from "../../models/influencers.models";
 import { Instagram } from "../../models/instagram.model";
 import { config } from "../../config/configuration";
+import { updateInstagramMetrics } from "./instagramPlatformData.service";
 
 export async function getTokens(code: string, influencerId: string) {
   try {

@@ -1,0 +1,82 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main, staging]
+
+jobs:
+  build-client:
+    name: 🔧 Build Client
+    runs-on: ubuntu-latest
+
+    env: # Set environment variables for the client build
+      NEXT_AWS_PUBLIC_PATH: covo-test2.s3.us-east-1.amazonaws.com
+      IMAGE_HOSTNAME: s3.amazon.aws.com
+
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🧰 Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: 📥 Install client dependencies
+        run: npm install
+        working-directory: client
+
+      - name: Restore Next.js cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            client/.next/cache
+          key: ${{ runner.os }}-next-${{ hashFiles('client/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-
+      
+      - name: 🛠️ Build client
+        run: npm run build
+        working-directory: client
+
+  build-server:
+    name: ✅ Build & Test Server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🧰 Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: 📥 Install server dependencies
+        run: npm install
+        working-directory: server
+
+      - name: 🧪 TypeScript check
+        run: npx tsc --noEmit
+        working-directory: server
+
+      - name: ✅ Run tests
+        run: npm test
+        working-directory: server
+
+  # deploy:
+  #   name: 🚀 Deploy
+  #   needs: [build-client, build-server]
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
+
+  #   steps:
+  #     - name: 📦 Checkout code
+  #       uses: actions/checkout@v3
+
+  #     - name: 🚀 Deploy to Server
+  #       run: |
+  #         echo "Deploying to ${{ github.ref == 'refs/heads/main' && 'Production' || 'Staging' }}..."
+  #         # Add your real deploy command here

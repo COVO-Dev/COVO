@@ -8,6 +8,7 @@ import { config } from "../config/configuration";
 import { randomBytes } from "crypto";
 import { redisSave, redisRetrieve } from "../app";
 import { AuthenticatedRequest } from "../types";
+import { asyncHandler } from "../middleware/helper";
 
 
 /**
@@ -39,7 +40,7 @@ export const redirectToFacebookLogin = (
 /**
  * Handle Facebook OAuth callback
  */
-export const handleFacebookCallback = async (req: Request, res: Response) => {
+export const handleFacebookCallback = asyncHandler(async (req: Request, res: Response) => {
   try {
     const { code, state } = req.query;
 
@@ -87,4 +88,4 @@ export const handleFacebookCallback = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
-};
+});
