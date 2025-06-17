@@ -11,6 +11,10 @@ jobs:
     name: 🔧 Build Client
     runs-on: ubuntu-latest
 
+    env: # Set environment variables for the client build
+      NEXT_AWS_PUBLIC_PATH: covo-test2.s3.us-east-1.amazonaws.com
+      IMAGE_HOSTNAME: s3.amazon.aws.com
+
     steps:
       - name: 📦 Checkout code
         uses: actions/checkout@v3
