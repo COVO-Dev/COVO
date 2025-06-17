@@ -1,4 +1,7 @@
 /** @type {import('next').NextConfig} */
+
+const { NEXT_AWS_PUBLIC_PATH } = process.env;
+
 const nextConfig = {
   typescript: {
     // Ignoring TypeScript errors during build
@@ -12,7 +15,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: process.env.NEXT_AWS_PUBLIC_PATH,
+        hostname: "covo-test2.s3.us-east-1.amazonaws.com",
         port: "",
         pathname: "/**",
       },
