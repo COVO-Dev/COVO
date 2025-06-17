@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-client:
-    name: CI/CD Pipeline / build-client  # This matches the expected status check
+    name: build-client
     runs-on: ubuntu-latest
 
     env: # Set environment variables for the client build
@@ -42,7 +42,7 @@ jobs:
         working-directory: client
 
   build-server:
-    name: CI/CD Pipeline / build-server  # This matches the expected status check
+    name: build-server
     runs-on: ubuntu-latest
 
     steps:
@@ -80,4 +80,3 @@ jobs:
   #       run: |
   #         echo "Deploying to ${{ github.ref == 'refs/heads/main' && 'Production' || 'Staging' }}..."
   #         # Add your real deploy command here
-  
