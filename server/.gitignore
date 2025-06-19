@@ -1,25 +1,17 @@
-.idea/
-.vscode/
-node_modules/
-build/
-tmp/
-temp/
-dist/
-coverage/
-*.log
-*.log.*
-*.log-*
-*.log/*
-*.log-*/
+# Python caches
+__pycache__/
+*.py[cod]
 
-package-lock.json
-yarn.lock
+# Environment files
 .env
-/src/config/covo-6d45f-firebase-adminsdk-zwfjj-e130d06008.json
-/src/services/just.ts
-/src/cus
-/src/services/platformData.service.ts
-/src/tests/test/*
+*.env
 
+# VSCode settings
+.vscode/
 
+# Logs
+*.log
 
+# OS files
+.DS_Store
+Thumbs.db
