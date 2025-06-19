@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-client:
-    name: 🔧 Build Client
+    name: build-client
     runs-on: ubuntu-latest
 
     env: # Set environment variables for the client build
@@ -42,7 +42,7 @@ jobs:
         working-directory: client
 
   build-server:
-    name: ✅ Build & Test Server
+    name: build-server
     runs-on: ubuntu-latest
 
     steps:
