@@ -27,6 +27,10 @@ import { searchLogRoute } from "./routes/searchLog.routes";
 import { instagramPlatformData } from "./routes/instagramPlatformData.routes";
 import { milestoneRouter } from "./routes/campaignMilestone.routes";
 import { surveyRouters } from "./routes/covoSurvey.route";
+import { subscriptionRoute } from "./routes/subscription.routes";
+import subscriptionService from "./services/subscription.service";
+import { checkExpiredSubscriptions } from "./utils/subscription.utils";
+
 
 dotenv.config();
 
@@ -147,9 +151,13 @@ app.use("/api", twitterPlatformData);
 app.use("/api", facebookRoute);
 app.use("/api", facebookPlatformData);
 
+// Subscription routes
+app.use("/api/subscription", subscriptionRoute);
+
 
 app.use(routeNotFound);
 app.use(errorHandler);
+
 
 app.get("/", (req: Request, res: Response) => {
   res.json({

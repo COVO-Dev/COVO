@@ -13,7 +13,6 @@ const SubscriptionSchema: Schema = new Schema({
     providerSubscriptionId: { type: String },
     provider: { type: String, default: "paystack" },
     cancelledAt: { type: Date },
-    billingType: { type: String, enum: ["recurring", "one-time"], default: "recurring" },
 },
     { timestamps: true },
 );
