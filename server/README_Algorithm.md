@@ -2,6 +2,8 @@
 
 This service implements an influencer-brand matching engine using weighted cosine similarity. It currently supports Facebook, with the intention of including YouTube and TikTok vectors (configurable via the `platform` field).
 
+Docker API: https://algorithm-api-wy7g.onrender.com/
+
 Repository Structure
 
 server/
