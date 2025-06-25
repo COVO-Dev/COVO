@@ -1,0 +1,28 @@
+{
+  "name": "name-parser",
+  "version": "0.0.1",
+  "description": "Parses full names into small chunks, like first and last name.",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/.bin/mocha --compilers coffee:coffee-script",
+    "prepublish": "./node_modules/.bin/coffee --compile index.coffee"
+  },
+  "devDependencies": {
+    "mocha": "~1.9.0",
+    "coffee-script": "~1.6.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/laynemoseley/name-parser.git"
+  },
+  "keywords": [
+    "names",
+    "fullnames",
+    "parsing",
+    "first",
+    "last"
+  ],
+  "author": "Layne Moseley",
+  "license": "MIT",
+  "readmeFilename": "README.md"
+}

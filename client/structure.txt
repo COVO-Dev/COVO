@@ -1,0 +1,195 @@
+.
+├── app
+│   ├── (authorized)
+│   │   ├── brand
+│   │   │   ├── campaign
+│   │   │   │   ├── all-campaigns
+│   │   │   │   ├── create-campaign
+│   │   │   │   └── details
+│   │   │   │       └── [campaignId]
+│   │   │   ├── dashboard
+│   │   │   ├── deactivate
+│   │   │   ├── discover
+│   │   │   ├── influencer-profile
+│   │   │   │   └── [id]
+│   │   │   ├── messages
+│   │   │   ├── moreInfo
+│   │   │   ├── notifications
+│   │   │   ├── privacy-policy
+│   │   │   └── profile
+│   │   └── influencer
+│   │       ├── additional
+│   │       ├── campaign
+│   │       │   └── apply
+│   │       │       └── [...brandId]
+│   │       ├── dashboard
+│   │       ├── deactivate
+│   │       ├── form
+│   │       ├── messages
+│   │       ├── moreInfo
+│   │       ├── notifications
+│   │       ├── oauth
+│   │       ├── privacy-policy
+│   │       └── profile
+│   ├── (unauthorized)
+│   │   ├── landingpage
+│   │   ├── login
+│   │   ├── privacy-policy
+│   │   └── signup
+│   ├── api
+│   │   └── auth
+│   │       └── [...nextauth]
+│   └── fonts
+├── assets
+│   ├── images
+│   │   └── Social_Media_Icons
+│   └── svg
+├── components
+│   ├── authorized
+│   │   ├── brand
+│   │   │   ├── campaign
+│   │   │   │   ├── all-campaigns
+│   │   │   │   ├── create-campaign
+│   │   │   │   │   └── create-campaign-form
+│   │   │   │   └── details
+│   │   │   │       ├── applied-influencers-box
+│   │   │   │       │   └── applied-influencer-card
+│   │   │   │       ├── page-skeleton
+│   │   │   │       ├── recommended-influencers-box
+│   │   │   │       └── registered-influencers-section
+│   │   │   │           └── registered-influencer-card
+│   │   │   ├── discover
+│   │   │   │   ├── result-table
+│   │   │   │   └── search-bar
+│   │   │   ├── influencer-profile
+│   │   │   ├── profile
+│   │   │   │   ├── area-chart
+│   │   │   │   └── user-avatar
+│   │   │   └── side-bar
+│   │   │       ├── app-sidebar
+│   │   │       ├── covo-logo
+│   │   │       └── nav
+│   │   └── influencer
+│   │       ├── campaign
+│   │       │   ├── all-campaigns
+│   │       │   └── apply-to-campaign
+│   │       │       ├── form
+│   │       │       └── skeleton
+│   │       ├── more-info
+│   │       ├── o-auth
+│   │       ├── side-bar
+│   │       │   ├── app-sidebar
+│   │       │   ├── covo-logo
+│   │       │   └── nav
+│   │       └── update-info
+│   │           ├── step-one
+│   │           └── step-two
+│   ├── shared
+│   │   ├── campaign-hero
+│   │   │   ├── campaign-hero-card
+│   │   │   └── campaign-hero-skeleton
+│   │   ├── campaign-section
+│   │   │   ├── profile-campaign-card
+│   │   │   ├── profile-campaign-fallback-card
+│   │   │   └── profile-campaign-skeleton
+│   │   ├── deactivate
+│   │   ├── messages
+│   │   │   ├── chat-area
+│   │   │   │   ├── chat-header
+│   │   │   │   ├── input
+│   │   │   │   └── messages-area
+│   │   │   └── sidebar
+│   │   │       ├── chat-list
+│   │   │       │   └── chat-head
+│   │   │       ├── header
+│   │   │       └── search
+│   │   ├── page-title
+│   │   └── privacy-policy
+│   ├── ui
+│   │   └── extension
+│   └── unauthorized
+│       ├── footer
+│       │   ├── contact-legal
+│       │   │   ├── contact
+│       │   │   │   └── logo-array
+│       │   │   └── legal
+│       │   ├── covo-logo-section
+│       │   └── join
+│       │       └── input-button
+│       ├── form-header
+│       ├── landing-page
+│       │   ├── about
+│       │   │   └── about-box
+│       │   ├── benefits
+│       │   ├── faq
+│       │   │   └── faq-buttons
+│       │   │       ├── for-agencies
+│       │   │       ├── for-brands
+│       │   │       ├── for-influencers
+│       │   │       ├── general
+│       │   │       └── technical-support
+│       │   ├── features
+│       │   ├── hero
+│       │   ├── logo-slider
+│       │   └── price
+│       │       └── price-card
+│       ├── login
+│       │   ├── login-box
+│       │   └── login-box-image
+│       ├── navbar
+│       └── signup
+│           ├── signup-box
+│           ├── signup-box-image
+│           └── terms-check-boxs
+├── hooks
+│   └── unauthorized
+│       └── login
+├── lib
+│   ├── api
+│   │   ├── campaign
+│   │   │   ├── apply-to-campaign
+│   │   │   ├── create-campaign
+│   │   │   ├── edit-campaign
+│   │   │   ├── get-all-campaigns
+│   │   │   ├── get-applied-campaign-influencer
+│   │   │   ├── get-campaign-by-brand-id
+│   │   │   ├── get-campaign-by-id
+│   │   │   ├── get-recommended-influencers
+│   │   │   └── get-registered-campaign-influencer
+│   │   ├── chat
+│   │   ├── decativate
+│   │   ├── get-auth-url
+│   │   ├── get-details
+│   │   ├── get-notifications
+│   │   │   └── influencer
+│   │   ├── login
+│   │   ├── register
+│   │   │   ├── brand
+│   │   │   └── influencer
+│   │   ├── search
+│   │   │   └── influencer
+│   │   ├── update-data
+│   │   │   ├── brand
+│   │   │   └── influencer
+│   │   └── upload
+│   │       ├── brand-remove-photo
+│   │       ├── brand-upload-photo
+│   │       ├── influencer-upload-photo
+│   │       ├── user-check-photo
+│   │       └── user-remove-photo
+│   └── store
+│       ├── additional-info
+│       ├── campaign
+│       ├── chat
+│       ├── model
+│       └── profile
+├── provider
+├── public
+│   ├── data
+│   ├── images
+│   └── svg
+├── types
+│   └── users
+└── utils
+
+193 directories
