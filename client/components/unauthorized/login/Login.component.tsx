@@ -1,0 +1,14 @@
+// login/page.tsx
+import LoginBoxImage from "./login-box-image/LoginBoxImage";
+import LoginBox from "./login-box/LoginBox";
+
+export default function Login() {
+	return (
+		<main className="h-[calc(100dvh-100px)] flex items-center justify-center p-6 relative overflow-hidden bg-custom-very-soft-blue bg-[url('/svg/BG.svg')] bg-no-repeat bg-cover">
+			<div className='bg-custom-light-grayish-blue bg-[url("/svg/BG.svg")]  p-10 rounded-lg shadow-md z-40 flex flex-col items-center justify-center h-[37em] md:h-[25em] md:flex-row md:w-auto w-[97%] '>
+				<LoginBoxImage />
+				<LoginBox />
+			</div>
+		</main>
+	);
+}
