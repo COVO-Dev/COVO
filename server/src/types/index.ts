@@ -170,7 +170,7 @@ export interface AuthenticatedRequest extends Request {
 		firstName: string;
 		lastName: string;
 	};
-	// subscription?: any
+	subscription?: any
 }
 
 export interface EmailData {
@@ -627,7 +627,7 @@ export interface IPlan {
 	name: string;
 	price: number;
 	planCode: string;
-	interval: "monthly" | "weekly";
+	interval: "monthly"
 }
 
 export interface PaystackPlan {

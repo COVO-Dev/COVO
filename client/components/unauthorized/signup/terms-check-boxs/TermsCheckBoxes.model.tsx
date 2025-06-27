@@ -9,4 +9,5 @@ export interface ICheckBoxesProps {
 		marketingOptIn: boolean;
 		dataComplianceConsent: boolean;
 	}) => void;
+	onErrorClear?: () => void;
 }

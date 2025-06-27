@@ -7,7 +7,7 @@ import TermsCheckBoxes from "../terms-check-boxs/TermsCheckBoxes.component";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 // Define the form schema
@@ -50,6 +50,7 @@ const steps = [
 export default function BrandSignUp() {
 	const [error, setError] = useState("");
 	const [loggedInSuccessfully, setLoggedInSuccessfully] = useState("");
+	const [isLoading, setIsLoading] = useState(false);
 	const [consentAndAgreements, setConsentAndAgreements] = useState({
 		termsAccepted: false,
 		marketingOptIn: false,
@@ -91,8 +92,22 @@ export default function BrandSignUp() {
 		}
 	};
 
+	const clearErrors = () => {
+		setError("");
+		setLoggedInSuccessfully("");
+	};
+
 	const handleSignUp = async () => {
 		try {
+			// Validate that all required consents are accepted
+			if (!consentAndAgreements.termsAccepted || !consentAndAgreements.dataComplianceConsent) {
+				setError("You must accept the privacy policy, terms and data compliance consent to register.");
+				return;
+			}
+
+			setIsLoading(true);
+			setError(""); // Clear any previous errors
+
 			const formData = getValues();
 			console.log("Submitting form data:", formData);
 			const response = await brandRegisterRoute({
@@ -104,33 +119,37 @@ export default function BrandSignUp() {
 				// phoneNumber: formData.phoneNumber,
 				password: formData.password,
 				consentAndAgreements,
+				privacyPolicy: consentAndAgreements.termsAccepted, // Set privacyPolicy based on termsAccepted
 				username: formData.username,
 			});
 
 			console.log("API response:", response);
 			if (response.status === "error") {
 				console.error("Error during sign-up:", response.message);
-				setError(response.message as string);
-			} else if (response.status === "success") {
-				const signInResponse = await signIn("credentials", {
-					redirect: false,
-					email: formData.email,
-					password: formData.password,
-				});
-				console.log("Sign-in response:", signInResponse);
+				setError(response.message as string);		} else if (response.status === "success") {
+			const signInResponse = await signIn("credentials", {
+				redirect: false,
+				email: formData.email,
+				password: formData.password,
+			});
+			console.log("Sign-in response:", signInResponse);
 
-				if (signInResponse?.error) {
-					setError(signInResponse.error);
-				} else if (signInResponse?.ok) {
-					setLoggedInSuccessfully("Brand registered successfully");
+			if (signInResponse?.error) {
+				setError(signInResponse.error);
+			} else if (signInResponse?.ok) {
+				setLoggedInSuccessfully("Brand registered successfully! Redirecting...");
+				setTimeout(() => {
 					router.push("/brand/moreInfo");
-				}
+				}, 1500);
 			}
-		} catch (error) {
-			console.error("Error during sign-up:", error);
-			setError("An unexpected error occurred.");
 		}
-	};
+	} catch (error) {
+		console.error("Error during sign-up:", error);
+		setError("An unexpected error occurred.");
+	} finally {
+		setIsLoading(false);
+	}
+};
 
 	return (
 		<div className="md:w-[400px]  w-auto flex-col">
@@ -174,6 +193,22 @@ export default function BrandSignUp() {
 			<br />
 
 			<form onSubmit={handleSubmit(handleSignUp)}>
+				{error && (
+					<div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+						<p className="text-red-700 text-sm text-center flex items-center justify-center font-medium">
+							<span className="mr-2">⚠️</span>
+							{error}
+						</p>
+					</div>
+				)}
+				{loggedInSuccessfully && (
+					<div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
+						<p className="text-green-700 text-sm text-center flex items-center justify-center font-medium">
+							<span className="mr-2">✅</span>
+							{loggedInSuccessfully}
+						</p>
+					</div>
+				)}
 				{currentStep === 0 && (
 					<motion.div
 						initial={{ x: delta >= 0 ? "50%" : "-50%", opacity: 0 }}
@@ -186,6 +221,7 @@ export default function BrandSignUp() {
 								<input
 									{...register("firstName")}
 									placeholder="First Name"
+									onFocus={clearErrors}
 									className={`${
 										errors.firstName
 											? "border-red-500 animate-shake"
@@ -231,16 +267,16 @@ export default function BrandSignUp() {
 						</div>
 
 						{/* email input */}
-						<div className="w-full">
-							<input
-								{...register("email")}
-								placeholder="Email"
-								className={`${
-									errors.email
-										? "border-red-500 animate-shake"
-										: "border-custom-dark-desaturated-blue"
-								} w-full p-3 rounded-md border  bg-white/50 placeholder-gray-500 focus:outline-none`}
-							/>
+						<div className="w-full">								<input
+									{...register("email")}
+									placeholder="Email"
+									onFocus={clearErrors}
+									className={`${
+										errors.email
+											? "border-red-500 animate-shake"
+											: "border-custom-dark-desaturated-blue"
+									} w-full p-3 rounded-md border  bg-white/50 placeholder-gray-500 focus:outline-none`}
+								/>
 							<div className="w-full h-5 text-red-500 text-xs">
 								{errors.email && <span>{errors.email.message}</span>}
 							</div>
@@ -331,17 +367,20 @@ export default function BrandSignUp() {
 						<TermsCheckBoxes
 							consentAndAgreements={consentAndAgreements}
 							setConsentAndAgreements={setConsentAndAgreements}
+							onErrorClear={clearErrors}
 						/>
 						<button
 							type="submit"
-							className="w-full mb-2 p-3 rounded-md bg-custom-dark-desaturated-blue text-white hover:bg-gray-600 focus:outline-none"
+							disabled={!consentAndAgreements.termsAccepted || !consentAndAgreements.dataComplianceConsent || isLoading}
+							className={`w-full mb-2 p-3 rounded-md text-white focus:outline-none transition-all duration-200 ease-in-out ${
+								!consentAndAgreements.termsAccepted || !consentAndAgreements.dataComplianceConsent || isLoading
+									? "bg-gray-400 cursor-not-allowed"
+									: "bg-custom-dark-desaturated-blue hover:bg-gray-600 hover:scale-105"
+							}`}
 							onClick={handleSignUp}
 						>
-							Sign Up
+							{isLoading ? "Signing Up..." : "Sign Up"}
 						</button>
-						<div className="w-full h-7 text-red-500 text-sm text-center font-bold">
-							{error && <span>{error}</span>}
-						</div>
 					</motion.div>
 				)}
 			</form>

@@ -32,13 +32,13 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en" suppressHydrationWarning>
+		<html lang="en">
 			<head>
 				<title>COVO</title>
 			</head>
 			<body
 				className={`${geistSans.variable} ${geistMono.variable} antialiased ${roboto.className}`}
-				suppressHydrationWarning
+				suppressHydrationWarning={true}
 			>
 				<RootProvider>{children}</RootProvider>
 			</body>

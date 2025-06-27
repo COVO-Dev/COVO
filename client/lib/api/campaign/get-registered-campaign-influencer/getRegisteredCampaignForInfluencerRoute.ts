@@ -13,40 +13,73 @@ export async function getRegisteredCampaignForInfluencerRoute(
       influencerId
     );
     console.log(
-      "getRegisteredCampaignForInfluencerRoute",
+      "getRegisteredCampaignForInfluencerRoute - URL:",
       updateUrl,
-      influencerId
+      "influencerId:",
+      influencerId,
+      "token:",
+      token ? `${token.substring(0, 10)}...` : "NO_TOKEN"
     );
 
-    const response = await fetch(updateUrl, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    let response;
+    try {
+      response = await fetch(updateUrl, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    } catch (networkError) {
+      console.error("Network error during fetch:", networkError);
+      throw new Error(`Network error: ${networkError instanceof Error ? networkError.message : 'Unable to connect to server'}`);
+    }
+
+    console.log("Response status:", response.status);
+    console.log("Response headers:", Object.fromEntries(response.headers.entries()));
 
     // Handle API errors and non-JSON responses
     if (!response.ok) {
+      console.error("Response not OK:", response.status, response.statusText);
       const contentType = response.headers.get("Content-Type");
       if (contentType && contentType.includes("application/json")) {
         const errorData = await response.json();
+        console.error("Error data:", errorData);
         throw new Error(errorData.message || response.statusText);
       } else {
         const errorText = await response.text();
+        console.error("Error text:", errorText);
         throw new Error(errorText || response.statusText);
       }
     }
 
-    return { status: "success", data: await response.json() };
-  } catch (error) {
+    let responseData;
+    try {
+      responseData = await response.json();
+    } catch (parseError) {
+      console.error("Error parsing JSON response:", parseError);
+      throw new Error("Server returned invalid JSON response");
+    }
+
+    console.log("Raw response data:", responseData);
+    console.log("Response data type:", typeof responseData);
+    console.log("Response data keys:", Object.keys(responseData || {}));
+
+    // Check if responseData is empty
+    if (!responseData || (typeof responseData === 'object' && Object.keys(responseData).length === 0)) {
+      console.error("Server returned empty or null response");
+      throw new Error("Server returned empty response - backend may not be running");
+    }
+
+    return { status: "success", data: responseData };
+  } catch (error: unknown) {
     console.error(
       "Error in getRegisteredCampaignForInfluencerRoute:",
-      error.message
+      error instanceof Error ? error.message : String(error)
     );
     return {
       status: "error",
-      message: error.message || "Validation or API request failed.",
+      message: error instanceof Error ? error.message : "Validation or API request failed.",
     };
   }
 }

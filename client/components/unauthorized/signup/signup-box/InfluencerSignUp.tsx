@@ -20,6 +20,7 @@ export default function InfluencerSignUp() {
 		email: "",
 		password: "",
 		username: "",
+		yearOfBirth: "",
 		// phoneNumber: "",
 		userType: "",
 	});
@@ -33,8 +34,16 @@ export default function InfluencerSignUp() {
 		// Validate required fields
 		if (!influencerData.firstName || !influencerData.lastName || 
 			!influencerData.email || !influencerData.password || 
-			!influencerData.username) {
+			!influencerData.username || !influencerData.yearOfBirth) {
 			setError("Please fill in all required fields");
+			return;
+		}
+
+		// Validate year of birth
+		const currentYear = new Date().getFullYear();
+		const birthYear = parseInt(influencerData.yearOfBirth);
+		if (isNaN(birthYear) || birthYear < 1900 || birthYear > currentYear - 13) {
+			setError("Please enter a valid year of birth. You must be at least 13 years old.");
 			return;
 		}
 
@@ -144,6 +153,21 @@ export default function InfluencerSignUp() {
 					}))
 				}
 				placeholder="Username"
+				className="mb-4 w-full p-3 rounded-md border border-custom-dark-desaturated-blue bg-white/50 placeholder-gray-500 focus:outline-none focus:border-blue-500"
+			/>
+			<input
+				type="number"
+				name="yearOfBirth"
+				value={influencerData.yearOfBirth}
+				onChange={(e) =>
+					setInfluencerData((prev) => ({
+						...prev,
+						yearOfBirth: e.target.value,
+					}))
+				}
+				placeholder="Year of Birth (e.g., 1995)"
+				min="1900"
+				max={new Date().getFullYear() - 13}
 				className="mb-4 w-full p-3 rounded-md border border-custom-dark-desaturated-blue bg-white/50 placeholder-gray-500 focus:outline-none focus:border-blue-500"
 			/>
 
