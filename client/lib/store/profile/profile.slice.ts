@@ -9,6 +9,7 @@ const initialState: IInitialState = {
   lastName: "",
   username: "",
   role: "",
+  yearOfBirth: "",
   consentAndAgreements: {
     termsAccepted: false,
     marketingOptIn: false,

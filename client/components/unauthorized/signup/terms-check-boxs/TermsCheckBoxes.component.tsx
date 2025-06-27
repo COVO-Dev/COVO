@@ -4,10 +4,11 @@ import { ICheckBoxesProps } from "./TermsCheckBoxes.model";
 export default function TermsCheckBoxes({
 	consentAndAgreements,
 	setConsentAndAgreements,
+	onErrorClear,
 }: ICheckBoxesProps) {
 	return (
-		<ul className="flex flex-col gap-2 mb-4">
-			<li className="flex items-center space-x-2 origin-left scale-110">
+		<div className="flex flex-col gap-2 mb-4">
+			<div className="flex items-center space-x-2 origin-left scale-110">
 				<Checkbox
 					id="acceptAll"
 					checked={
@@ -22,6 +23,7 @@ export default function TermsCheckBoxes({
 							dataComplianceConsent: checked,
 							marketingOptIn: checked,
 						});
+						onErrorClear?.();
 					}}
 				/>
 				<label
@@ -30,18 +32,19 @@ export default function TermsCheckBoxes({
 				>
 					Accept terms and conditions
 				</label>
-			</li>
-			<ul className="ml-4 flex flex-col gap-2">
-				<li className="flex items-center space-x-2">
+			</div>
+			<div className="ml-4 flex flex-col gap-2">
+				<div className="flex items-center space-x-2">
 					<Checkbox
 						id="termsAccepted"
 						checked={consentAndAgreements.termsAccepted}
-						onCheckedChange={(e) =>
+						onCheckedChange={(e) => {
 							setConsentAndAgreements({
 								...consentAndAgreements,
 								termsAccepted: Boolean(e),
-							})
-						}
+							});
+							onErrorClear?.();
+						}}
 					/>
 					<label
 						htmlFor="termsAccepted"
@@ -49,17 +52,18 @@ export default function TermsCheckBoxes({
 					>
 						Accept terms and conditions
 					</label>
-				</li>
-				<li className="flex items-center space-x-2">
+				</div>
+				<div className="flex items-center space-x-2">
 					<Checkbox
 						id="dataComplianceConsent"
 						checked={consentAndAgreements.dataComplianceConsent}
-						onCheckedChange={(e) =>
+						onCheckedChange={(e) => {
 							setConsentAndAgreements({
 								...consentAndAgreements,
 								dataComplianceConsent: Boolean(e),
-							})
-						}
+							});
+							onErrorClear?.();
+						}}
 					/>
 					<label
 						htmlFor="dataComplianceConsent"
@@ -67,8 +71,8 @@ export default function TermsCheckBoxes({
 					>
 						Accept data compliance consent
 					</label>
-				</li>
-				<li className="flex items-center space-x-2">
+				</div>
+				<div className="flex items-center space-x-2">
 					<Checkbox
 						id="marketingOptIn"
 						checked={consentAndAgreements.marketingOptIn}
@@ -77,6 +81,7 @@ export default function TermsCheckBoxes({
 								...consentAndAgreements,
 								marketingOptIn: Boolean(e),
 							});
+							onErrorClear?.();
 						}}
 					/>
 					<label
@@ -85,8 +90,8 @@ export default function TermsCheckBoxes({
 					>
 						Receive marketing emails
 					</label>
-				</li>
-			</ul>
-		</ul>
+				</div>
+			</div>
+		</div>
 	);
 }

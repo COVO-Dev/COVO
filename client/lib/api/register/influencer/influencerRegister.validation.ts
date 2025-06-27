@@ -14,6 +14,13 @@ export const influencerRegisterSchema = z.object({
 			message:
 				"Allowed characters are letters, numbers and underscore(_) and dash(-)",
 		}),
+	yearOfBirth: z.string().refine((val) => {
+		const year = parseInt(val);
+		const currentYear = new Date().getFullYear();
+		return !isNaN(year) && year >= 1900 && year <= currentYear - 13;
+	}, {
+		message: "Please enter a valid year of birth. You must be at least 13 years old.",
+	}),
 	consentAndAgreements: z.object({
 		termsAccepted: z.boolean(),
 		marketingOptIn: z.boolean(),
