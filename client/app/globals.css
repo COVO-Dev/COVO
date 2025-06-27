@@ -141,3 +141,27 @@ html {
     @apply bg-background text-foreground;
   }
 }
+
+/* Prevent hydration issues caused by browser extensions like Grammarly */
+[data-new-gr-c-s-check-loaded],
+[data-gr-ext-installed] {
+  /* Hide any visual changes from Grammarly extension */
+  outline: none !important;
+}
+
+/* Ensure consistent styling regardless of browser extensions */
+input[type="email"],
+input[type="password"],
+input[type="text"],
+textarea {
+  /* Prevent browser extensions from affecting input styling */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* Additional hydration protection */
+.hydration-safe {
+  /* This class can be used for components that need hydration protection */
+  position: relative;
+}

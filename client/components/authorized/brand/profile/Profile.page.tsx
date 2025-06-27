@@ -1,39 +1,12 @@
 'use client';
 // src/app/authorized/profile/page.tsx
 
-import Image from "next/image";
-import { Separator } from "@/components/ui/separator";
-import facebook from "@/assets/images/Social_Media_Icons/facebook.png";
-import instagram from "@/assets/images/Social_Media_Icons/instagram.png";
-import tiktok from "@/assets/images/Social_Media_Icons/tiktok.png";
-import youtube from "@/assets/images/Social_Media_Icons/youtube.png";
-import { AreaChartComponent } from "./area-chart/AreaChart.component";
 import UserAvatar from "./user-avatar/UserAvatar.component";
 import { useEffect, useState } from "react";
 import { getCampaignByBrandIdRoute } from "@/lib/api/campaign/get-campaign-by-brand-id/getCampaignByBrandId.route";
 import { useAppSelector } from "@/lib/store/hooks";
-import { setCampaignData } from "@/lib/store/campaign/campaign.slice";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
-import {
-	Check,
-	CalendarDays,
-	MapPin,
-	Users,
-	Target,
-	DollarSign,
-	TrendingUp,
-	FileText,
-} from "lucide-react"; // Import icons
-import { formatDate } from "date-fns"; // For date formatting (install: npm install date-fns)
 import ProfileCampaignSection from "@/components/shared/campaign-section/ProfileCampaignSection.component";
 import ShadcnTitle from "@/components/shared/page-title/PageTitle.component";
 import userCheckPhotoRoute from "@/lib/api/upload/user-check-photo/userCheckPhotoRoute";
@@ -71,8 +44,9 @@ export default function ProfilePage() {
 	const [isLoading, setIsLoading] = useState<boolean>(true);
 	// console.log("cred", session?.user?.access_token);
 	const { data: session, update } = useSession();
-	const token = session?.user?.access_token;
-	const id = session?.user?._id;
+	// Type-safe session property access
+	const token = (session?.user as { access_token?: string })?.access_token;
+	const id = (session?.user as { _id?: string })?._id;
 	const router = useRouter();
 	const profile = useAppSelector((state) => state.profile);
 
@@ -101,24 +75,39 @@ export default function ProfilePage() {
 		async function getBrandCampaigns() {
 			// setIsLoading(true);
 			try {
-				if (token) {
+				if (token && id) {
 					const result = await getCampaignByBrandIdRoute(token, id);
-					console.log("server data", result.data.data.data);
-					if (result.status === "success") {
-						const campaignResultDataArray = result.data.data.data;
+					console.log("server data", result);
+					
+					if (result.status === "success" && result.data) {
+						// Safely access nested data properties
+						const campaignResultDataArray = result.data.data?.data || result.data.data || result.data || [];
+						console.log("Campaign data array:", campaignResultDataArray);
 						setCampaignData(campaignResultDataArray);
+					} else {
+						console.warn("No campaign data available or request failed:", result);
+						setCampaignData([]);
 					}
-					// setCampaignData(result.data.data.data);
+				} else {
+					console.warn("Missing token or user ID, cannot fetch campaigns");
+					setCampaignData([]);
 				}
 			} catch (error) {
-				console.error(error);
+				console.error("Error fetching brand campaigns:", error);
+				setCampaignData([]);
 			} finally {
 				setIsLoading(false);
 			}
 		}
-		getBrandCampaigns();
-		check(profile.logo);
-	}, [token, id, profile.logo]);
+		
+		// Only call functions if we have session data
+		if (session?.user) {
+			getBrandCampaigns();
+			if (profile?.logo) {
+				check(profile.logo);
+			}
+		}
+	}, [token, id, profile?.logo, session?.user, session, update]);
 
 	const handleFallbackCardClick = () => {
 		router.push("/brand/campaign/create-campaign");

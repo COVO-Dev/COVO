@@ -1,13 +1,16 @@
 "use server";
 
-import { IResetPassword } from "./resetPassword.validation";
+import { IResetPassword, resetPasswordSchema } from "./resetPassword.validation";
 
 export const resetPasswordRoute = async (data: IResetPassword) => {
   try {
+    // Validate the input data
+    const validatedData = resetPasswordSchema.parse(data);
+    
     console.log("Resetting password with data:", { 
-      token: data.token ? `${data.token.substring(0, 20)}...` : "MISSING", 
-      passwordLength: data.newPassword?.length,
-      confirmPasswordLength: data.confirmPassword?.length
+      token: validatedData.token ? `${validatedData.token.substring(0, 20)}...` : "MISSING", 
+      passwordLength: validatedData.newPassword?.length,
+      confirmPasswordLength: validatedData.confirmPassword?.length
     });
     
     const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/auth/reset-password`;
@@ -18,7 +21,11 @@ export const resetPasswordRoute = async (data: IResetPassword) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+        token: validatedData.token,
+        newPassword: validatedData.newPassword,
+        confirmPassword: validatedData.confirmPassword,
+      }),
     });
 
     const responseData = await response.json();
@@ -39,6 +46,18 @@ export const resetPasswordRoute = async (data: IResetPassword) => {
     }
   } catch (error) {
     console.error("Reset password error:", error);
+    
+    // Handle Zod validation errors
+    if (error && typeof error === 'object' && 'issues' in error) {
+      const zodError = error as { issues: Array<{ message: string }> };
+      const firstError = zodError.issues[0];
+      return {
+        status: "error",
+        message: firstError?.message || "Validation failed.",
+        status_code: 400,
+      };
+    }
+    
     return {
       status: "error",
       message: "Failed to connect to server. Please try again later.",
