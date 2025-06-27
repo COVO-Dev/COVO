@@ -1,0 +1,10 @@
+version: '3.9'
+
+services:
+  matching-api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: always
