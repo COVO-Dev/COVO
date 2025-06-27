@@ -22,6 +22,14 @@ import {
 import Image from "next/image";
 import COVO_LOGOGRAM_BLACK_2 from "@/assets/images/COVO_LOGOGRAM_BLACK_2.png";
 
+// Function to calculate age from year of birth
+const calculateAge = (yearOfBirth: string): number | null => {
+	if (!yearOfBirth) return null;
+	const birth = parseInt(yearOfBirth);
+	if (isNaN(birth)) return null;
+	return new Date().getFullYear() - birth;
+};
+
 // interface InfluencerProfileProps {
 //   influencerData: IInfluencer;
 // }
@@ -33,6 +41,7 @@ const InfluencerDetails = ({ influencerData }) => {
 		lastName,
 		username,
 		email,
+		yearOfBirth,
 		selectedPlatforms,
 		totalMetrics,
 		contentAndAudience,
@@ -83,6 +92,12 @@ const InfluencerDetails = ({ influencerData }) => {
 							{firstName} {lastName}
 						</h2>
 						<p className="text-sm text-muted-foreground">@{username}</p>
+						{/* Display age for brands */}
+						{yearOfBirth && (
+							<p className="text-sm text-muted-foreground font-medium">
+								Age: {calculateAge(yearOfBirth)} years old
+							</p>
+						)}
 					</div>
 				</aside>
 

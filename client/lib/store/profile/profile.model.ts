@@ -10,6 +10,7 @@ export interface IInitialState {
   isActive: boolean;
   isDeleted: boolean;
   phoneNumber: string;
+  yearOfBirth?: string;
   consentAndAgreements: {
     termsAccepted: boolean;
     marketingOptIn: boolean;

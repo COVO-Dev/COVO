@@ -6,6 +6,7 @@ export interface IUser {
 	username: string;
 	password: string;
 	phoneNumber?: string;
+	yearOfBirth?: string;
 	role: UserRole;
 	is_deleted: boolean;
 	is_active: boolean;

@@ -5,7 +5,7 @@ dotenv.config();
 export const config = {
 	port: process.env.PORT ?? 8000,
 	NODE_ENV: "development",
-	BASE_URL: process.env.BASE_URL || 'http://localhost:3000',
+	BASE_URL: process.env.BASE_URL,
 	"api-prefix": "api/",
 	POSTGRES_HOST: process.env.POSTGRES_HOST,
 	POSTGRES_PORT: process.env.POSTGRES_PORT,
@@ -39,7 +39,7 @@ export const config = {
 	AWS_BUCKET_NAME: process.env.AWS_BUCKET_NAME,
 
 	FIREBASE_CREDENTIALS_PATH: process.env.FIREBASE_CREDENTIALS_PATH,
-	FRONTEND_URL: process.env.FRONTEND_URL,
+	FRONTEND_URL: process.env.FRONTEND_URL || "http://localhost:3000",
 	WEBSOCKET_PORT: process.env.WEBSOCKET_PORT,
 
 	TWITTER_CLIENT_ID: process.env.TWITTER_CLIENT_ID,
@@ -68,4 +68,9 @@ export const config = {
 	INSTAGRAM_APP_ID: process.env.INSTAGRAM_APP_ID,
 	INSTAGRAM_APP_SECRET: process.env.INSTAGRAM_APP_SECRET,
 	INSTAGRAM_REDIRECT_URL: process.env.INSTAGRAM_REDIRECT_URI,
+
+	PAYSTACK_SECRET_KEY: process.env.PAYSTACK_SECRET_KEY,
+	PAYSTACK_PUBLIC_KEY: process.env.PAYSTACK_PUBLIC_KEY,
+	PAYSTACK_WEBHOOK_SECRET: process.env.PAYSTACK_WEBHOOK_SECRET,
+	PAYSTACK_BASE_URL: process.env.PAYSTACK_BASE_URL,
 };

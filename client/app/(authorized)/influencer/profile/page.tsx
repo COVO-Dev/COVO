@@ -16,6 +16,14 @@ import ShadcnTitle from "@/components/shared/page-title/PageTitle.component";
 import { useRouter } from "next/navigation";
 import ProfileCampaignSection from "@/components/shared/campaign-section/ProfileCampaignSection.component";
 
+// Function to calculate age from year of birth
+const calculateAge = (yearOfBirth: string): number | null => {
+  if (!yearOfBirth) return null;
+  const birth = parseInt(yearOfBirth);
+  if (isNaN(birth)) return null;
+  return new Date().getFullYear() - birth;
+};
+
 export default function ProfilePage() {
   const profile = useAppSelector((state) => state.profile);
   const [isLoading, setIsLoading] = useState(false); // Add loading state
@@ -145,6 +153,13 @@ export default function ProfilePage() {
 
         <div className="w-full h-auto flex flex-col justify-center items-center text-center max-w-[800px] px-4 mt-[90px] gap-4">
           <h2 className="text-3xl font-bold">{`${profile.firstName} ${profile.lastName}`}</h2>
+          
+          {/* Display age if yearOfBirth is available */}
+          {profile.yearOfBirth && (
+            <p className="text-lg text-gray-600 font-medium">
+              Age: {calculateAge(profile.yearOfBirth)} years old
+            </p>
+          )}
 
           {profile.contentAndAudience && (
             <p className="text-2xltext-gray-600">

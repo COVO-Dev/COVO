@@ -1,18 +1,26 @@
 import { z } from "zod";
 
-// Schema for reset password
+// Individual field schemas for validation
+export const passwordSchema = z
+  .string()
+  .min(8, { message: "Password must be at least 8 characters long" })
+  .regex(
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+    { message: "Password must contain at least one uppercase letter, one lowercase letter, and one number" }
+  );
+
+export const confirmPasswordSchema = z.string().min(1, { message: "Please confirm your password" });
+
+export const tokenSchema = z.string().min(1, { message: "Reset token is required" });
+
+// Main reset password schema
 export const resetPasswordSchema = z.object({
-  token: z.string().min(1, "Token is required"),
-  newPassword: z.string().min(8, "Password must be at least 8 characters"),
-  confirmPassword: z.string().min(8, "Password must be at least 8 characters"),
+  token: tokenSchema,
+  newPassword: passwordSchema,
+  confirmPassword: confirmPasswordSchema,
 }).refine((data) => data.newPassword === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
 });
 
-// Type for reset password
-export interface IResetPassword {
-  token: string;
-  newPassword: string;
-  confirmPassword: string;
-}
+export type IResetPassword = z.infer<typeof resetPasswordSchema>;

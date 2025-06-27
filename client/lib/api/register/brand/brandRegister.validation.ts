@@ -26,6 +26,7 @@ export const brandRegisterSchema = z.object({
     marketingOptIn: z.boolean(),
     dataComplianceConsent: z.boolean(),
   }),
+  privacyPolicy: z.boolean(),
 });
 
 export type IbrandRegister = z.infer<typeof brandRegisterSchema>;
