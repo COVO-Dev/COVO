@@ -19,4 +19,4 @@ paymentRouter.get('/transactions/:id', paymentController.getTransaction);
 paymentRouter.get('/transactions/brand', paymentController.getBrandTransactions);
 paymentRouter.get('/transactions/influencer', paymentController.getInfluencerTransactions);
 
-export default paymentRouter;
+export { paymentRouter };

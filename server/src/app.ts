@@ -30,7 +30,7 @@ import { surveyRouters } from "./routes/covoSurvey.route";
 import { subscriptionRoute } from "./routes/subscription.routes";
 import subscriptionService from "./services/subscription.service";
 import { checkExpiredSubscriptions } from "./utils/subscription.utils";
-import paymentRouter from "./routes/payment.routes";
+import { paymentRouter } from "./routes/payment.routes";
 
 
 dotenv.config();
