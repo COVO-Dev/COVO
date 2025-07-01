@@ -446,8 +446,8 @@ const { io: ioObject, connectedClients, chatRooms } = startWebSocketServer();
 metricsDB.on("error", (err) => {
 	console.error("Metrics database connection error:", err);
 	process.exit(1);
-  });
-  metricsDB.once("open", () => {
+});
+metricsDB.once("open", () => {
 	console.log("Connected to metrics database 🚀");
 });
 

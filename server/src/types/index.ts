@@ -669,3 +669,160 @@ export interface ICovoSurvey {
 	createdAt?: Date;
 	updatedAt?: Date;
 }
+
+
+export interface PaymentMethod {
+	IMMEDIATE_SPLIT: 'immediate_split';
+	ESCROW: 'escrow';
+	MANUAL_RELEASE: 'manual_release';
+}
+
+// Wallet functionality removed - payments go directly to bank accounts
+
+export interface PaymentStatus {
+	PENDING: 'pending';
+	PROCESSING: 'processing';
+	COMPLETED: 'completed';
+	FAILED: 'failed';
+	REFUNDED: 'refunded';
+}
+
+export interface ITransaction extends Document {
+	campaignId: mongoose.Types.ObjectId;
+	brandId: mongoose.Types.ObjectId;
+	influencerId: mongoose.Types.ObjectId;
+
+	// Payment Details
+	totalAmount: number;
+	platformCommission: number; // 8%
+	influencerAmount: number; // 92%
+
+	// Payment Method & Status
+	paymentMethod: 'immediate_split' | 'escrow' | 'manual_release';
+	paymentStatus: 'pending' | 'processing' | 'completed' | 'failed' | 'refunded';
+
+	// Paystack References
+	paystackReference: string;
+	paystackTransactionId?: string;
+
+	// Commission Tracking
+	commissionTransferId?: string; // For platform commission transfer
+	commissionTransferStatus: 'pending' | 'completed' | 'failed';
+
+	// Influencer Payout (Direct bank transfer only)
+	influencerPayoutPreference: 'direct_bank' | 'platform_wallet'; // Direct bank transfer or platform wallet
+	influencerTransferId?: string; // Paystack transfer ID
+	influencerPayoutStatus: 'pending' | 'completed' | 'failed';
+
+	// Optional Payment Verification (for future use)
+	requiresVerification?: boolean; // Set this to true if you want manual verification
+	verifiedAt?: Date;
+	verifiedBy?: mongoose.Types.ObjectId;
+	verificationNotes?: string;
+
+	// Metadata
+	metadata?: any;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
+export interface IInfluencerBankAccount {
+	influencerId: mongoose.Types.ObjectId;
+
+	accountNumber: string;
+	bankCode: string;
+	accountName: string;
+	bankName: string;
+
+	// Paystack recipient code (created once, reused for transfers)
+	paystackRecipientCode?: string;
+
+	isActive: boolean;
+	isVerified: boolean;
+
+	createdAt: Date;
+	updatedAt: Date;
+}
+
+// models/CommissionRecord.ts - For tracking your 8% commission
+export interface ICommissionRecord extends Document {
+	transactionId: mongoose.Types.ObjectId;
+	campaignId: mongoose.Types.ObjectId;
+
+	amount: number; // 8% commission amount
+	status: 'pending' | 'transferred' | 'failed';
+
+	paystackTransferId?: string;
+	transferReference?: string;
+
+	// For reporting and invoicing
+	reportingMonth: string;
+	reportingYear: number;
+
+	transferredAt?: Date;
+	failureReason?: string;
+
+	createdAt: Date;
+	updatedAt: Date;
+}
+
+export interface InitiatePaymentRequest {
+	campaignId: string;
+	brandId: string;
+	influencerId: string;
+	amount: number;
+	influencerPayoutPreference: 'direct_bank' | 'platform_wallet';
+	paymentMethod: 'immediate_split' | 'escrow' | 'manual_release';
+	brandEmail: string;
+	callbackUrl?: string;
+
+	// Optional: For payment verification feature
+	requiresVerification?: boolean;
+}
+
+export interface PayInfluencerRequest {
+	campaignId: string;
+	brandId: string;
+	influencerId: string;
+	amount: number;
+	influencerPayoutPreference: 'direct_bank' | 'platform_wallet';
+
+	// Optional verification
+	requiresVerification?: boolean;
+	verificationNotes?: string;
+}
+
+export interface IWallet {
+	userId: mongoose.Types.ObjectId;
+	userType: 'influencer' | 'brand';
+	balance: number;
+	totalEarnings: number;
+	totalWithdrawals: number;
+
+	// Bank Account Info (for withdrawals)
+	bankAccountNumber?: string;
+	bankCode?: string;
+	accountName?: string;
+
+	isActive: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
+export interface IWalletTransaction extends Document {
+	walletId: mongoose.Types.ObjectId;
+	userId: mongoose.Types.ObjectId;
+	type: 'credit' | 'debit';
+	amount: number;
+	sourceType: 'campaign_payment' | 'withdrawal' | 'refund' | 'adjustment';
+	sourceId?: mongoose.Types.ObjectId;
+	withdrawalReference?: string;
+	paystackTransferId?: string;
+	status: 'pending' | 'completed' | 'failed';
+	description: string;
+	balanceBefore: number;
+	balanceAfter: number;
+	createdAt: Date;
+	updatedAt: Date;
+}
+

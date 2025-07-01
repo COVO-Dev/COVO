@@ -5,11 +5,11 @@ import { asyncHandler } from '../middleware/helper';
 import { config } from '../config/configuration';
 
 class WebhookController {
-  public handlePaystackWebhook = asyncHandler ( async (req: Request, res: Response) => {
+  public handlePaystackWebhook = asyncHandler(async (req: Request, res: Response) => {
     try {
       const secret = config.PAYSTACK_WEBHOOK_SECRET!;
       const hash = crypto.createHmac('sha512', secret).update(JSON.stringify(req.body)).digest('hex');
-      
+
       if (hash !== req.headers['x-paystack-signature']) {
         return res.status(400).json({ error: 'Invalid signature' });
       }
@@ -44,10 +44,10 @@ class WebhookController {
   private async handleSubscriptionCreated(data: any) {
     await Subscription.findOneAndUpdate(
       { userId: data.customer.customer_code },
-      { 
+      {
         providerSubscriptionId: data.subscription_code,
         status: 'active',
-        paymentStatus: 'paid' 
+        paymentStatus: 'paid'
       }
     );
   }
@@ -55,9 +55,9 @@ class WebhookController {
   private async handleSubscriptionDisabled(data: any) {
     await Subscription.findOneAndUpdate(
       { providerSubscriptionId: data.subscription_code },
-      { 
+      {
         status: 'cancelled',
-        cancelledAt: new Date() 
+        cancelledAt: new Date()
       }
     );
   }
@@ -73,9 +73,9 @@ class WebhookController {
     if (data.plan) {
       await Subscription.findOneAndUpdate(
         { providerSubscriptionId: data.plan.plan_code },
-        { 
+        {
           paymentStatus: 'paid',
-          status: 'active' 
+          status: 'active'
         }
       );
     }
