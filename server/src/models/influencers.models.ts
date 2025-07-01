@@ -38,6 +38,11 @@ const InfluencerSchema: Schema = new Schema(
       city: { type: String },
     },
     referralSource: { type: String },
+    payoutPreference: {
+      type: String,
+      enum: ['bank', 'wallet'],
+      default: 'bank',
+    },
     deactivated: { type: Boolean, default: false },
   },
   {

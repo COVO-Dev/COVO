@@ -6,7 +6,8 @@ import { paystackService } from './paystack.service';
 import { UserRole } from '../types/enum';
 import mongoose from 'mongoose';
 import { Campaign } from '../models/campaign.models';
-import { InitiatePaymentRequest, PayInfluencerRequest, ITransaction } from '../types';
+import { InitiatePaymentRequest } from '../types';
+import { Influencer } from '../models/influencers.models';
 
 export class PaymentService {
     private readonly PLATFORM_COMMISSION_RATE = 0.08;
@@ -23,6 +24,11 @@ export class PaymentService {
             const platformCommission = totalAmount * this.PLATFORM_COMMISSION_RATE;
             const influencerAmount = totalAmount - platformCommission;
 
+            const influencer = await Influencer.findById(request.influencerId).select('paystackRecipientCode').session(session);
+            if (!influencer) {
+                throw new Error('Influencer not found');
+            }
+
             const reference = paystackService.generateReference('CAMPAIGN');
 
             // Create transaction record
@@ -34,7 +40,7 @@ export class PaymentService {
                 platformCommission,
                 influencerAmount,
                 paymentMethod: 'immediate_split',
-                influencerPayoutPreference: request.influencerPayoutPreference || 'direct_bank',
+                influencerPayoutPreference: influencer.payoutPreference || 'bank',
                 paystackReference: reference,
             });
 
@@ -97,7 +103,7 @@ export class PaymentService {
             await transaction.save({ session });
 
             await this.transferPlatformCommission(transaction, session);
-            if (transaction.influencerPayoutPreference === 'direct_bank') {
+            if (transaction.influencerPayoutPreference === 'bank') {
                 await this.transferToInfluencerBank(transaction, session);
             } else {
                 await this.creditWallet(transaction, session);

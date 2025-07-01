@@ -8,7 +8,7 @@ export interface ITransaction extends Document {
     platformCommission: number;
     influencerAmount: number;
     paymentMethod: 'immediate_split';
-    influencerPayoutPreference: 'direct_bank' | 'platform_wallet';
+    influencerPayoutPreference: 'bank' | 'wallet';
     paystackReference: string;
     paystackTransactionId?: string;
     commissionTransferStatus?: 'completed' | 'failed';
@@ -28,8 +28,8 @@ const TransactionSchema = new Schema<ITransaction>(
         paymentMethod: { type: String, enum: ['immediate_split'], required: true },
         influencerPayoutPreference: {
             type: String,
-            enum: ['direct_bank', 'platform_wallet'],
-            default: 'direct_bank'
+            enum: ['bank', 'wallet'],
+            default: 'bank'
         },
         paystackReference: { type: String, required: true },
         paystackTransactionId: String,

@@ -15,8 +15,13 @@ paymentRouter.post('/wallet/add-bank-account', paymentController.addBankAccount)
 paymentRouter.post('/wallet/withdraw', paymentController.withdrawFromWallet)
 paymentRouter.get('/wallet', paymentController.getWallet);
 paymentRouter.get('/wallet/withdrawals', paymentController.getWithdrawalHistory);
-paymentRouter.get('/transactions/:id', paymentController.getTransaction);
 paymentRouter.get('/transactions/brand', paymentController.getBrandTransactions);
 paymentRouter.get('/transactions/influencer', paymentController.getInfluencerTransactions);
+paymentRouter.get('/transactions/:id', paymentController.getTransaction);
+
+// Export the payment router
+// Query format: e.g /export/transactions/brand?format=pdf
+paymentRouter.get('/export/transactions/brand', paymentController.exportBrandTransactions);
+paymentRouter.get('/export/transactions/influencer', paymentController.exportInfluencerTransactions);
 
 export { paymentRouter };

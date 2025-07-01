@@ -169,4 +169,9 @@ app.get("/", (req: Request, res: Response) => {
   });
 });
 
+app.get('/payment-success', (req, res) => {
+  res.send('🎉 Payment was successful!');
+});
+
+
 export default app;

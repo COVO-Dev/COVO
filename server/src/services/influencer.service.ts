@@ -2,6 +2,8 @@ import { IInfluencer } from "../types";
 import { Influencer } from "../models/influencers.models";
 import { ServiceResponse, SearchResponse } from "../types";
 import { HttpError } from "../middleware/errors";
+import { BadRequest } from "../middleware/errors";
+import mongoose from "mongoose";
 import {
   influencerMoreInformationSchema,
 } from "../schema/auth.schema";
@@ -235,6 +237,46 @@ export class InfluencerService {
       };
     } catch (err) {
       throw new HttpError(500, err.message || "Error searching influencers.");
+    }
+  }
+
+  /**
+   * Upadte influencer payout preference.
+   * @param influencerId - ID of the influencer
+   * @param payoutPreference - New payout preference ('bank' or 'wallet')
+   * @returns A promise that resolves with the updated influencer data
+   */
+
+  public async updateInfluencerPayoutPreference(
+    influencerId: string,
+    payoutPreference: "bank" | "wallet"
+  ): Promise<ServiceResponse<IInfluencer>> {
+    try {
+      if (!mongoose.Types.ObjectId.isValid(influencerId)) {
+        throw new BadRequest("Invalid influencer ID format");
+      }
+
+      const updatedInfluencer = await Influencer.findByIdAndUpdate(
+        influencerId,
+        { payoutPreference },
+        { new: true, runValidators: true }
+      );
+
+      if (!updatedInfluencer) {
+        throw new ResourceNotFound("Influencer not found");
+      }
+
+      return {
+        status_code: 200,
+        message: "Payout preference updated successfully.",
+        data: updatedInfluencer,
+      };
+    } catch (err) {
+      console.error("Error updating payout preference: ", err);
+      if (err instanceof ResourceNotFound || err instanceof BadRequest) {
+        throw err;
+      }
+      throw new HttpError(500, "An error occurred while updating payout preference");
     }
   }
 }

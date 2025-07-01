@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import { paymentService } from '../services/payment.service';
 import { asyncHandler, sendJsonResponse } from '../middleware/helper';
+import { exportService } from '../services/export.service';
 import { UserRole } from '../types/enum';
+import { send } from 'process';
 
 export class PaymentController {
     initiatePayment = asyncHandler(async (req: Request, res: Response) => {
@@ -16,7 +18,7 @@ export class PaymentController {
 
     getBrandTransactions = asyncHandler(async (req: Request, res: Response) => {
         const { page = 1, limit = 10 } = req.query;
-        const brandId = req.user.id;
+        const brandId = req.user.userId;
         const result = await paymentService.getBrandTransactions(
             brandId,
             Number(page),
@@ -27,7 +29,7 @@ export class PaymentController {
 
     getInfluencerTransactions = asyncHandler(async (req: Request, res: Response) => {
         const { page = 1, limit = 10 } = req.query;
-        const influencerId = req.user.id;
+        const influencerId = req.user.userId;
         const result = await paymentService.getInfluencerTransactions(
             influencerId,
             Number(page),
@@ -75,6 +77,51 @@ export class PaymentController {
         const result = await paymentService.handlePaymentWebhook(req.body);
         sendJsonResponse(res, 200, 'Webhook handled', result);
     });
+
+    exportBrandTransactions = asyncHandler(async (req: Request, res: Response) => {
+        const brandId = req.user.id;
+        const format = req.query.format || 'csv';
+
+        const { transactions } = await paymentService.getBrandTransactions(brandId);
+
+        if (format === 'csv') {
+            const csv = await exportService.generateCSV(transactions);
+            res.setHeader('Content-Type', 'text/csv');
+            res.setHeader('Content-Disposition', 'attachment; filename=brand_transactions.csv');
+            return res.send(csv);
+        }
+
+        if (format === 'pdf') {
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', 'attachment; filename=brand_transactions.pdf');
+            return exportService.generatePDF(transactions, res);
+        }
+
+        sendJsonResponse(res, 400, 'Invalid format. Use csv or pdf.');
+    });
+
+    exportInfluencerTransactions = asyncHandler(async (req: Request, res: Response) => {
+        const influencerId = req.user.id;
+        const format = req.query.format || 'csv';
+
+        const { transactions } = await paymentService.getInfluencerTransactions(influencerId);
+
+        if (format === 'csv') {
+            const csv = await exportService.generateCSV(transactions);
+            res.setHeader('Content-Type', 'text/csv');
+            res.setHeader('Content-Disposition', 'attachment; filename=influencer_transactions.csv');
+            return res.send(csv);
+        }
+
+        if (format === 'pdf') {
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', 'attachment; filename=influencer_transactions.pdf');
+            return exportService.generatePDF(transactions, res);
+        }
+
+        sendJsonResponse(res, 400, 'Invalid format. Use csv or pdf.');
+    });
+
 }
 
 export const paymentController = new PaymentController();
