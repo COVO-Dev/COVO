@@ -31,7 +31,7 @@ const CampaignSchema: Schema = new Schema(
 		collaborationPreferences: {
 			hasWorkedWithInfluencers: { type: Boolean, required: true },
 			exclusiveCollaborations: { type: Boolean, required: true },
-			type: { type: String, enum: [ "Nano", "Micro", "Macro", "Mega" ], required: true },
+			type: { type: String, enum: ["Nano", "Micro", "Macro", "Mega"], required: true },
 			styles: { type: [String], required: true },
 		},
 		recommendedInfluencers: [
@@ -58,15 +58,17 @@ const CampaignSchema: Schema = new Schema(
 			enum: ["active", "inactive", "pending", "ongoing", "completed"],
 			default: "active",
 		},
+		totalAmountPaid: { type: Number, default: 0 },
+		totalCommissionPaid: { type: Number, default: 0 },
 		isDeleted: { type: Boolean, default: false },
 	},
 	{ timestamps: true }
 );
 
 CampaignSchema.virtual("milestones", {
-  ref: "Milestone",
-  localField: "_id",
-  foreignField: "campaignId",
+	ref: "Milestone",
+	localField: "_id",
+	foreignField: "campaignId",
 });
 
 CampaignSchema.set("toObject", { virtuals: true });

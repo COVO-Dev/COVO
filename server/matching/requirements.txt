@@ -1,5 +1,0 @@
-fastapi
-uvicorn
-pymongo
-numpy
-pydantic
