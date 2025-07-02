@@ -450,6 +450,7 @@ export interface IInstagramMetrics {
 		lastMentionedAt?: Date;
 		engagement: number;
 	}[];
+	reauthorizeRequired?: boolean;
 	createdAt?: Date;
 	updatedAt?: Date;
 }
@@ -513,6 +514,7 @@ export interface IYoutubeMetrics {
 		lastMentionedAt: Date;
 		engagement: number;
 	}[];
+	reauthorizeRequired?: boolean;
 }
 
 export interface IFacebookMetrics {
@@ -591,6 +593,7 @@ export interface IFacebookMetrics {
 	}[];
 
 	audienceInterests: string[];
+	reauthorizeRequired?: boolean;
 
 	createdAt?: Date;
 	updatedAt?: Date;

@@ -44,9 +44,9 @@ const sendJsonResponse = (
  */
 const asyncHandler =
   (fn: (req: Request, res: Response, next: NextFunction) => void) =>
-  (req: Request, res: Response, next: NextFunction) => {
-    return Promise.resolve(fn(req, res, next)).catch(next);
-};
+    (req: Request, res: Response, next: NextFunction) => {
+      return Promise.resolve(fn(req, res, next)).catch(next);
+    };
 
 export default function getUserData(req: Request): {
   userId: string;
@@ -55,12 +55,12 @@ export default function getUserData(req: Request): {
   firstName: string;
   lastName: string
 } | null {
-	const user = (req as Request & { user?: any }).user;
-	if (user) {
-		return user;
-	} else {
-		return null;
-	}
+  const user = (req as Request & { user?: any }).user;
+  if (user) {
+    return user;
+  } else {
+    return null;
+  }
 }
 
 export function isAdmin(req: Request): boolean {
@@ -69,7 +69,7 @@ export function isAdmin(req: Request): boolean {
   return user && user.role.includes(UserRole.Admin);
 }
 
-export const isAdminAndHasPermission = asyncHandler( async ( req: Request, res: Response, next: NextFunction) => {
+export const isAdminAndHasPermission = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
   const user = getUserData(req);
   if (!user || !user.role.includes(UserRole.Admin)) {
     throw new Error("You are not authorized to perform this action.");
@@ -94,4 +94,13 @@ export const getPlatformModel = (platform: string) => {
   }
 };
 
+export function isTokenExpiringSoon(expiry: Date): boolean {
+  const now = Date.now();
+  const buffer = 5 * 60 * 1000; // 5 minutes
+  return expiry.getTime() - now <= buffer;
+}
+
+export function isTokenExpired(expiry: Date): boolean {
+  return Date.now() > expiry.getTime();
+}
 export { sendJsonResponse, asyncHandler };

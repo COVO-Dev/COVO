@@ -31,7 +31,7 @@ import { subscriptionRoute } from "./routes/subscription.routes";
 import subscriptionService from "./services/subscription.service";
 import { checkExpiredSubscriptions } from "./utils/subscription.utils";
 import { paymentRouter } from "./routes/payment.routes";
-
+import "./cron/scheduler.cron"
 
 dotenv.config();
 

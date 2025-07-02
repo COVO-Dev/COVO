@@ -3,6 +3,8 @@ import { Influencer } from "../../models/influencers.models";
 import { Instagram } from "../../models/instagram.model";
 import { config } from "../../config/configuration";
 import { updateInstagramMetrics } from "./instagramPlatformData.service";
+import { Notification } from "../../models/notification.models";
+import { NotificationCategory, NotificationStatus, UserRole } from "../../types/enum";
 
 export async function getTokens(code: string, influencerId: string) {
   try {
@@ -53,6 +55,9 @@ export async function getTokens(code: string, influencerId: string) {
 
     const expires_in = tokenResponse.data.expires_in || 60 * 24 * 60 * 60;
 
+    const existingAccount = await Instagram.findOne({ influencerId });
+    const isReauth = existingAccount?.connected === false;
+
     const updateInstagram = await Instagram.findOneAndUpdate(
       { influencerId },
       {
@@ -72,6 +77,18 @@ export async function getTokens(code: string, influencerId: string) {
 
     if (!updateInstagram) {
       throw new Error("Failed to update influencer record");
+    }
+
+    if (isReauth) {
+      await Notification.updateMany(
+        {
+          recipientId: influencerId,
+          type: "reauthorization",
+          category: NotificationCategory.System,
+          status: NotificationStatus.Unread,
+        },
+        { $set: { status: NotificationStatus.Read } }
+      );
     }
 
     return {
