@@ -1,6 +1,46 @@
 import axios from 'axios';
 import { PaystackPlan, PaystackSubscription } from '../types';
+import crypto from 'crypto';
 import { config } from '../config/configuration';
+
+
+export interface PaystackConfig {
+    secretKey: string;
+    publicKey: string;
+    baseUrl: string;
+}
+
+export interface InitializePaymentData {
+    email: string;
+    amount: number;
+    reference: string;
+    callback_url?: string;
+    metadata?: any;
+    currency?: string;
+}
+
+export interface TransferRecipientData {
+    type: 'nuban' | 'mobile_money' | 'basa';
+    name: string;
+    account_number: string;
+    bank_code: string;
+    currency?: string;
+}
+
+export interface InitiateTransferData {
+    source: 'balance';
+    amount: number;
+    recipient: string;
+    reason: string;
+    reference?: string;
+}
+
+export interface PaystackResponse<T = any> {
+    status: boolean;
+    message: string;
+    data: T;
+}
+
 
 class PaystackService {
     private baseURL = 'https://api.paystack.co';
@@ -128,6 +168,111 @@ class PaystackService {
             throw new Error(`Failed to get subscription: ${error.response?.data?.message || error.message}`);
         }
     }
+
+    async initialisePayment(data: InitializePaymentData): Promise<PaystackResponse> {
+        try {
+            const response = await axios.post(
+                `${this.baseURL}/transaction/initialize`,
+                data,
+                { headers: this.getHeaders() }
+            );
+            return response.data;
+        } catch (error: any) {
+            throw new Error(`Paystack initialization error: ${error.response?.data?.message || error.message}`);
+        }
+    }
+
+    async createTransferRecipient(data: TransferRecipientData): Promise<PaystackResponse> {
+        try {
+            const response = await axios.post(
+                `${this.baseURL}/transferrecipient`,
+                data,
+                { headers: this.getHeaders() }
+            );
+            return response.data;
+        } catch (error: any) {
+            throw new Error(`Paystack recipient creation error: ${error.response?.data?.message || error.message}`);
+        }
+    }
+
+    // Initiate Transfer
+    async initiateTransfer(data: InitiateTransferData): Promise<PaystackResponse> {
+        try {
+            const response = await axios.post(
+                `${this.baseURL}/transfer`,
+                data,
+                { headers: this.getHeaders() }
+            );
+            return response.data;
+        } catch (error: any) {
+            throw new Error(`Paystack transfer error: ${error.response?.data?.message || error.message}`);
+        }
+    }
+
+    // Verify Transfer Status
+    async verifyTransfer(transferCode: string): Promise<PaystackResponse> {
+        try {
+            const response = await axios.get(
+                `${this.baseURL}/transfer/verify/${transferCode}`,
+                { headers: this.getHeaders() }
+            );
+            return response.data;
+        } catch (error: any) {
+            throw new Error(`Paystack transfer verification error: ${error.response?.data?.message || error.message}`);
+        }
+    }
+
+    // Get Banks List
+    async getBanks(country: string = 'nigeria'): Promise<PaystackResponse> {
+        try {
+            const response = await axios.get(
+                `${this.baseURL}/bank?country=${country}`,
+                { headers: this.getHeaders() }
+            );
+            return response.data;
+        } catch (error: any) {
+            throw new Error(`Paystack banks fetch error: ${error.response?.data?.message || error.message}`);
+        }
+    }
+
+    // Resolve Account Number
+    async resolveAccountNumber(accountNumber: string, bankCode: string): Promise<PaystackResponse> {
+        try {
+            const response = await axios.get(
+                `${this.baseURL}/bank/resolve?account_number=${accountNumber}&bank_code=${bankCode}`,
+                { headers: this.getHeaders() }
+            );
+            return response.data;
+        } catch (error: any) {
+            throw new Error(`Paystack account resolution error: ${error.response?.data?.message || error.message}`);
+        }
+    }
+
+    // Verify Webhook Signature
+    verifyWebhookSignature(payload: string, signature: string): boolean {
+        const hash = crypto
+            .createHmac('sha512', this.secretKey)
+            .update(payload, 'utf8')
+            .digest('hex');
+        return hash === signature;
+    }
+
+    // Generate Payment Reference
+    generateReference(prefix: string = 'TX'): string {
+        const timestamp = Date.now();
+        const random = Math.random().toString(36).substring(2, 15);
+        return `${prefix}_${timestamp}_${random}`.toUpperCase();
+    }
+
+    // Convert amount to kobo (Paystack uses kobo)
+    toKobo(amount: number): number {
+        return Math.round(amount * 100);
+    }
+
+    // Convert amount from kobo to naira
+    fromKobo(amount: number): number {
+        return amount / 100;
+    }
 }
 
-export default new PaystackService();
+export const paystackService = new PaystackService();

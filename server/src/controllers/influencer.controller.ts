@@ -110,4 +110,30 @@ export class InfluencerController {
       sendJsonResponse(res, error.status_code || 500, error.message);
     }
   };
+
+  /**
+   * Update influencer payout preference
+   */
+  public updateInfluencerPayoutPreference = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { id } = req.params;
+      const { payoutPreference } = req.body;
+
+      const userData = getUserData(req);
+
+      if (!userData) {
+        throw new BadRequest("You are not authenticated");
+      }
+
+      if (id !== userData.userId) {
+        throw new BadRequest("You are not authorized to perform this operation");
+      }
+
+      const result = await influencerService.updateInfluencerPayoutPreference(
+        id,
+        payoutPreference
+      );
+      sendJsonResponse(res, result.status_code, result.message, result.data);
+    }
+  );
 }

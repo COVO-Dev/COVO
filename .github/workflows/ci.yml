@@ -11,7 +11,7 @@ jobs:
     name: build-client
     runs-on: ubuntu-latest
 
-    env: # Set environment variables for the client build
+    env:
       NEXT_AWS_PUBLIC_PATH: covo-test2.s3.us-east-1.amazonaws.com
       IMAGE_HOSTNAME: s3.amazon.aws.com
 
@@ -28,15 +28,13 @@ jobs:
         run: npm install
         working-directory: client
 
-      - name: Restore Next.js cache
+      - name: 💾 Restore Next.js cache
         uses: actions/cache@v3
         with:
-          path: |
-            client/.next/cache
+          path: client/.next/cache
           key: ${{ runner.os }}-next-${{ hashFiles('client/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-nextjs-
-      
+          restore-keys: ${{ runner.os }}-nextjs-
+
       - name: 🛠️ Build client
         run: npm run build
         working-directory: client
@@ -66,17 +64,46 @@ jobs:
         run: npm test
         working-directory: server
 
-  # deploy:
-  #   name: 🚀 Deploy
-  #   needs: [build-client, build-server]
-  #   runs-on: ubuntu-latest
-  #   if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
+  deploy:
+    name: 🚀 Deploy
+    needs: [build-client, build-server]
+    runs-on: ubuntu-latest
+    if: github.ref_name == 'staging' || github.ref_name == 'main'
 
-  #   steps:
-  #     - name: 📦 Checkout code
-  #       uses: actions/checkout@v3
+    steps:
+      - name: 🚀 Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            echo "🌐 Switching to project folder..."
+            cd ~/covo-${{ github.ref_name }}
+            git fetch origin
+            git reset --hard origin/${{ github.ref_name }}
 
-  #     - name: 🚀 Deploy to Server
-  #       run: |
-  #         echo "Deploying to ${{ github.ref == 'refs/heads/main' && 'Production' || 'Staging' }}..."
-  #         # Add your real deploy command here
+            echo "📦 Ensuring PM2 & TSC are installed..."
+            sudo npm install -g pm2 typescript
+
+            echo "📦 Installing backend dependencies..."
+            cd server
+            npm install || exit 1
+            NODE_OPTIONS="--max-old-space-size=4096" npm run build || exit 1
+
+            echo "🔁 Restarting backend with PM2..."
+            pm2 describe covo-${{ github.ref_name }} > /dev/null && \
+              pm2 restart covo-${{ github.ref_name }} || \
+              PORT=${{ github.ref_name == 'main' && '3000' || '4000' }} pm2 start build/app.js --name covo-${{ github.ref_name }}
+
+            echo "🌐 Building frontend..."
+            cd ../client
+            npm install || exit 1
+            NODE_OPTIONS="--max-old-space-size=4096" npm run build || exit 1
+
+            echo "🔁 Restarting frontend with PM2..."
+            pm2 describe covo-client-${{ github.ref_name }} > /dev/null && \
+              pm2 restart covo-client-${{ github.ref_name }} || \
+              PORT=${{ github.ref_name == 'main' && '3000' || '4000' }} pm2 start npm --name covo-client-${{ github.ref_name }} -- run start
+
+            echo "✅ Deployment complete!"

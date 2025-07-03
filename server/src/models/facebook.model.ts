@@ -4,7 +4,7 @@ import { IFacebookMetrics } from "../types";
 const FacebookMetricsSchema: Schema = new Schema(
     {
         influencerId: { type: Schema.Types.ObjectId, ref: "Influencer", required: true },
-        
+
         metrics: {
             followers: { type: Number, default: 0 },
             impressions: { type: Number, default: 0 },
@@ -13,7 +13,7 @@ const FacebookMetricsSchema: Schema = new Schema(
             views: { type: Number, default: 0 },
             comments: { type: Number, default: 0 },
             shares: { type: Number, default: 0 },
-            reach: { type: Number, default: 0 },      
+            reach: { type: Number, default: 0 },
             lastUpdated: { type: Date, default: Date.now },
         },
 
@@ -83,7 +83,7 @@ const FacebookMetricsSchema: Schema = new Schema(
         ],
 
         audienceInterests: [{ type: String }],
-
+        reauthorizeRequired: { type: Boolean, default: false },
     },
     { timestamps: true }
 );

@@ -20,7 +20,7 @@ subscriptionRoute.get('/history', subscriptionController.getSubscriptionHistory)
 
 
 // // Subscription management routes
-subscriptionRoute.use(checkSubscription({ allowedPlans: ['free', 'premium', 'platinum'] }));
+subscriptionRoute.use(checkSubscription({ allowedPlans: ['COVO Basic', 'COVO Creator', 'COVO Pro', 'COVO Elite'] }));
 subscriptionRoute.get('/current', subscriptionController.getCurrentSubscription);
 subscriptionRoute.post('/change-plan', subscriptionController.changeSubscription);
 

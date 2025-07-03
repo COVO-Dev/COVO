@@ -3,13 +3,6 @@ import mongoose from "mongoose";
 import { config } from "./config/configuration";
 import { createServer } from "http";
 import app from "./app";
-import { WebSocketServer, WebSocket } from "ws";
-import { ChatService } from "./services/chat.service";
-import { NotificationService } from "./services/notification.service";
-import { ServiceResponse, IMessage } from "./types";
-import { Server, Socket } from "socket.io";
-import { authorizeSocket } from "./middleware/auth";
-import { NextFunction } from "express";
 import { startWebSocketServer } from "./socketServer";
 import { chatController } from "./routes/chat.routes";
 
@@ -446,8 +439,8 @@ const { io: ioObject, connectedClients, chatRooms } = startWebSocketServer();
 metricsDB.on("error", (err) => {
 	console.error("Metrics database connection error:", err);
 	process.exit(1);
-  });
-  metricsDB.once("open", () => {
+});
+metricsDB.once("open", () => {
 	console.log("Connected to metrics database 🚀");
 });
 

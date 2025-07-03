@@ -22,7 +22,7 @@ const InstagramMetricsSchema: Schema = new Schema(
             lastUpdated: { type: Date, default: Date.now },
         },
         accessToken: { type: String, required: true },
-        pageAccessToken: {type:  String, required: true},
+        pageAccessToken: { type: String, required: true },
         refreshToken: { type: String },
         tokenExpiry: { type: Date, required: true },
         connected: { type: Boolean, default: false },
@@ -65,7 +65,7 @@ const InstagramMetricsSchema: Schema = new Schema(
                 mentionCount: { type: Number, default: 0 },
                 lastUsedAt: { type: Date },
             }
-        ],        
+        ],
         topPosts: [
             {
                 content: { type: String },
@@ -88,7 +88,7 @@ const InstagramMetricsSchema: Schema = new Schema(
             averageCommentsPerPost: { type: Number, default: 0 },
             averageSharesPerPost: { type: Number, default: 0 },
             averageViewsPerReel: { type: Number, default: 0 },
-        },        
+        },
         // adPerformance: {
         //     reach: { type: Number, default: 0 },
         //     clicks: { type: Number, default: 0 },
@@ -103,7 +103,8 @@ const InstagramMetricsSchema: Schema = new Schema(
                 lastMentionedAt: { type: Date },
                 engagement: { type: Number }
             }
-        ]
+        ],
+        reauthorizeRequired: { type: Boolean, default: false },
     },
     { timestamps: true }
 );

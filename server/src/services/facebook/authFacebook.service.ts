@@ -3,6 +3,8 @@ import { Influencer } from "../../models/influencers.models";
 import { Facebook } from "../../models/facebook.model";
 import { config } from "../../config/configuration";
 import { Tokens } from "../../types";
+import { Notification } from "../../models/notification.models";
+import { NotificationCategory, NotificationStatus, UserRole } from "../../types/enum";
 
 export function generateFacebookAuthUrl(state: string) {
   const appId = config.FACEBOOK_APP_ID;
@@ -95,6 +97,9 @@ export const getFacebookTokens = async (
       throw new Error("No Facebook page found for this user");
     }
 
+    const fbAccount = await Facebook.findOne({ influencerId });
+    const isReauth = fbAccount?.reauthorizeRequired === true;
+
     const updateResult = await Facebook.findOneAndUpdate(
       { influencerId },
       {
@@ -104,6 +109,7 @@ export const getFacebookTokens = async (
           lastConnected: new Date(),
           pageAccessToken,
           facebookId: platformId,
+          reauthorizeRequired: false,
         },
         $setOnInsert: {
           connected: true, influencerId
@@ -114,6 +120,18 @@ export const getFacebookTokens = async (
 
     if (!updateResult) {
       throw new Error("Failed to update influencer data");
+    }
+
+    if (isReauth) {
+      await Notification.updateMany(
+        {
+          recipientId: influencerId,
+          type: "reauthorization",
+          category: NotificationCategory.System,
+          status: NotificationStatus.Unread,
+        },
+        { $set: { status: NotificationStatus.Read } }
+      );
     }
 
     return longLivedResponse.data;
