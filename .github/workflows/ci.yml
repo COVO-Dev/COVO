@@ -89,7 +89,7 @@ jobs:
             echo "📦 Installing backend dependencies..."
             cd server
             npm install || exit 1
-            NODE_OPTIONS="--max_old_space_size=2048" npm run build || exit 1
+            NODE_OPTIONS="--max-old-space-size=2048" npm run build || exit 1
 
             echo "🔁 Restarting backend with PM2..."
             pm2 describe covo-${{ github.ref_name }} > /dev/null && \
