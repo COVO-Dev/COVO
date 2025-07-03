@@ -23,7 +23,7 @@ const nextConfig = {
   },
   experimental: {
     // Enabling React Server Components
-    serverActions: []
+    serverActions: {}
   },
 };
 
