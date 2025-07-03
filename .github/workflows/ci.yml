@@ -89,7 +89,7 @@ jobs:
             echo "📦 Installing backend dependencies..."
             cd server
             npm install || exit 1
-            NODE_OPTIONS="--max-old-space-size=2048" npm run build || exit 1
+            NODE_OPTIONS="--max-old-space-size=4096" npm run build || exit 1
 
             echo "🔁 Restarting backend with PM2..."
             pm2 describe covo-${{ github.ref_name }} > /dev/null && \
@@ -99,15 +99,11 @@ jobs:
             echo "🌐 Building frontend..."
             cd ../client
             npm install || exit 1
-            npm run build || exit 1
+            NODE_OPTIONS="--max-old-space-size=4096" npm run build || exit 1
 
-            echo "📁 Deploying frontend to web directory..."
-            if [ "${{ github.ref_name }}" = "main" ]; then
-              sudo rm -rf /var/www/covo-production
-              sudo cp -r out /var/www/covo-production
-            else
-              sudo rm -rf /var/www/covo-staging
-              sudo cp -r out /var/www/covo-staging
-            fi
+            echo "🔁 Restarting frontend with PM2..."
+            pm2 describe covo-client-${{ github.ref_name }} > /dev/null && \
+              pm2 restart covo-client-${{ github.ref_name }} || \
+              PORT=${{ github.ref_name == 'main' && '3000' || '4000' }} pm2 start npm --name covo-client-${{ github.ref_name }} -- run start
 
             echo "✅ Deployment complete!"
