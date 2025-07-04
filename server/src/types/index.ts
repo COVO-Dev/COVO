@@ -101,11 +101,12 @@ export interface ICampaign {
 	currency: string;
 	targetAudience: string;
 	primaryGoals: string[];
+	influencerType: "Nano" | "Micro" | "Mid-Tier" | "Macro" | "Celebrity";
 	geographicFocus: string;
 	collaborationPreferences: {
 		hasWorkedWithInfluencers: boolean;
 		exclusiveCollaborations: boolean;
-		type: "Nano" | "Micro" | "Macro" | "Mega";
+		type: "Paid Collaborations" | "Gifting/PR Packages" | "Affiliate/Commission-Based Deals" | "Long-Term Brand Partnerships" | "Event Hosting" | "Product Reviews" | "UGC-Only Content";
 		styles: string[];
 	};
 	trackingAndAnalytics: {
