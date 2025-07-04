@@ -8,9 +8,17 @@ export default function ProfileProvider() {
 	const session = useSession();
 	const dispatch = useAppDispatch();
 	useEffect(() => {
-		if (session && session.data?.user)
+		console.log("ProfileProvider - session status:", session.status);
+		console.log("ProfileProvider - session data:", session.data);
+		console.log("ProfileProvider - user data:", session.data?.user);
+		
+		if (session && session.data?.user) {
+			console.log("ProfileProvider - setting profile data:", session.data.user);
 			dispatch(setProfileData(session.data.user));
-		else dispatch(resetFields());
-	}, [session]);
+		} else {
+			console.log("ProfileProvider - resetting fields");
+			dispatch(resetFields());
+		}
+	}, [session, dispatch]);
 	return null;
 }
