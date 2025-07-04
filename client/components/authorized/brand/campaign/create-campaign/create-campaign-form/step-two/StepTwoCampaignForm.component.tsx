@@ -1,6 +1,5 @@
 "use client";
 import {
-  Form,
   FormControl,
   FormDescription,
   FormField,
@@ -10,27 +9,17 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import TagsInput from "../../../../../../ui/tags-input";
-import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import { setCampaignData, updateCollaborationPreferences, updateTrackingAndAnalytics } from '@/lib/store/campaign/campaign.slice'
-import useControlledField from "@/utils/useControlledField";
+import { Control } from "react-hook-form";
+import { ICampaign } from "@/lib/api/campaign/create-campaign/createCampaign.validation";
+import ImprovedTagsInput from "@/components/ui/improved-tags-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MultiSelector, MultiSelectorContent, MultiSelectorInput, MultiSelectorItem, MultiSelectorList, MultiSelectorTrigger } from "@/components/ui/extension/multi-select";
 
-export default function CampaignFormStepTwo({ control }) {
-  const dispatch = useAppDispatch();
-  const campaignData = useAppSelector((state) => state.campaign);
+interface CampaignFormStepTwoProps {
+  control: Control<ICampaign>;
+}
 
-  // Controlled fields using react-hook-form
-  const primaryGoalsField = useControlledField("primaryGoals", control);
-  const influencerTypeField = useControlledField("influencerType", control);
-  const geographicFocusField = useControlledField("geographicFocus", control);
-
-  const hasWorkedWithInfluencersField = useControlledField("collaborationPreferences.hasWorkedWithInfluencers", control);
-  const exclusiveCollaborationsField = useControlledField("collaborationPreferences.exclusiveCollaborations", control);
-  const typeCollaborationField = useControlledField("collaborationPreferences.type", control);
-  const stylesField = useControlledField("collaborationPreferences.styles", control);
-
+export default function CampaignFormStepTwo({ control }: CampaignFormStepTwoProps) {
   return (
     <div className="flex flex-col gap-4">
       {/* Primary Goals */}
@@ -42,15 +31,18 @@ export default function CampaignFormStepTwo({ control }) {
             <FormItem>
               <FormLabel>Primary Goals</FormLabel>
               <FormControl>
-                <TagsInput
-                  tags={primaryGoalsField.value || []}
-                  // placeholder="Add a goal and press enter"
+                <ImprovedTagsInput
+                  tags={field.value || []}
                   setTags={(tags) => {
-                    primaryGoalsField.onChange(tags);
-                    // dispatch(setCampaignData({ ...campaignData, primaryGoals: tags }));
+                    field.onChange(tags);
                   }}
+                  placeholder="Add a goal and press Enter"
+                  maxTags={5}
                 />
               </FormControl>
+              <FormDescription>
+                Add your campaign goals. Examples: &quot;Increase brand awareness&quot;, &quot;Drive sales&quot;, &quot;Generate leads&quot;
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -62,7 +54,7 @@ export default function CampaignFormStepTwo({ control }) {
           {/* Influencer Type */}
           <FormField
             control={control}
-            name={influencerTypeField.name}
+            name="influencerType"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Influencer Type</FormLabel>
@@ -76,20 +68,18 @@ export default function CampaignFormStepTwo({ control }) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="Nano">{` Nano (1K–10K) `}</SelectItem>
-                    <SelectItem value="Micro">{` Micro (10K–50K) `}</SelectItem>
-                    <SelectItem value="Mid-Tier">{` Mid-Tier (50K–250K) `}</SelectItem>
-                    <SelectItem value="Macro">{` Macro (250K–1M) `}</SelectItem>
-                    <SelectItem value="Celebrity">{` Celebrity (1M+) `}</SelectItem>
+                    <SelectItem value="Nano">Nano (1K–10K)</SelectItem>
+                    <SelectItem value="Micro">Micro (10K–50K)</SelectItem>
+                    <SelectItem value="Mid-Tier">Mid-Tier (50K–250K)</SelectItem>
+                    <SelectItem value="Macro">Macro (250K–1M)</SelectItem>
+                    <SelectItem value="Celebrity">Celebrity (1M+)</SelectItem>
                   </SelectContent>
                 </Select>
-                <FormDescription>Select a collaboration type from the drop-down menu</FormDescription>
+                <FormDescription>Select the influencer tier you want to work with</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
-
-
         </div>
 
         <div className="col-span-12 md:col-span-6">
@@ -103,22 +93,21 @@ export default function CampaignFormStepTwo({ control }) {
                 <FormControl>
                   <Input
                     placeholder="Focus"
-                    {...geographicFocusField}
-                    value={geographicFocusField.value || ""}
-                    onChange={(e) => {
-                      geographicFocusField.onChange(e);
-                      // dispatch(setCampaignData({ ...campaignData, geographicFocus: e.target.value }));
-                    }}
+                    {...field}
+                    value={field.value || ""}
                   />
                 </FormControl>
+                <FormDescription>
+                  Where should your campaign focus? (e.g., &quot;Global&quot;, &quot;United States&quot;, &quot;Europe&quot;)
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
-
         </div>
       </div>
-      {/* Two checkboxes */}
+
+      {/* Collaboration Preferences */}
       <div className="grid grid-cols-12 gap-4">
         {/* Worked With Influencers */}
         <div className="col-span-12 md:col-span-6">
@@ -129,12 +118,8 @@ export default function CampaignFormStepTwo({ control }) {
               <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                 <FormControl>
                   <Checkbox
-                    // checked={campaignData.collaborationPreferences.hasWorkedWithInfluencers || false}
-                    checked={hasWorkedWithInfluencersField.value || false}
-                    onCheckedChange={(checked) => {
-                      hasWorkedWithInfluencersField.onChange(checked);
-                      // dispatch(updateCollaborationPreferences({ hasWorkedWithInfluencers: checked }));
-                    }}
+                    checked={field.value || false}
+                    onCheckedChange={field.onChange}
                   />
                 </FormControl>
                 <div className="space-y-1 leading-none">
@@ -158,12 +143,8 @@ export default function CampaignFormStepTwo({ control }) {
               <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                 <FormControl>
                   <Checkbox
-                    // checked={campaignData.collaborationPreferences.exclusiveCollaborations || false}
-                    checked={exclusiveCollaborationsField.value || false}
-                    onCheckedChange={(checked) => {
-                      exclusiveCollaborationsField.onChange(checked);
-                      // dispatch(updateCollaborationPreferences({ exclusiveCollaborations: checked }));
-                    }}
+                    checked={field.value || false}
+                    onCheckedChange={field.onChange}
                   />
                 </FormControl>
                 <div className="space-y-1 leading-none">
@@ -184,7 +165,7 @@ export default function CampaignFormStepTwo({ control }) {
         <div className="col-span-12 md:col-span-6">
           <FormField
             control={control}
-            name={typeCollaborationField.name}
+            name="collaborationPreferences.type"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Collaboration Type</FormLabel>
@@ -212,32 +193,6 @@ export default function CampaignFormStepTwo({ control }) {
               </FormItem>
             )}
           />
-
-          {/* <FormField
-            control={control}
-            name="collaborationPreferences.type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Collaboration Type</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Collaboration type"
-                    {...typeCollaborationField}
-                    // value={campaignData.collaborationPreferences.type}
-                    value={typeCollaborationField.value || ""}
-                    // defaultValue={campaignData.type}
-
-                    onChange={(e) => {
-                      typeCollaborationField.onChange(e);
-                      // dispatch(updateCollaborationPreferences({ type: e.target.value }));
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          /> */}
-
         </div>
 
         {/* Styles */}
@@ -247,11 +202,13 @@ export default function CampaignFormStepTwo({ control }) {
             name="collaborationPreferences.styles"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{`Collaboration Style`}</FormLabel>
+                <FormLabel>Collaboration Style</FormLabel>
                 <FormControl>
                   <MultiSelector
-                    values={field.value}
-                    onValuesChange={field.onChange}
+                    values={field.value || []}
+                    onValuesChange={(values) => {
+                      field.onChange(values);
+                    }}
                     loop
                     className="px-1 rounded-md border max-w-xs"
                   >
@@ -267,23 +224,19 @@ export default function CampaignFormStepTwo({ control }) {
                         <MultiSelectorItem value="YouTube Videos">YouTube Videos</MultiSelectorItem>
                         <MultiSelectorItem value="Blog or X Posts">Blog or X Posts</MultiSelectorItem>
                         <MultiSelectorItem value="Live Streams">Live Streams</MultiSelectorItem>
-                        <MultiSelectorItem value="Podcasts" >Podcasts</MultiSelectorItem>
-                        <MultiSelectorItem value="Carousel Posts" >Carousel Posts</MultiSelectorItem>
+                        <MultiSelectorItem value="Podcasts">Podcasts</MultiSelectorItem>
+                        <MultiSelectorItem value="Carousel Posts">Carousel Posts</MultiSelectorItem>
                       </MultiSelectorList>
                     </MultiSelectorContent>
                   </MultiSelector>
                 </FormControl>
-                <FormDescription>Select multiple options.</FormDescription>
+                <FormDescription>Select multiple content styles you&apos;d like to see</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
-
-
         </div>
-
       </div>
-
     </div>
   );
 }
