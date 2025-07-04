@@ -23,9 +23,10 @@ export class CampaignProvider {
 
   private isFollowerCountValidForType(followers: number): string {
     if (followers >= 1000 && followers < 10000) return 'Nano';
-    if (followers >= 10000 && followers < 100000) return 'Micro';
-    if (followers >= 100000 && followers < 1000000) return 'Macro';
-    if (followers >= 1000000) return 'Mega';
+    if (followers >= 10000 && followers < 50000) return 'Micro';
+    if (followers >= 50000 && followers < 250000) return 'Mid-Tier';
+    if (followers >= 250000 && followers < 1000000) return 'Macro';
+    if (followers >= 1000000) return 'Celebrity';
     return 'Unknown';
   }
 
@@ -498,15 +499,15 @@ export class CampaignProvider {
       const computedType = this.isFollowerCountValidForType(influencer.followers);
 
       // Validate campaign expects a valid type
-      const allowedTypes = ['Nano', 'Micro', 'Macro', 'Mega'];
-      if (!allowedTypes.includes(campaign.collaborationPreferences.type)) {
+      const allowedTypes = ['Nano', 'Micro', 'Mid-Tier', 'Macro', 'Celebrity'];
+      if (!allowedTypes.includes(campaign.influencerType)) {
         throw new BadRequest("Campaign has invalid influencer type criteria");
       }
 
       // Compare computed type to campaign requirement
-      if (campaign.collaborationPreferences.type !== computedType) {
+      if (campaign.influencerType !== computedType) {
         throw new BadRequest(
-          `This campaign is only open to ${campaign.collaborationPreferences.type} influencers. You are categorized as ${computedType}.`
+          `This campaign is only open to ${campaign.influencerType} influencers. You are categorized as ${computedType}.`
         );
       }
 
