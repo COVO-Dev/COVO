@@ -27,11 +27,24 @@ const CampaignSchema: Schema = new Schema(
 		budgetRange: { type: Number, required: true },
 		targetAudience: { type: String, required: true },
 		primaryGoals: { type: [String], required: true },
+		influencerType: { type: String, enum: [ "Nano", "Micro", "Mid-Tier", "Macro", "Celebrity" ], required: true },
 		geographicFocus: { type: String, required: true },
 		collaborationPreferences: {
 			hasWorkedWithInfluencers: { type: Boolean, required: true },
 			exclusiveCollaborations: { type: Boolean, required: true },
-			type: { type: String, enum: [ "Nano", "Micro", "Macro", "Mega" ], required: true },
+			type: { 
+				type: String, 
+				enum: [
+					"Paid Collaborations",
+					"Gifting/PR Packages",
+					"Affiliate/Commission-Based Deals",
+					"Long-Term Brand Partnerships",
+					"Event Hosting",
+					"Product Reviews",
+					"UGC-Only Content"
+				], 
+				required: true 
+			},
 			styles: { type: [String], required: true },
 		},
 		recommendedInfluencers: [
