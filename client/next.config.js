@@ -21,10 +21,6 @@ const nextConfig = {
       },
     ],
   },
-  experimental: {
-    // Enabling React Server Components
-    serverActions: true,
-  },
 };
 
 module.exports = nextConfig;
