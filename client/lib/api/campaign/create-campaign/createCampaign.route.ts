@@ -1,7 +1,7 @@
 "use server";
 
 import endpoints from "@/lib/api/endpoints";
-import { campaignSchema, ICampaign } from "./createCampaign.validation";
+import { ICampaign } from "./createCampaign.validation";
 // import { IInitialState } from "@/lib/store/campaign/campaign.model";
 // import { ICampaign } from "./createCampaign.validation";
 
@@ -11,9 +11,30 @@ export async function campaignDataRoute(
   userId: string
 ) {
   try {
+    // Validate inputs
+    if (!userId || userId.trim() === '') {
+      throw new Error("Brand ID is required but was empty or undefined");
+    }
+    
+    if (!token || token.trim() === '') {
+      throw new Error("Authentication token is required but was empty or undefined");
+    }
+
+    console.log("campaignDataRoute inputs:", {
+      formData: formData,
+      token: token ? "Present" : "Missing", 
+      userId: userId,
+      endpointTemplate: endpoints.createCampaign,
+      fullEndpoint: endpoints.createCampaign
+    });
+
     // Construct the endpoint URL
     const updateUrl = endpoints.createCampaign.replace(":brandId", userId);
-    console.log("campaignDataRoute", updateUrl)
+    console.log("campaignDataRoute URL construction:", {
+      template: endpoints.createCampaign,
+      userId: userId,
+      finalUrl: updateUrl
+    });
 
     const response = await fetch(updateUrl, {
       method: "POST",
@@ -38,7 +59,10 @@ export async function campaignDataRoute(
 
     return { status: "success", data: await response.json() };
   } catch (error) {
-    console.error("Error in campaignDataRoute:", error.message);
-    return { status: "error", message: error.message || "Validation or API request failed." };
+    console.error("Error in campaignDataRoute:", error instanceof Error ? error.message : String(error));
+    return { 
+      status: "error", 
+      message: error instanceof Error ? error.message : "Validation or API request failed." 
+    };
   }
 }
