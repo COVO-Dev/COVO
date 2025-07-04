@@ -6,6 +6,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import custom animations */
+@import '../styles/animations.css';
+
 body {
   font-family: Arial, Helvetica, sans-serif;
 }
@@ -131,6 +134,19 @@ html {
 
 .animate-shake {
   animation: shake 0.5s;
+}
+
+/* Animation delay utilities */
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animation-delay-400 {
+  animation-delay: 400ms;
+}
+
+.animation-delay-600 {
+  animation-delay: 600ms;
 }
 
 @layer base {

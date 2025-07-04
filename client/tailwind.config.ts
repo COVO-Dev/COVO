@@ -10,17 +10,25 @@ const config: Config = {
   theme: {
     extend: {
       animation: {
-        scroll: "scroll 20s linear infinite",
+        "fade-in-up": "fadeInUp 0.6s ease-out forwards",
+        "trusted-scroll": "scrollSmooth 120s linear infinite",
       },
       keyframes: {
-        scroll: {
+        fadeInUp: {
           "0%": {
-            transform: "translateX(0)",
+            opacity: "0",
+            transform: "translateY(30px)",
           },
           "100%": {
-            transform: "translateX(-100%)",
+            opacity: "1",
+            transform: "translateY(0)",
           },
         },
+      },
+      animationDelay: {
+        "200": "200ms",
+        "400": "400ms",
+        "600": "600ms",
       },
       colors: {
         "custom-light-grayish-blue": "#ebf1f9",

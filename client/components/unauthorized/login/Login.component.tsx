@@ -1,4 +1,3 @@
-// login/page.tsx
 import LoginBoxImage from "./login-box-image/LoginBoxImage";
 import LoginBox from "./login-box/LoginBox";
 

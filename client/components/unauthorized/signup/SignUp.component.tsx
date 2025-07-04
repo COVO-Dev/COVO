@@ -1,4 +1,3 @@
-// SignUp/page.tsx
 import SignUpBoxImage from "./signup-box-image/SignUpBoxImage";
 import SignUpBox from "./signup-box/SignUpBox";
 
