@@ -1,7 +1,7 @@
 import { Plan } from '../models/plan.model';
 import { Subscription } from '../models/subscription.model';
 import { IPlan, ISubscription } from '../types';
-import paystackService from './paystack.service';
+import { paystackService } from './paystack.service';
 import { config } from '../config/configuration';
 
 class SubscriptionService {
@@ -9,33 +9,72 @@ class SubscriptionService {
   async initializePlans() {
     const plans = [
       {
-        name: 'Free',
+        name: 'COVO Basic',
         price: 0,
         interval: 'monthly' as const,
-        features: ['Basic features', 'Limited usage', 'Email support'],
+        features: [
+          'Basic profile creation',
+          'Apply to 5 campaigns/month',
+          'In-platform messaging',
+          'Earnings + 8% commission',
+          'Basic analytics',
+          'Help center access',
+          'Basic Creator badge'
+        ],
       },
       {
-        name: 'Premium',
-        price: 20000,
+        name: 'COVO Creator',
+        price: 1100, // in kobo = $11
         interval: 'monthly' as const,
-        features: ['Enhanced features', 'Increased limits', 'Priority support', 'Advanced analytics'],
+        features: [
+          'Enhanced profile',
+          'Unlimited campaign applications',
+          'Priority applications',
+          'Basic audience insights',
+          'Engagement rate tracking',
+          'Priority email support',
+          'Verified Creator badge'
+        ],
       },
       {
-        name: 'Platinum',
-        price: 50000,
+        name: 'COVO Pro',
+        price: 2900, // $29
         interval: 'monthly' as const,
-        features: ['All features', 'Unlimited usage', '24/7 support', 'Custom integrations', 'White-label options'],
+        features: [
+          'Advanced profile & AI suggestions',
+          'Private campaign access',
+          'Advanced audience insights',
+          'Media kit builder',
+          'Content calendar',
+          'Financial reports',
+          '30 pitch credits/month',
+          'Live chat support',
+          'Pro Creator badge'
+        ],
       },
+      {
+        name: 'COVO Elite',
+        price: 6900, // $69
+        interval: 'monthly' as const,
+        features: [
+          'Custom domain portfolio',
+          'Top visibility in search',
+          'Full audience insights',
+          'Expedited payments (24-48hr)',
+          'Dedicated account manager',
+          'Legal templates',
+          'Masterclasses & workshops',
+          '60 pitch credits/month',
+          'Elite Creator badge'
+        ],
+      }
     ];
 
     for (const planData of plans) {
-      // Check if plan exists in database
       let plan = await Plan.findOne({ name: planData.name, isActive: true });
 
       if (!plan) {
-        // Create in database
         plan = new Plan(planData);
-        // Create in Paystack (skip free plan)
         if (planData.price > 0) {
           try {
             const paystackPlan = await paystackService.createPlan({

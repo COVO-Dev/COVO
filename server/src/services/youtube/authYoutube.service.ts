@@ -2,6 +2,9 @@ import { google } from 'googleapis';
 import { Youtube } from '../../models/youtube.model';
 import { config } from '../../config/configuration';
 import { Tokens } from '../../types';
+import { Notification } from "../../models/notification.models";
+import { NotificationCategory, NotificationStatus, UserRole } from "../../types/enum";
+
 
 const oauth2Client = new google.auth.OAuth2(
   config.GOOGLE_CLIENT_ID,
@@ -48,8 +51,11 @@ export const getYoutubeTokens = async (code: string, influencerId: string): Prom
     const platformUsername = channelData?.snippet?.title || '';
     const youtubeId = channelData?.id || '';
 
+    const existingAccount = await Youtube.findOne({ influencerId });
+    const isReauth = existingAccount?.connected === false;
+
     const youtubeAccount = await Youtube.findOneAndUpdate(
-      { influencerId }, 
+      { influencerId },
       {
         $set: {
           youtubeId,
@@ -64,6 +70,18 @@ export const getYoutubeTokens = async (code: string, influencerId: string): Prom
       },
       { upsert: true, new: true }
     );
+
+    if (isReauth) {
+      await Notification.updateMany(
+        {
+          recipientId: influencerId,
+          type: "reauthorization",
+          category: NotificationCategory.System,
+          status: NotificationStatus.Unread,
+        },
+        { $set: { status: NotificationStatus.Read } }
+      );
+    }
 
     return tokens as Tokens;
   } catch (error) {

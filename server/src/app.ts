@@ -30,7 +30,8 @@ import { surveyRouters } from "./routes/covoSurvey.route";
 import { subscriptionRoute } from "./routes/subscription.routes";
 import subscriptionService from "./services/subscription.service";
 import { checkExpiredSubscriptions } from "./utils/subscription.utils";
-
+import { paymentRouter } from "./routes/payment.routes";
+import "./cron/scheduler.cron"
 
 dotenv.config();
 
@@ -77,7 +78,7 @@ app.use(
 
 
 export const redisSave = async (key: string, value: any, expireTimeInMin?: number) => {
-  if(expireTimeInMin === undefined || expireTimeInMin === 0) {
+  if (expireTimeInMin === undefined || expireTimeInMin === 0) {
     expireTimeInMin = 60 * 60;
   } else {
     expireTimeInMin = expireTimeInMin * 60;
@@ -94,16 +95,16 @@ export const redisSave = async (key: string, value: any, expireTimeInMin?: numbe
 
 export const redisRetrieve = (key: string): Promise<any> => {
   return new Promise<any>((resolve, reject) => {
-  redis.get(key, (err, result) => {
-    if (err) {
-      console.error('Error retrieving record:', err);
-      reject(err);
-    } else {
-      console.log('Return retrieved record:', result);
-      resolve(JSON.parse(result));
-    }
+    redis.get(key, (err, result) => {
+      if (err) {
+        console.error('Error retrieving record:', err);
+        reject(err);
+      } else {
+        console.log('Return retrieved record:', result);
+        resolve(JSON.parse(result));
+      }
+    });
   });
-});
 }
 
 
@@ -154,6 +155,9 @@ app.use("/api", facebookPlatformData);
 // Subscription routes
 app.use("/api/subscription", subscriptionRoute);
 
+// Payment routes
+app.use("/api/payment", paymentRouter);
+
 
 app.use(routeNotFound);
 app.use(errorHandler);
@@ -164,5 +168,10 @@ app.get("/", (req: Request, res: Response) => {
     message: "I am the express API responding to Covo API request",
   });
 });
+
+app.get('/payment-success', (req, res) => {
+  res.send('🎉 Payment was successful!');
+});
+
 
 export default app;

@@ -11,4 +11,7 @@ userRoute.get("/influencer/:id", authMiddleware, influencerController.getInfluen
 userRoute.put("/influencer/:id", authMiddleware, influencerController.getInfluencer); // partial update
 userRoute.patch("/influencer/:id", authMiddleware, influencerController.updateInfluencerController) // full update
 
+// Influencer payout preference
+userRoute.patch("/influencer/:id/payout-preference", authMiddleware, influencerController.updateInfluencerPayoutPreference);
+
 export { userRoute };

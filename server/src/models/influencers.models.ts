@@ -11,7 +11,7 @@ const InfluencerSchema: Schema = new Schema(
     },
     age: { type: Number, min: 18, max: 65 },
     covoScore: {
-      overall: { type: Number, min: 0, max: 100 },
+      overall: { type: Number, min: 0, max: 100, default: 100 },
       ratings: [{ type: mongoose.Schema.Types.ObjectId, ref: 'CovoSurvey' }],
     },
     followers: {
@@ -38,6 +38,11 @@ const InfluencerSchema: Schema = new Schema(
       city: { type: String },
     },
     referralSource: { type: String },
+    payoutPreference: {
+      type: String,
+      enum: ['bank', 'wallet'],
+      default: 'bank',
+    },
     deactivated: { type: Boolean, default: false },
   },
   {
