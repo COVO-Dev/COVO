@@ -3,12 +3,27 @@ import { z } from "zod";
 const collaborationPreferencesSchema = z.object({
   hasWorkedWithInfluencers: z.boolean(),
   exclusiveCollaborations: z.boolean(),
-  type: z.string().min(1, "Collaboration type is required"),
-  styles: z.array(z.string()).min(1, "At least one character for style").min(1, "At least one style"),
+  type: z.enum([
+    "Paid Collaborations", 
+    "Gifting/PR Packages", 
+    "Affiliate/Commission-Based Deals", 
+    "Long-Term Brand Partnerships", 
+    "Event Hosting", 
+    "Product Reviews", 
+    "UGC-Only Content"
+  ], {
+    errorMap: () => ({ message: "Please select a valid collaboration type" })
+  }).transform((val) => val.trim()), // Trim any whitespace
+  styles: z.array(z.string()).min(1, "Please select at least one style"),
 });
 
 const trackingAndAnalyticsSchema = z.object({
-  // metrics: z.array(z.string()).min(1, "At least one character for a metric is required").min(1, "At least one metric is required"),
+  metrics: z.array(z.string().min(1, "Metric cannot be empty"))
+    .min(1, "Please select at least one metric")
+    .refine(
+      (metrics) => metrics.every(metric => metric.trim().length > 0),
+      "Metrics cannot be empty"
+    ),
   reportFrequency: z.string().min(1, "Report frequency is required"),
   performanceTracking: z.boolean(),
 })
@@ -42,14 +57,23 @@ export const campaignSchema = z.object({
   targetAudience: z.string().min(1, "Target audience is required"),
 
   // step 2
-  primaryGoals: z.array(z.string()).min(1, "Goal should have at least one character").min(1, "Make sure to add at least one goal and press enter"),
-  influencerType: z.string().min(1, "Influencer type is required"),
+  primaryGoals: z.array(z.string().min(1, "Goal cannot be empty"))
+    .min(1, "Please add at least one goal")
+    .refine(
+      (goals) => goals.every(goal => goal.trim().length > 0),
+      "Goals cannot be empty"
+    ),
+  influencerType: z.enum(["Nano", "Micro", "Mid-Tier", "Macro", "Celebrity"], {
+    errorMap: () => ({ message: "Please select a valid influencer type" })
+  }),
   geographicFocus: z.string().min(1, "Geographic focus is required"),
   collaborationPreferences: collaborationPreferencesSchema,
 
   // step 3
   trackingAndAnalytics: trackingAndAnalyticsSchema,
-  status: z.string().min(1, "Status is required"),
+  status: z.enum(["active", "completed", "pending"], {
+    errorMap: () => ({ message: "Please select a valid status" })
+  }),
 });
 
 
