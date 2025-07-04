@@ -20,11 +20,12 @@ const handler = NextAuth({
         } else if (res.status === "success") {
           const { data } = res;
           const { data: info } = data;
-          const { password, __v, ...rest } = info;
+          const { _id, ...rest } = info;
 
           return {
             access_token: data.access_token,
-            // ...data.data,
+            id: _id, // Map MongoDB _id to id field
+            _id, // Keep original _id for backward compatibility
             ...rest,
           };
         }
