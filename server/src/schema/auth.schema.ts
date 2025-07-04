@@ -180,13 +180,24 @@ export const CampaignValidationSchema = z.object({
 	primaryGoals: z
 		.array(z.string().min(1, { message: "Goal cannot be empty" }))
 		.min(1),
+	influencerType: z.enum(["Nano", "Micro", "Mid-Tier", "Macro", "Celebrity"], {
+		message: "Invalid influencer type"
+	}),
 	geographicFocus: z
 		.string()
 		.min(1, { message: "Geographic focus is required" }),
 	collaborationPreferences: z.object({
 		hasWorkedWithInfluencers: z.boolean(),
 		exclusiveCollaborations: z.boolean(),
-		type: z.string().min(1, { message: "Collaboration type is required" }),
+		type: z.enum([
+			"Paid Collaborations", 
+			"Gifting/PR Packages", 
+			"Affiliate/Commission-Based Deals", 
+			"Long-Term Brand Partnerships", 
+			"Event Hosting", 
+			"Product Reviews", 
+			"UGC-Only Content"
+		], { message: "Invalid collaboration type" }),
 		styles: z
 			.array(z.string().min(1, { message: "Style cannot be empty" }))
 			.min(1),
