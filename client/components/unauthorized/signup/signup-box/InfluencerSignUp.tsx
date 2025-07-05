@@ -14,6 +14,7 @@ export default function InfluencerSignUp() {
 		marketingOptIn: false,
 		dataComplianceConsent: false,
 	});
+	const [privacyPolicy, setPrivacyPolicy] = useState(false);
 	const [influencerData, setInfluencerData] = useState({
 		firstName: "",
 		lastName: "",
@@ -27,11 +28,21 @@ export default function InfluencerSignUp() {
 
 	const router = useRouter();
 
+	const handleConsent = (field: string, value: boolean) => {
+		setConsentAndAgreements(prev => {
+			const updated = { ...prev, [field]: value };
+			if (field === 'termsAccepted') {
+				setPrivacyPolicy(value);
+			}
+			return updated;
+		});
+	};
+
 	const handleSignUp = async () => {
-		// Clear previous errors
+	
 		setError("");
 		
-		// Validate required fields
+		
 		if (!influencerData.firstName || !influencerData.lastName || 
 			!influencerData.email || !influencerData.password || 
 			!influencerData.username || !influencerData.yearOfBirth) {
@@ -39,7 +50,7 @@ export default function InfluencerSignUp() {
 			return;
 		}
 
-		// Validate year of birth
+		
 		const currentYear = new Date().getFullYear();
 		const birthYear = parseInt(influencerData.yearOfBirth);
 		if (isNaN(birthYear) || birthYear < 1900 || birthYear > currentYear - 13) {
@@ -61,6 +72,7 @@ export default function InfluencerSignUp() {
 			const response = await influencerRegisterRoute({
 				...influencerData,
 				consentAndAgreements,
+				privacyPolicy: privacyPolicy || consentAndAgreements.termsAccepted, // Ensure privacyPolicy is set
 			});
 
 			console.log("Full response:", response);
@@ -83,8 +95,8 @@ export default function InfluencerSignUp() {
 				}
 			}
 		} catch (error) {
-			console.error("Network or unexpected error:", error);
-			setError("Registration failed. Please try again.");
+			console.error("Registration error:", error);
+			setError("An error occurred during registration. Please try again.");
 		}
 	};
 
