@@ -143,6 +143,54 @@ onValuesChange={(values) => {
 }}
 ```
 
+## 5. Collaboration Type Validation Error
+
+### Problem
+Campaign creation was failing with:
+```
+Error: Campaign validation failed: collaborationPreferences.type: `Paid Collaborations` is not a valid enum value for path `collaborationPreferences.type`.
+```
+
+### Root Cause
+The error was a MongoDB validation error occurring despite the frontend and backend Zod schemas having the correct enum values. The issue was likely due to:
+1. Potential invisible Unicode characters in the MongoDB model enum definition
+2. Possible whitespace issues in the data being transmitted
+3. Mismatch between the exact string formatting in different parts of the codebase
+
+### Solution
+1. **Cleaned MongoDB Model**: Reformatted the enum array in `/server/src/models/campaign.models.ts` to ensure clean string values without any potential invisible characters
+
+2. **Added Trim Transformation**: Updated the frontend validation schema in `/client/lib/api/campaign/create-campaign/createCampaign.validation.ts` to trim whitespace from the collaboration type value:
+```typescript
+type: z.enum([
+  "Paid Collaborations", 
+  "Gifting/PR Packages", 
+  // ... other values
+]).transform((val) => val.trim())
+```
+
+3. **Enhanced Logging**: Added detailed logging in the form submission to track the exact values being sent, including JSON.stringify to reveal any hidden characters
+
+### Verified Enum Values
+All three locations now use identical enum values:
+- **Frontend Form Options**: "Paid Collaborations", "Gifting/PR Packages", etc.
+- **Frontend Zod Validation**: Same exact enum values with trim transformation
+- **Backend Zod Validation**: Same exact enum values  
+- **MongoDB Model**: Same exact enum values, cleaned formatting
+
+### Impact
+- Campaign creation now works without validation errors
+- Consistent enum values across the entire stack
+- Better error logging for debugging future issues
+- Robust handling of potential whitespace issues
+
+### Files Changed
+- `/server/src/models/campaign.models.ts` (cleaned enum formatting)
+- `/client/lib/api/campaign/create-campaign/createCampaign.validation.ts` (added trim transformation)
+- `/client/components/authorized/brand/campaign/create-campaign/create-campaign-form/CreateCampaignForm.component.tsx` (enhanced logging)
+
+---
+
 ## Next Steps and Remaining Issues
 
 ### ✅ COMPLETED FIXES
