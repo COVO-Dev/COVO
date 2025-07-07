@@ -23,7 +23,6 @@ export default function Footer({ className = "" }: FooterProps) {
   const router = useRouter();
   const [email, setEmail] = useState("");
 
-  // Custom handler for anchor links to ensure proper URL display
   const handleAnchorClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string, sectionId: string) => {
     e.preventDefault();
 
@@ -40,7 +39,7 @@ export default function Footer({ className = "" }: FooterProps) {
 
   const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle newsletter subscription
+  
     console.log("Newsletter subscription:", email);
     setEmail("");
   };
@@ -57,13 +56,14 @@ export default function Footer({ className = "" }: FooterProps) {
   const legalLinks = [
     { label: "Privacy Policy", href: "/privacy-policy" },
     { label: "Terms of Service", href: "/terms-of-service" },
+    {label: "FAQ", href: "/faq"},
     // { label: "Cookie Policy", href: "/cookie-policy" },
     // { label: "Accessibility Statement", href: "/accessibility" },
   ];
 
   const supportLinks = [
     // { label: "Help Center", href: "/help" },
-    { label: "Contact Us", href: "/contact" },
+    { label: "Contact Us", href: "/contact-us" },
     // { label: "Community", href: "/community" },
     // { label: "Status", href: "/status" },
   ];

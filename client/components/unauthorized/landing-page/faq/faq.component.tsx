@@ -4,16 +4,20 @@ import ForAgenciesButton from "./faq-buttons/for-agencies/ForAgencies.button";
 import ForInfluencersButton from "./faq-buttons/for-influencers/ForInfluencers.button";
 import TechnicalSupportButton from "./faq-buttons/technical-support/TechnicalSupport.button";
 import { limelight } from "./faq.data";
+import Link from "next/link";
 
 export default function Faq() {
   return (
-    <section className="py-20 bg-white">
-      <div className="container mx-auto px-4">
-        {/* Section header */}
+    <section className="py-20 bg-white relative">
+     
+      <div className="absolute inset-0 bg-gradient-to-b from-gray-50/20 via-transparent to-gray-50/10 pointer-events-none"></div>
+
+      <div className="container mx-auto px-4 relative z-10">
+       
         <div className="text-center mb-16">
-          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-            Frequently Asked Questions About{" "}
-            <span className={`text-blue-600 ${limelight.className}`}>COVO</span>
+          <h2 className="text-3xl lg:text-4xl font-bold text-black mb-6 tracking-tight">
+            Everything You Need to Know About{" "}
+            <span className="text-black font-bold">COVO</span>
           </h2>
           <p className="text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed">
             COVO is a platform that connects brands with influencers. It simplifies influencer marketing by offering
@@ -38,16 +42,24 @@ export default function Faq() {
 
         {/* Bottom section */}
         <div className="text-center mt-16">
-          <div className="bg-gray-50 rounded-2xl p-8 max-w-2xl mx-auto">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              Still have questions?
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Our support team is here to help you get the most out of COVO.
-            </p>
-            <button className="px-8 py-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-300">
-              Contact Support
-            </button>
+          <div className="bg-white backdrop-blur-xl border border-gray-100 rounded-2xl p-8 max-w-2xl mx-auto shadow-2xl shadow-gray-900/10 relative">
+            {/* Subtle gradient overlay for visual depth */}
+            <div className="absolute inset-0 bg-gradient-to-b from-gray-50/20 via-transparent to-gray-50/10 pointer-events-none rounded-2xl"></div>
+
+            <div className="relative z-10">
+              <h3 className="text-2xl font-bold text-black mb-4 tracking-tight">
+                Still have questions?
+              </h3>
+              <p className="text-gray-600 mb-6 text-lg">
+                Our support team is here to help you get the most out of COVO.
+              </p>
+              <Link 
+                href="/contact-us"
+                className="inline-block px-8 py-4 bg-black hover:bg-gray-800 text-white font-medium rounded-xl transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl active:scale-[0.98] hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
+              >
+                Contact Support
+              </Link>
+            </div>
           </div>
         </div>
       </div>
