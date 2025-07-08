@@ -195,7 +195,8 @@ export const CampaignValidationSchema = z.object({
 		performanceTracking: z.boolean(),
 		metrics: z
 			.array(z.string().min(1, { message: "Metric cannot be empty" }))
-			.min(1),
+			.optional(),
+			// .min(1),
 		reportFrequency: z
 			.string()
 			.min(1, { message: "Report frequency is required" }),
