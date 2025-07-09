@@ -3,9 +3,11 @@ import { ICheckBoxesProps } from "./TermsCheckBoxes.model";
 import Link from "next/link";
 
 export default function TermsCheckBoxes({
-	consentAndAgreements,
-	setConsentAndAgreements,
-	onErrorClear,
+  consentAndAgreements,
+  setConsentAndAgreements,
+  privacyPolicy,
+  privacyPolicyChange,
+  onErrorClear,
 }: ICheckBoxesProps) {
 	return (
 		<div className="flex flex-col gap-2 mb-4">
@@ -24,6 +26,7 @@ export default function TermsCheckBoxes({
 							dataComplianceConsent: checked,
 							marketingOptIn: checked,
 						});
+						privacyPolicyChange?.(checked);
 						onErrorClear?.();
 					}}
 				/>
@@ -81,6 +84,24 @@ export default function TermsCheckBoxes({
 						<Link href="/privacy-policy" target="_blank" className="text-blue-600 hover:text-blue-800 underline">
 							Privacy Policy
 						</Link>
+					</label>
+				</div>
+				<div className="flex items-center space-x-2">
+					<Checkbox
+						id="privacyPolicy"
+						checked={privacyPolicy}
+						onCheckedChange={(e) => {
+							if (privacyPolicyChange) {
+								privacyPolicyChange(Boolean(e));
+							}
+							onErrorClear?.();
+						}}
+					/>
+					<label
+						htmlFor="privacyPolicy"
+						className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+					>
+						Privacy Policy
 					</label>
 				</div>
 				<div className="flex items-center space-x-2">
