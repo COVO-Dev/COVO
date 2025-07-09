@@ -1,12 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import InfluencerSignUp from "./InfluencerSignUp";
 import BrandSignUp from "./BrandSignUp";
 
 export default function SignUpBox() {
 	const [activeTab, setActiveTab] = useState("brand");
+	const searchParams = useSearchParams();
+
+	useEffect(() => {
+		const type = searchParams.get('type');
+		if (type === 'influencer') {
+			setActiveTab('influencer');
+		}
+	}, [searchParams]);
 
 	return (
 		<div className="rounded-lg w-auto max-w-lg z-40 relative flex-col items-center justify-center h-auto">

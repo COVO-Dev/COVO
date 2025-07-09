@@ -28,14 +28,20 @@ export default function Faq() {
         </div>
 
         {/* FAQ Categories */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto mb-16">
           <div className="lg:col-span-3 flex justify-center">
             <GeneralButton />
           </div>
-          <ForBrandsButton />
-          <ForAgenciesButton />
-          <ForInfluencersButton />
-          <div className="md:col-span-2 lg:col-span-1 flex justify-center">
+          <div className="flex justify-center">
+            <ForBrandsButton />
+          </div>
+          <div className="flex justify-center">
+            <ForAgenciesButton />
+          </div>
+          <div className="flex justify-center">
+            <ForInfluencersButton />
+          </div>
+          <div className="md:col-span-2 lg:col-span-3 flex justify-center">
             <TechnicalSupportButton />
           </div>
         </div>

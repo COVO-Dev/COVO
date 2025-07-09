@@ -35,7 +35,7 @@ export const pricingPlans = [
       "Basic audience insights",
       "Performance tracking"
     ],
-    buttonText: "Get Started",
+    buttonText: "Get Started Now",
     buttonStyle: "primary",
     popular: false
   },
@@ -55,7 +55,7 @@ export const pricingPlans = [
       "Media kit builder",
       "30 brand pitch credits/month"
     ],
-    buttonText: "Get Started",
+    buttonText: "Get Started Now",
     buttonStyle: "primary",
     popular: true
   },
@@ -75,7 +75,7 @@ export const pricingPlans = [
       "Dedicated account manager",
       "50 brand pitch credits/month"
     ],
-    buttonText: "Get Started",
+    buttonText: "Get Started Now",
     buttonStyle: "primary",
     popular: false
   }

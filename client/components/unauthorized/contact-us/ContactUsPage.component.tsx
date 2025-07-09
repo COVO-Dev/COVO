@@ -1,5 +1,4 @@
 "use client";
-
 import ContactUs from "./ContactUs.component";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
@@ -39,6 +38,7 @@ export default function ContactUsPage() {
         <ContactUs />
       </div>
 
+      
     </div>
   );
 }

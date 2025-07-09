@@ -1,5 +1,6 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { ICheckBoxesProps } from "./TermsCheckBoxes.model";
+import Link from "next/link";
 
 export default function TermsCheckBoxes({
 	consentAndAgreements,
@@ -30,7 +31,7 @@ export default function TermsCheckBoxes({
 					htmlFor="acceptAll"
 					className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 				>
-					Accept terms and conditions
+					Accept all terms and policies
 				</label>
 			</div>
 			<div className="ml-4 flex flex-col gap-2">
@@ -50,7 +51,14 @@ export default function TermsCheckBoxes({
 						htmlFor="termsAccepted"
 						className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 					>
-						Accept terms and conditions
+						I agree to the{" "}
+						<Link href="/terms-and-conditions" target="_blank" className="text-blue-600 hover:text-blue-800 underline">
+							Terms and Conditions
+						</Link>
+						{" "}and{" "}
+						<Link href="/privacy-policy" target="_blank" className="text-blue-600 hover:text-blue-800 underline">
+							Privacy Policy
+						</Link>
 					</label>
 				</div>
 				<div className="flex items-center space-x-2">
@@ -69,7 +77,10 @@ export default function TermsCheckBoxes({
 						htmlFor="dataComplianceConsent"
 						className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 					>
-						Accept data compliance consent
+						I consent to data processing as described in the{" "}
+						<Link href="/privacy-policy" target="_blank" className="text-blue-600 hover:text-blue-800 underline">
+							Privacy Policy
+						</Link>
 					</label>
 				</div>
 				<div className="flex items-center space-x-2">

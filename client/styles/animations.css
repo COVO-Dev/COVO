@@ -310,6 +310,18 @@ html {
   animation-delay: 1s;
 }
 
+.animation-delay-1100 {
+  animation-delay: 1.1s;
+}
+
+.animation-delay-1200 {
+  animation-delay: 1.2s;
+}
+
+.animation-delay-1300 {
+  animation-delay: 1.3s;
+}
+
 /* Hover Effects */
 .hover-lift {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

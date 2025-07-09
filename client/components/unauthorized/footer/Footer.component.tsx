@@ -55,7 +55,8 @@ export default function Footer({ className = "" }: FooterProps) {
 
   const legalLinks = [
     { label: "Privacy Policy", href: "/privacy-policy" },
-    { label: "Terms of Service", href: "/terms-of-service" },
+    {label: "Deactivation Policy", href: "/deactivation-policy"},
+    { label: "Terms and Conditions", href: "/terms-and-conditions" },
     {label: "FAQ", href: "/faq"},
     // { label: "Cookie Policy", href: "/cookie-policy" },
     // { label: "Accessibility Statement", href: "/accessibility" },

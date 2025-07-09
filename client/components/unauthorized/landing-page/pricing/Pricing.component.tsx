@@ -1,9 +1,10 @@
 "use client";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/useScrollAnimation";
 import { pricingPlans } from "./pricing.data";
+import Link from "next/link";
 
 export default function Pricing() {
-	// Scroll animations for different sections
+
 	const { elementRef: headerRef, hasTriggered: headerTriggered } = useScrollAnimation({
 		threshold: 0.1,
 		triggerOnce: true
@@ -88,9 +89,11 @@ export default function Pricing() {
 							</ul>
 
 							{/* CTA Button */}
+							<Link href="/signup">
 							<button className="w-full py-3 px-6 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors duration-300">
 								{plan.buttonText}
-							</button>
+ 							</button>
+							</Link>
 						</div>
 					))}
 				</div>
