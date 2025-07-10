@@ -26,6 +26,7 @@ export const influencerRegisterSchema = z.object({
 		marketingOptIn: z.boolean(),
 		dataComplianceConsent: z.boolean(),
 	}).optional(),
+	privacyPolicy: z.boolean().optional(),
 });
 
 export type IinfluencerRegister = z.infer<typeof influencerRegisterSchema>;
