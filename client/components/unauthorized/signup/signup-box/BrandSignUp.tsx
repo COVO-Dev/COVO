@@ -217,34 +217,34 @@ export default function BrandSignUp() {
 					>
 						<div className="w-auto flex justify-between">
 							{/* first name input */}
-							<div className="w-full mr-1">
+							<div className="w-full mr-2">
 								<input
 									{...register("firstName")}
 									placeholder="First Name"
 									onFocus={clearErrors}
-									className={`${
+									className={`w-full px-4 py-3 rounded-xl border bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-300 ${
 										errors.firstName
-											? "border-red-500 animate-shake"
-											: "border-custom-dark-desaturated-blue"
-									} w-full p-3 rounded-md border  bg-white/50 placeholder-gray-500 focus:outline-none`}
+											? "border-red-300 focus:ring-red-500 animate-shake"
+											: "border-gray-200 hover:border-gray-300"
+									}`}
 								/>
-								<div className="w-full h-5 text-red-500 text-xs">
+								<div className="w-full h-5 text-red-500 text-xs mt-1">
 									{errors.firstName && <span>{errors.firstName.message}</span>}
 								</div>
 							</div>
 
 							{/* last name input */}
-							<div className="w-full ml-1">
+							<div className="w-full ml-2">
 								<input
 									{...register("lastName")}
 									placeholder="Last Name"
-									className={`${
+									className={`w-full px-4 py-3 rounded-xl border bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-300 ${
 										errors.lastName
-											? "border-red-500 animate-shake"
-											: "border-custom-dark-desaturated-blue"
-									} w-full p-3  rounded-md border  bg-white/50 placeholder-gray-500 focus:outline-none`}
+											? "border-red-300 focus:ring-red-500 animate-shake"
+											: "border-gray-200 hover:border-gray-300"
+									}`}
 								/>
-								<div className="w-full h-5 text-red-500 text-xs">
+								<div className="w-full h-5 text-red-500 text-xs mt-1">
 									{errors.lastName && <div>{errors.lastName.message}</div>}
 								</div>
 							</div>
@@ -267,17 +267,18 @@ export default function BrandSignUp() {
 						</div>
 
 						{/* email input */}
-						<div className="w-full">								<input
-									{...register("email")}
-									placeholder="Email"
-									onFocus={clearErrors}
-									className={`${
-										errors.email
-											? "border-red-500 animate-shake"
-											: "border-custom-dark-desaturated-blue"
-									} w-full p-3 rounded-md border  bg-white/50 placeholder-gray-500 focus:outline-none`}
-								/>
-							<div className="w-full h-5 text-red-500 text-xs">
+						<div className="w-full">
+							<input
+								{...register("email")}
+								placeholder="Email Address"
+								onFocus={clearErrors}
+								className={`w-full px-4 py-3 rounded-xl border bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-300 ${
+									errors.email
+										? "border-red-300 focus:ring-red-500 animate-shake"
+										: "border-gray-200 hover:border-gray-300"
+								}`}
+							/>
+							<div className="w-full h-5 text-red-500 text-xs mt-1">
 								{errors.email && <span>{errors.email.message}</span>}
 							</div>
 						</div>
