@@ -4,6 +4,7 @@ import { asyncHandler, sendJsonResponse } from "../middleware/helper";
 import { BadRequest } from "../middleware/errors";
 import { ChatService } from "../services/chat.service";
 import getUserData from "../middleware/helper";
+import { Schema } from "mongoose";
 
 const campaignService = new CampaignProvider();
 const chatService = new ChatService();
@@ -181,8 +182,10 @@ export class CampaignController {
         );
 
       const { data: chatData } = await chatService.createChatRoom([
-        brandId,
-        influencerId,
+        // brandId,
+        // influencerId,
+        new Schema.ObjectId(brandId),
+        new Schema.ObjectId(influencerId),
       ]);
       console.log("acceptInfluencer controller: chatData", chatData);
 
@@ -517,8 +520,10 @@ export class CampaignController {
 
       // Create a chat room between the brand and influencer
       const { data: chatData } = await chatService.createChatRoom([
-        brandId,
-        influencerId,
+        // brandId,
+        // influencerId,
+        new Schema.ObjectId(brandId),
+        new Schema.ObjectId(influencerId),
       ]);
       console.log("acceptCampaignInvitation controller: chatData", chatData);
 
