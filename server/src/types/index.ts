@@ -530,7 +530,8 @@ export interface IYoutubeMetrics {
 }
 
 export interface IFacebookMetrics {
-    influencerId: mongoose.Types.ObjectId;
+    // influencerId: mongoose.Types.ObjectId;
+    influencerId: string;
 
     metrics: {
         followers: number;
