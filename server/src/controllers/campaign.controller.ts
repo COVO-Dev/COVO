@@ -48,7 +48,7 @@ export class CampaignController {
    */
   public getCampaignById = asyncHandler(async (req: Request, res: Response) => {
     const { brandId, id: campaignId } = req.params;
-    // console.log("getCampaignById controller: ", brandId, campaignId);
+    console.log("getCampaignById controller: ", brandId, campaignId);
     const userData = getUserData(req);
 
     if (!userData) {
@@ -66,6 +66,7 @@ export class CampaignController {
       brandId,
       campaignId
     );
+    console.log("getCampaignById controller: data", data);
     sendJsonResponse(res, 200, message, data);
   });
 
@@ -122,6 +123,7 @@ export class CampaignController {
   public rejectInfluencer = asyncHandler(
     async (req: Request, res: Response) => {
       const { brandId, id: campaignId } = req.params;
+      const { influencerId } = req.body;
       const userData = getUserData(req);
 
       if (!userData) {
@@ -134,11 +136,15 @@ export class CampaignController {
         );
       }
 
+      if (!influencerId) {
+        throw new BadRequest("Influencer ID is required.");
+      }
+
       const { message, data } =
         await campaignService.rejectInfluencerForCampaign(
           brandId,
           campaignId,
-          req.body
+          influencerId
         );
       sendJsonResponse(res, 200, message, data);
     }
@@ -150,15 +156,8 @@ export class CampaignController {
   public acceptInfluencer = asyncHandler(
     async (req: Request, res: Response) => {
       const { brandId, id: campaignId } = req.params;
-      const userData = getUserData(req);
       const { influencerId } = req.body;
-
-      // console.log(
-      //   "acceptInfluencer controller: userData",
-      //   userData,
-      //   "\nrequest body: ",
-      //   req.body
-      // );
+      const userData = getUserData(req);
 
       if (!userData) {
         throw new BadRequest("You are not authenticated");
@@ -170,16 +169,20 @@ export class CampaignController {
         );
       }
 
+      if (!influencerId) {
+        throw new BadRequest("Influencer ID is required.");
+      }
+
       const { message, data } =
         await campaignService.acceptInfluencerForCampaign(
           brandId,
           campaignId,
-          req.body
+          influencerId
         );
 
       const { data: chatData } = await chatService.createChatRoom([
         brandId,
-        influencerId[0],
+        influencerId,
       ]);
       console.log("acceptInfluencer controller: chatData", chatData);
 
@@ -232,15 +235,57 @@ export class CampaignController {
       throw new BadRequest("You are not authorized to perform this operation");
     }
 
-    const { offer } = req.body;
-    const { message, data } = await campaignService.applyToCampaign(
-      campaignId,
+    const { offer, message } = req.body;
+    console.log(
+      "applyToCampaign controller: ",
       influencerId,
-      req.body.message,
-      offer
+      campaignId,
+      offer,
+      message
     );
-    sendJsonResponse(res, 200, message, data);
+    const { message: serviceMessage, data } =
+      await campaignService.applyToCampaign(
+        campaignId,
+        influencerId,
+        message,
+        offer
+      );
+    sendJsonResponse(res, 200, serviceMessage, data);
   });
+
+  /**
+   * Handles brand inviting an influencer to a campaign
+   */
+  public inviteToCampaign = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { brandId, id: campaignId } = req.params;
+      const { influencerId, message } = req.body;
+      const userData = getUserData(req);
+
+      if (!userData) {
+        throw new BadRequest("You are not authenticated");
+      }
+
+      if (brandId !== userData.userId) {
+        throw new BadRequest(
+          "You are not authorized to perform this operation"
+        );
+      }
+
+      if (!influencerId) {
+        throw new BadRequest("Influencer ID is required");
+      }
+
+      const { message: serviceMessage, data } =
+        await campaignService.inviteToCampaign(
+          campaignId,
+          brandId,
+          influencerId,
+          message
+        );
+      sendJsonResponse(res, 200, serviceMessage, data);
+    }
+  );
 
   /**
    * Controller to get campaigns under a specific brand that the influencer applied to.
@@ -413,4 +458,103 @@ export class CampaignController {
       await campaignService.getAllInfluencerApplications(influencerId);
     sendJsonResponse(res, 200, message, data);
   });
+
+  /**
+   * Get all invitations received by an influencer.
+   */
+  public getCampaignInvitations = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { influencerId } = req.params;
+      const userData = getUserData(req);
+      const status = req.query.status as
+        | "pending"
+        | "accepted"
+        | "rejected"
+        | undefined;
+
+      if (!userData) {
+        throw new BadRequest("You are not authenticated");
+      }
+
+      if (influencerId !== userData.userId) {
+        throw new BadRequest(
+          "You are not authorized to perform this operation"
+        );
+      }
+
+      const { message, data } =
+        await campaignService.getCampaignInvitationsByInfluencer(
+          influencerId,
+          status
+        );
+      sendJsonResponse(res, 200, message, data);
+    }
+  );
+
+  /**
+   * Influencer accepts a campaign invitation
+   */
+  public acceptCampaignInvitation = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { influencerId, campaignId, brandId } = req.params; // Assuming brandId is also in params or body
+      const userData = getUserData(req);
+
+      if (!userData) {
+        throw new BadRequest("You are not authenticated");
+      }
+
+      if (influencerId !== userData.userId) {
+        throw new BadRequest(
+          "You are not authorized to perform this operation"
+        );
+      }
+
+      const { message, data } = await campaignService.acceptCampaignInvitation(
+        influencerId,
+        campaignId,
+        brandId
+      );
+
+      // Create a chat room between the brand and influencer
+      const { data: chatData } = await chatService.createChatRoom([
+        brandId,
+        influencerId,
+      ]);
+      console.log("acceptCampaignInvitation controller: chatData", chatData);
+
+      sendJsonResponse(
+        res,
+        200,
+        "Invitation accepted and chat room created",
+        data
+      );
+    }
+  );
+
+  /**
+   * Influencer declines a campaign invitation
+   */
+  public rejectCampaignInvitation = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { influencerId, campaignId, brandId } = req.params; // Assuming brandId is also in params or body
+      const userData = getUserData(req);
+
+      if (!userData) {
+        throw new BadRequest("You are not authenticated");
+      }
+
+      if (influencerId !== userData.userId) {
+        throw new BadRequest(
+          "You are not authorized to perform this operation"
+        );
+      }
+
+      const { message, data } = await campaignService.rejectCampaignInvitation(
+        influencerId,
+        campaignId,
+        brandId
+      );
+      sendJsonResponse(res, 200, message, data);
+    }
+  );
 }
