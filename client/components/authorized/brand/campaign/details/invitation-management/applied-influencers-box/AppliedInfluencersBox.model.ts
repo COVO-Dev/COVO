@@ -10,9 +10,9 @@ interface InfluencerApplication {
   message: string;
 }
 
-export default interface IAppliedInfluencerDataProps {
+export default interface IAppliedInfluencerBoxProps {
   appliedInfluencers: InfluencerApplication[];
-  className: string;
+  className?: string;
   credentials: {
     campaignId: string;
     brandId: string;

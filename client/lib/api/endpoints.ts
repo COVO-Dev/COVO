@@ -30,8 +30,14 @@ const endpoints = {
   getRecommendedInfluencers: "/:brandId/campaigns/:campaignId/recommended",
   editCampaign: "/:brandId/campaign/:campaignId/accept",
   rejectInfluencerForCampaign: "/:brandId/campaign/:campaignId/reject",
+  inviteToCampaign: "/:brandId/campaign/:campaignId/invite",
   getAppliedCampaignsForInfluencer: "/:influencerId/campaigns/applied",
   getRegisteredCampaignsForInfluencer: "/:influencerId/campaigns/registered",
+  getCampaignInvitationsForInfluencer: "/:influencerId/campaigns/invitations", // New endpoint
+  acceptCampaignInvitation:
+    "/:influencerId/campaign/:campaignId/brand/:brandId/invitations/accept", // New endpoint
+  rejectCampaignInvitation:
+    "/:influencerId/campaign/:campaignId/brand/:brandId/invitations/reject", // New endpoint
   // to be overridden
   getAllCampaigns: "/campaigns",
 
