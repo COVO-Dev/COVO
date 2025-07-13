@@ -129,6 +129,16 @@ export interface IApplication {
 	lastEditedAt?: Date;
 }
 
+export interface IInvitation extends Document {
+    campaignId: mongoose.Types.ObjectId;
+    influencerId: mongoose.Types.ObjectId;
+    brandId: mongoose.Types.ObjectId;
+	offer?: string | number;
+	appliedAt?: Date;
+    status: "pending" | "accepted" | "rejected";
+    message?: string;
+}
+
 export interface IRecommendedInfluencer {
 	influencer: IInfluencer;
 	recommendationScore?: number;
