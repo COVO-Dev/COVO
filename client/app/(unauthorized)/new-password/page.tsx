@@ -153,9 +153,15 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <main className="h-[calc(100dvh-100px)] flex items-center justify-center p-6 relative overflow-hidden bg-custom-very-soft-blue bg-[url('/svg/BG.svg')] bg-no-repeat bg-cover">
-      <div className='bg-custom-light-grayish-blue bg-[url("/svg/BG.svg")] p-10 rounded-lg shadow-md z-40 flex flex-col items-center justify-center h-auto md:flex-row md:w-auto w-[97%]'>
-        
+    <main className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden bg-white">
+      {/* Background gradient overlay matching Home page */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-100 opacity-60"></div>
+
+      {/* Main container with Home page styling */}
+      <div className='bg-white backdrop-blur-xl border border-gray-100 p-8 sm:p-10 lg:p-12 rounded-2xl shadow-2xl shadow-gray-900/10 z-40 flex flex-col items-center justify-center md:flex-row md:w-auto w-[95%] max-w-5xl relative'>
+        {/* Subtle gradient overlay for visual depth */}
+        <div className="absolute inset-0 bg-gradient-to-b from-gray-50/20 via-transparent to-gray-50/10 pointer-events-none rounded-2xl"></div>
+
         {/* Logo Side */}
         <div className="flex items-center justify-center w-[390px]">
           <div className='w-[300px] h-[120px] md:w-[400px] md:h-[400px] flex items-center justify-center'>
@@ -164,10 +170,16 @@ export default function ResetPasswordPage() {
         </div>
         
         {/* Form Side */}
-        <div className="pt-8 rounded-lg w-auto max-w-80 z-50 relative flex-col items-center justify-center">
-          <h2 className="text-custom-dark-desaturated-blue text-center text-xl mb-6 font-semibold">
-            Reset Your Password
-          </h2>
+        <div className="pt-8 rounded-lg w-auto max-w-md z-50 relative flex-col items-center justify-center">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-3xl sm:text-4xl font-bold text-black mb-4 tracking-tight">
+              Reset Your Password
+            </h1>
+            <p className="text-gray-600 text-lg">
+              Enter your new password below
+            </p>
+          </div>
 
           {!tokenIsValid ? (
             <div className="text-center">
