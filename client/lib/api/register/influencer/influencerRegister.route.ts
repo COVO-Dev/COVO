@@ -7,13 +7,22 @@ import {
 } from "./influencerRegister.validation";
 
 export async function influencerRegisterRoute(influencerRegisterData: IinfluencerRegister) {
-	// console.log(endpoints.influencerRegister, "Fetch ServerURL");
+	console.log(endpoints.influencerRegister, "Fetch ServerURL");
 	console.log(influencerRegisterData, "influencerRegisterData");
+
+	const dataToSend = {
+		...influencerRegisterData,
+
+		privacyPolicy: influencerRegisterData.privacyPolicy !== undefined
+			? influencerRegisterData.privacyPolicy
+			: influencerRegisterData.consentAndAgreements.termsAccepted
+	};
+
 	const response = await fetch(endpoints.influencerRegister, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(
-			influencerRegisterSchema.parse(influencerRegisterData)
+			influencerRegisterSchema.parse(dataToSend)
 		),
 	});
 

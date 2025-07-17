@@ -534,6 +534,7 @@ export interface IFacebookMetrics {
 
 	accessToken: string;
 	refreshToken?: string;
+	pageAccessToken: string;
 	tokenExpiry: Date;
 	connected: boolean;
 	lastConnected: Date;

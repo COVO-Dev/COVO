@@ -119,70 +119,91 @@ export default function ForgotPasswordBox() {
   }
 
   return (
-    <div className="pt-8 rounded-lg w-auto max-w-80 z-50 relative flex-col items-center justify-center">
-      {error && (
-        <p className="mb-4 text-sm font-bold text-red-500 absolute top-0 left-1/2 transform -translate-x-1/2 w-full text-center">
-          {error}
+    <div className="pt-8 rounded-lg w-auto max-w-md z-50 relative flex-col items-center justify-center">
+      {/* Header */}
+      <div className="text-center mb-8">
+        <h1 className="text-3xl sm:text-4xl font-bold text-black mb-4 tracking-tight">
+          Reset Password
+        </h1>
+        <p className="text-gray-600 text-lg">
+          Enter your email address and we&apos;ll send you instructions to reset your password.
         </p>
-      )}
-      {successMessage && (
-        <p className="mb-4 text-sm font-bold text-green-500 absolute top-0 left-1/2 transform -translate-x-1/2 w-full text-center">
-          {successMessage}
-        </p>
-      )}
-
-      <h2 className="text-custom-dark-desaturated-blue text-center text-xl mb-6 font-semibold">
-        Reset Password
-      </h2>
-      
-      <p className="text-custom-dark-desaturated-blue text-center text-sm mb-6">
-        Enter your email address and we&apos;ll send you instructions to reset your password.
-      </p>
-
-      <div className="w-full">
-        <input
-          type="email"
-          name="email"
-          value={email}
-          onChange={(e) => handleInputChange(e.target.value)}
-          placeholder="Email"
-          className={`mb-2 w-full p-3 rounded-md border bg-white/50 text-custom-dark-desaturated-blue placeholder-gray-500 focus:outline-none transition-colors ${
-            validationErrors.email
-              ? "border-red-500 focus:border-red-500"
-              : "border-custom-dark-desaturated-blue focus:border-blue-500"
-          }`}
-          suppressHydrationWarning={true}
-        />
-        {validationErrors.email && (
-          <div className="mb-2">
-            <p className="text-red-500 text-xs px-1 flex items-center">
-              <span className="mr-1">⚠️</span>
-              {validationErrors.email === "Invalid email address" 
-                ? "Please enter a valid email format (e.g., example@domain.com)" 
-                : validationErrors.email}
-            </p>
-          </div>
-        )}
       </div>
 
+      {/* Error and Success Messages */}
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-sm font-medium text-red-600 text-center">
+            {error}
+          </p>
+        </div>
+      )}
+      {successMessage && (
+        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+          <p className="text-sm font-medium text-green-600 text-center">
+            {successMessage}
+          </p>
+        </div>
+      )}
+
+      {/* Email Input */}
+      <div className="space-y-6 mb-8">
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+            Email Address
+          </label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value={email}
+            onChange={(e) => handleInputChange(e.target.value)}
+            placeholder="Enter your email"
+            className={`w-full px-4 py-3 rounded-xl border bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-300 ${
+              validationErrors.email
+                ? "border-red-300 focus:ring-red-500"
+                : "border-gray-200 hover:border-gray-300"
+            }`}
+            suppressHydrationWarning={true}
+          />
+          {validationErrors.email && (
+            <div className="mt-2">
+              <p className="text-red-600 text-sm flex items-center">
+                <span className="mr-1">⚠️</span>
+                {validationErrors.email === "Invalid email address"
+                  ? "Please enter a valid email format (e.g., example@domain.com)"
+                  : validationErrors.email}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Reset Password Button */}
       <button
         onClick={handleForgotPassword}
         disabled={isSubmitting || Object.keys(validationErrors).length > 0 || !email}
-        className={`w-full mb-2 p-3 rounded-md text-white focus:outline-none transition-all duration-200 ease-in-out ${
+        className={`w-full mb-6 px-6 py-4 font-medium rounded-xl transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
           isSubmitting || Object.keys(validationErrors).length > 0 || !email
-            ? "bg-gray-400 cursor-not-allowed"
-            : "bg-custom-dark-desaturated-blue hover:bg-gray-600 hover:scale-105"
+            ? "bg-gray-400 text-white cursor-not-allowed"
+            : "bg-black hover:bg-gray-800 text-white hover:scale-[1.02] hover:shadow-2xl active:scale-[0.98] hover:-translate-y-1 focus:ring-black"
         }`}
       >
         {isSubmitting ? "Sending..." : "Reset Password"}
       </button>
 
-      <h1 className="text-custom-dark-desaturated-blue text-center text-sm pt-2">
-        Remember your password?{" "}
-        <Link className="text-custom-lark-blue" href={"/login"}>
-          Sign In
-        </Link>
-      </h1>
+      {/* Sign In Link */}
+      <div className="text-center">
+        <p className="text-gray-600 text-sm">
+          Remember your password?{" "}
+          <Link
+            className="text-black font-semibold hover:text-gray-700 transition-colors duration-200 hover:underline"
+            href={"/login"}
+          >
+            Sign In
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }
