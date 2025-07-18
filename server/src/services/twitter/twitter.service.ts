@@ -9,7 +9,6 @@ export const getTwitterMetrics = async (url: string) => {
     if (!tweetId) throw new Error('Invalid Twitter URL');
 
     try {
-        // ✅ Use access token from any connected Twitter account
         const twitterAuth = await Twitter.findOne({ connected: true }).sort({ lastConnected: -1 });
         const token = twitterAuth?.accessToken;
         if (!token) throw new Error('Twitter access token not found');
@@ -32,7 +31,7 @@ export const getTwitterMetrics = async (url: string) => {
             platform: 'twitter',
             postId: tweetId,
             metrics: {
-                views: metrics.view_count || 'N/A',
+                views: metrics.view_count || 0,
                 likes: metrics.like_count,
                 retweets: metrics.retweet_count,
                 replies: metrics.reply_count,
@@ -60,7 +59,7 @@ export const getTwitterMetrics = async (url: string) => {
                 platform: 'twitter',
                 postId: tweetId,
                 metrics: {
-                    views: 'N/A',
+                    views: 0,
                     likes,
                     retweets,
                     replies,

@@ -28,7 +28,7 @@ export const getInstagramMetrics = async (url: string) => {
                     platform: 'instagram',
                     postId,
                     metrics: {
-                        views: metrics.video_insights?.data?.[0]?.values?.[0]?.value || 'N/A',
+                        views: metrics.video_insights?.data?.[0]?.values?.[0]?.value || 0,
                         likes: metrics.like_count || 0,
                         comments: metrics.comments_count || 0,
                     },

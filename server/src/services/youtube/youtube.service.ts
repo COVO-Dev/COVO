@@ -81,8 +81,8 @@ const scrapeYouTubeMetrics = async (url: string, videoId: string) => {
             postId: videoId,
             metrics: {
                 views,
-                likes: likes || 'N/A',
-                comments: comments || 'N/A',
+                likes: likes || 0,
+                comments: comments || 0,
             },
             note: '⚠️ Scraped fallback, may be less accurate.',
         };

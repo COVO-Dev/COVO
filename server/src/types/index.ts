@@ -59,6 +59,7 @@ export interface IInfluencer extends IUser {
 		city: string;
 	};
 	gender: string;
+	referralCode?: string;
 	payoutPreference: "direct_bank" | "wallet";
 	referralSource?: string;
 }

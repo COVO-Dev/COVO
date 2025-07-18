@@ -18,7 +18,7 @@ export const getFacebookMetrics = async (url: string) => {
                 Authorization: `Bearer ${pageAccessToken}`,
             },
             params: {
-                metric: 'post_impressions,post_engaged_users,post_reactions_by_type_total,post_comments,post_shares',
+                metric: 'post_impressions,post_engaged_users,post_reactions_by_type_total,post_comments,post_shares,post_video_views',
             },
         });
 
@@ -35,10 +35,10 @@ export const getFacebookMetrics = async (url: string) => {
             metrics: {
                 impressions: result['post_impressions'],
                 engagement: result['post_engaged_users'],
-                likes: result['post_reactions_by_type_total'] || 0,
-                comments: result['post_comments'],
-                shares: result['post_shares'],
-                views: result['post_views']
+                likes: result['post_reactions_by_type_total'] ?? 0,
+                comments: result['post_comments'] ?? 0,
+                shares: result['post_shares'] ?? 0,
+                views: result['post_video_views'] ?? 0
             },
         };
     } catch (err) {
@@ -69,7 +69,7 @@ export const getFacebookMetrics = async (url: string) => {
                     likes,
                     comments,
                     shares,
-                    note: `Scraped fallback data. data may not be incomplete or accurate. Consider using the Facebook API for more reliable metrics.`,
+                    views: views || 0,
                 },
             };
         } catch {
