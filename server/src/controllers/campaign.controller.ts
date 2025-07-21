@@ -4,7 +4,7 @@ import { asyncHandler, sendJsonResponse } from "../middleware/helper";
 import { BadRequest } from "../middleware/errors";
 import { ChatService } from "../services/chat.service";
 import getUserData from "../middleware/helper";
-import { Schema } from "mongoose";
+import mongoose from "mongoose";
 
 const campaignService = new CampaignProvider();
 const chatService = new ChatService();
@@ -181,11 +181,14 @@ export class CampaignController {
           influencerId
         );
 
+      const brandIDObject = new mongoose.Types.ObjectId(brandId);
+      const influencerIDObject = new mongoose.Types.ObjectId(influencerId);
+
       const { data: chatData } = await chatService.createChatRoom([
         // brandId,
         // influencerId,
-        new Schema.ObjectId(brandId),
-        new Schema.ObjectId(influencerId),
+        brandIDObject,
+        influencerIDObject,
       ]);
       console.log("acceptInfluencer controller: chatData", chatData);
 
@@ -518,13 +521,24 @@ export class CampaignController {
         brandId
       );
 
-      // Create a chat room between the brand and influencer
+      const brandIDObject = new mongoose.Types.ObjectId(brandId);
+      const influencerIDObject = new mongoose.Types.ObjectId(influencerId);
+
       const { data: chatData } = await chatService.createChatRoom([
         // brandId,
         // influencerId,
-        new Schema.ObjectId(brandId),
-        new Schema.ObjectId(influencerId),
+        brandIDObject,
+        influencerIDObject,
       ]);
+
+      // // Create a chat room between the brand and influencer
+      // const { data: chatData } = await chatService.createChatRoom([
+      //   // brandId,
+      //   // influencerId,
+      //   new Schema.ObjectId(brandId),
+      //   new Schema.ObjectId(influencerId),
+      // ]);
+
       console.log("acceptCampaignInvitation controller: chatData", chatData);
 
       sendJsonResponse(
