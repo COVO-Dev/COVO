@@ -240,10 +240,16 @@ export default function BrandCampaignDetails({
           }
         />
 
-        <RegisteredInfluencerContainer
-          registeredInfluencers={registeredInfluencers}
-          className="lg:col-span-3"
-        />
+        {
+          registeredInfluencers && registeredInfluencers.length > 0 && (
+          <RegisteredInfluencerContainer
+            influencers={registeredInfluencers}
+            className="lg:col-span-3"
+            handleClick={handleRedirect}
+          />
+          )
+        }
+        
       </div>
     </div>
   );
