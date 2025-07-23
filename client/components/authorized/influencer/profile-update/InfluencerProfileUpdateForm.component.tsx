@@ -103,7 +103,7 @@ export default function InfluencerProfileUpdateForm({
 
   // Define clearFieldError function before it's used
   const clearFieldError = (fieldName: string) => {
-    setFieldErrors(prev => {
+    setFieldErrors((prev: Record<string, string>) => {
       const newErrors = { ...prev };
       delete newErrors[fieldName];
       return newErrors;
@@ -165,6 +165,8 @@ export default function InfluencerProfileUpdateForm({
       setCurrentStep(currentStep - 1);
     }
   };
+
+
 
   const handleFormSubmit = async () => {
     setIsSubmitting(true);
