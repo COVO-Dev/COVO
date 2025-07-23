@@ -94,6 +94,7 @@ export default function BrandProfileUpdateForm({
       billingInfo: rawFormData.paymentDetails?.billingInfo || "",
     },
     bio: rawFormData.bio || "",
+    companySize: rawFormData.companySize || "",
   }), [rawFormData, session?.user?.email]);
 
   // Use the brand schema for the form
@@ -482,33 +483,62 @@ export default function BrandProfileUpdateForm({
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Industry *
-                    </label>
-                    <select
-                      {...register("industry")}
-                      className={`w-full p-3 rounded-lg border transition-all duration-300 bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-black/20 focus:border-black ${
-                        errors.industry
-                          ? "border-red-500 bg-red-50/50"
-                          : "border-gray-300 hover:border-gray-400"
-                      }`}
-                    >
-                      <option value="">Select Industry</option>
-                      <option value="Fashion">Fashion</option>
-                      <option value="Beauty & Skincare">Beauty & Skincare</option>
-                      <option value="Technology & Gadgets">Technology & Gadgets</option>
-                      <option value="Food & Beverage">Food & Beverage</option>
-                      <option value="Health & Wellness">Health & Wellness</option>
-                      <option value="Travel & Hospitality">Travel & Hospitality</option>
-                      <option value="Parenting & Family">Parenting & Family</option>
-                      <option value="Other">Other</option>
-                    </select>
-                    {errors.industry && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {errors.industry.message}
-                      </p>
-                    )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Industry *
+                      </label>
+                      <select
+                        {...register("industry")}
+                        className={`w-full p-3 rounded-lg border transition-all duration-300 bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-black/20 focus:border-black ${
+                          errors.industry
+                            ? "border-red-500 bg-red-50/50"
+                            : "border-gray-300 hover:border-gray-400"
+                        }`}
+                      >
+                        <option value="">Select Industry</option>
+                        <option value="Fashion">Fashion</option>
+                        <option value="Beauty & Skincare">Beauty & Skincare</option>
+                        <option value="Technology & Gadgets">Technology & Gadgets</option>
+                        <option value="Food & Beverage">Food & Beverage</option>
+                        <option value="Health & Wellness">Health & Wellness</option>
+                        <option value="Travel & Hospitality">Travel & Hospitality</option>
+                        <option value="Parenting & Family">Parenting & Family</option>
+                        <option value="Other">Other</option>
+                      </select>
+                      {errors.industry && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.industry.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Company Size
+                      </label>
+                      <select
+                        {...register("companySize")}
+                        className={`w-full p-3 rounded-lg border transition-all duration-300 bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-black/20 focus:border-black ${
+                          errors.companySize
+                            ? "border-red-500 bg-red-50/50"
+                            : "border-gray-300 hover:border-gray-400"
+                        }`}
+                      >
+                        <option value="">Select Company Size</option>
+                        <option value="1-10">1-10 employees</option>
+                        <option value="11-50">11-50 employees</option>
+                        <option value="51-200">51-200 employees</option>
+                        <option value="201-500">201-500 employees</option>
+                        <option value="501-1000">501-1000 employees</option>
+                        <option value="1000+">1000+ employees</option>
+                      </select>
+                      {errors.companySize && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.companySize.message}
+                        </p>
+                      )}
+                    </div>
                   </div>
 
                   <div>
@@ -552,15 +582,10 @@ export default function BrandProfileUpdateForm({
                       </p>
                     )}
                   </div>
-                </div>
-              )}
 
-              {/* Step 3: Social & Contact */}
-              {currentStep === 2 && (
-                <div className="space-y-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Bio
+                      Brand Bio
                     </label>
                     <textarea
                       {...register("bio")}
@@ -578,7 +603,12 @@ export default function BrandProfileUpdateForm({
                       </p>
                     )}
                   </div>
+                </div>
+              )}
 
+              {/* Step 3: Social & Contact */}
+              {currentStep === 2 && (
+                <div className="space-y-6">
                   <div>
                     <h3 className="text-lg font-medium text-gray-900 mb-4">Social Media</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -25,6 +25,7 @@ export const brandFormDataSchema = z.object({
 		billingInfo: z.string().optional(),
 	}).optional(),
 	bio: z.string().optional(),
+	companySize: z.string().optional(),
 });
 
 export type IBrandUpdateData = z.infer<typeof brandFormDataSchema>;
