@@ -11,7 +11,7 @@ const BrandSchema: Schema = new Schema(
     industry: { type: String },
     logo: { type: String },
     reliabilityRating: {
-      overall: { type: Number, min: 0, max: 5, default: 0 },
+      overall: { type: Number, min: 0, max: 5, default: 100 },
       ratings: [{ type: Schema.Types.ObjectId, ref: 'CovoSurvey' }],
     },
     socialMedia: {

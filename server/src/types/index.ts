@@ -59,6 +59,7 @@ export interface IInfluencer extends IUser {
 		city: string;
 	};
 	gender: string;
+	referralCode?: string;
 	payoutPreference: "direct_bank" | "wallet";
 	referralSource?: string;
 }
@@ -534,6 +535,7 @@ export interface IFacebookMetrics {
 
 	accessToken: string;
 	refreshToken?: string;
+	pageAccessToken: string;
 	tokenExpiry: Date;
 	connected: boolean;
 	lastConnected: Date;
