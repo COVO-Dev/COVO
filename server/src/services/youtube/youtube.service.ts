@@ -29,13 +29,21 @@ export const getYouTubeMetrics = async (url: string) => {
             const stats = response.data.items?.[0]?.statistics;
 
             if (stats) {
+                const likes = Number(stats.likeCount || 0);
+                const comments = Number(stats.commentCount || 0);
+                const views = Number(stats.viewCount || 0);
+                const engagement = likes + comments;
+
                 return {
                     platform: 'youtube',
                     postId: videoId,
                     metrics: {
-                        views: Number(stats.viewCount),
-                        likes: Number(stats.likeCount || 0),
-                        comments: Number(stats.commentCount || 0),
+                        impressions: 0, // YouTube doesn't expose this
+                        engagement,
+                        likes,
+                        comments,
+                        shares: 0, // not available
+                        views,
                     },
                 };
             }
@@ -66,7 +74,6 @@ const scrapeYouTubeMetrics = async (url: string, videoId: string) => {
         });
 
         const $ = load(html);
-        const rawHTML = $.html();
 
         const getMetaValue = (prop: string) =>
             $(`meta[itemprop="${prop}"]`).attr('content') || '0';
@@ -74,17 +81,20 @@ const scrapeYouTubeMetrics = async (url: string, videoId: string) => {
         const views = extractNumberFromText(getMetaValue('interactionCount'));
         const likes = extractNumberFromText(getMetaValue('likeCount') || '0');
         const comments = extractNumberFromText(getMetaValue('commentCount') || '0');
-
+        const engagement = likes + comments;
 
         return {
             platform: 'youtube',
             postId: videoId,
             metrics: {
+                impressions: 0,
+                engagement,
+                likes,
+                comments,
+                shares: 0,
                 views,
-                likes: likes || 0,
-                comments: comments || 0,
             },
-            note: '⚠️ Scraped fallback, may be less accurate.',
+            note: '⚠️ Scraped fallback — impressions and shares not available.',
         };
     } catch (err) {
         throw new Error('YouTube scraping failed');

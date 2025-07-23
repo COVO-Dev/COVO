@@ -18,7 +18,14 @@ export const getInstagramMetrics = async (url: string) => {
             if (mediaId) {
                 const metricsRes = await axios.get(`https://graph.facebook.com/v19.0/${mediaId}`, {
                     params: {
-                        fields: 'like_count,comments_count,video_insights.metric(total_video_impressions)',
+                        fields: [
+                            'like_count',
+                            'comments_count',
+                            'video_views',
+                            'impressions',
+                            'engagement',
+                            'shares_count' // this may not be available depending on post type
+                        ].join(','),
                         access_token: accessToken,
                     },
                 });
@@ -28,9 +35,12 @@ export const getInstagramMetrics = async (url: string) => {
                     platform: 'instagram',
                     postId,
                     metrics: {
-                        views: metrics.video_insights?.data?.[0]?.values?.[0]?.value || 0,
+                        impressions: metrics.impressions || 0,
+                        engagement: metrics.engagement || 0,
                         likes: metrics.like_count || 0,
                         comments: metrics.comments_count || 0,
+                        shares: metrics.shares_count || 0, // may be 0 or undefined
+                        views: metrics.video_views || 0,
                     },
                 };
             }
@@ -78,15 +88,19 @@ const scrapeInstagramMetrics = async (url: string, postId: string) => {
         const comments = extractNumberFromText(json.commentCount || '0');
         const views = extractNumberFromText(json.video?.interactionCount || '0');
 
+        // Scraped data cannot provide impressions, engagement, or shares reliably
         return {
             platform: 'instagram',
             postId,
             metrics: {
-                views,
+                impressions: 0,
+                engagement: 0,
                 likes,
                 comments,
+                shares: 0,
+                views,
             },
-            note: '⚠️ Scraped fallback — may be limited or inaccurate.',
+            note: '⚠️ Scraped fallback — limited data (impressions, engagement, shares not available).',
         };
     } catch (err) {
         throw new Error('Instagram scraping failed');

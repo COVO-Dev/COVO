@@ -1,4 +1,3 @@
-// services/twitter.service.ts
 import axios from 'axios';
 import cheerio from 'cheerio';
 import { Twitter } from '../../models/twitter.model';
@@ -27,14 +26,22 @@ export const getTwitterMetrics = async (url: string) => {
 
         const metrics = tweet.public_metrics;
 
+        const likes = metrics.like_count || 0;
+        const comments = metrics.reply_count || 0;
+        const shares = metrics.retweet_count || 0;
+        const views = metrics.view_count || 0;
+        const engagement = likes + comments + shares;
+
         return {
             platform: 'twitter',
             postId: tweetId,
             metrics: {
-                views: metrics.view_count || 0,
-                likes: metrics.like_count,
-                retweets: metrics.retweet_count,
-                replies: metrics.reply_count,
+                impressions: views, // Twitter treats views as impressions
+                engagement,
+                likes,
+                comments,
+                shares,
+                views,
             },
         };
     } catch (err) {
@@ -52,20 +59,23 @@ export const getTwitterMetrics = async (url: string) => {
             const rawHTML = $.html();
 
             const likes = extractNumberFromText(getTextContaining(rawHTML, 'Like'));
-            const retweets = extractNumberFromText(getTextContaining(rawHTML, 'Retweet'));
-            const replies = extractNumberFromText(getTextContaining(rawHTML, 'Reply'));
+            const shares = extractNumberFromText(getTextContaining(rawHTML, 'Retweet'));
+            const comments = extractNumberFromText(getTextContaining(rawHTML, 'Reply'));
+            const engagement = likes + shares + comments;
 
             return {
                 platform: 'twitter',
                 postId: tweetId,
                 metrics: {
-                    views: 0,
+                    impressions: 0,
+                    engagement,
                     likes,
-                    retweets,
-                    replies,
-                    note: `Scraped fallback data. data may not be incomplete or accurate. Consider using the Facebook API for more reliable metrics.`
-                }
-            }
+                    comments,
+                    shares,
+                    views: 0,
+                },
+                note: '⚠️ Scraped fallback data. Impressions and views not available — may be incomplete or inaccurate.',
+            };
         } catch (scrapeErr) {
             console.error('❌ Twitter scraping failed:', scrapeErr.message);
             throw new Error('Twitter scraping failed');

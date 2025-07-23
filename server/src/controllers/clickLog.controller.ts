@@ -4,8 +4,9 @@ import { CampaignPerformances } from '../models/campaignAnalytics.models';
 import { ClickLog } from '../models/clickLog.model';
 import geoip from 'geoip-lite';
 import * as UAParser from 'ua-parser-js';
+import { asyncHandler } from '../middleware/helper';
 
-export const handleReferralClick = async (req: Request, res: Response) => {
+export const handleReferralClick = asyncHandler(async (req: Request, res: Response) => {
     const { referralCode } = req.params;
     const { postId, utm_source, utm_campaign } = req.query;
 
@@ -53,4 +54,4 @@ export const handleReferralClick = async (req: Request, res: Response) => {
     );
 
     return res.redirect(302, `https://covo.co.za/campaign?utm_source=covo&utm_content=${referralCode}`);
-};
+});

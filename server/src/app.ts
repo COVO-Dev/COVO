@@ -31,7 +31,9 @@ import { subscriptionRoute } from "./routes/subscription.routes";
 import subscriptionService from "./services/subscription.service";
 import { checkExpiredSubscriptions } from "./utils/subscription.utils";
 import { paymentRouter } from "./routes/payment.routes";
+
 import "./cron/scheduler.cron"
+import { clickLogRouter } from "./routes/clickLog.routes";
 
 dotenv.config();
 
@@ -158,6 +160,8 @@ app.use("/api/subscription", subscriptionRoute);
 // Payment routes
 app.use("/api/payment", paymentRouter);
 
+// Click Log routes
+app.use("/api", clickLogRouter);
 
 app.use(routeNotFound);
 app.use(errorHandler);
