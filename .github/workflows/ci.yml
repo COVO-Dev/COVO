@@ -99,7 +99,7 @@ jobs:
             echo "🌐 Building frontend..."
             cd ../client
             npm install || exit 1
-            NODE_OPTIONS="--max-old-space-size=4096" npm run build || exit 1
+             NODE_OPTIONS="--max-old-space-size=4096" npm run build || exit 1
 
             echo "🔁 Restarting frontend with PM2..."
             pm2 describe covo-client-${{ github.ref_name }} > /dev/null && \
