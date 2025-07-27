@@ -14,25 +14,39 @@ interface ICampaignApplication {
 export default interface ICampaignHeroProps {
   campaignData: {
     brandId: {
+      _id: string;
       firstName: string;
       lastName: string;
     };
-    budgetRange: number;
+    budgetRange: string;
     collaborationPreferences: {
       exclusiveCollaborations: boolean;
       hasWorkedWithInfluencers: boolean;
+      type: string;
+      styles: string[];
     };
     createdAt: Date;
     endDate: Date;
     applications?: ICampaignApplication[];
-    geographicFocus: string;
+    geographicFocus: {
+      country: string;
+      city?: string;
+    };
     influencerId: string[];
     influencerType: string;
-    isDeleted: false;
-    primaryGoals: string[];
+    isDeleted: boolean;
+    primaryGoals: string;
     startDate: Date;
     status: string;
-    targetAudience: string;
+    targetAudience: {
+      ageGroups: string;
+      gender: string;
+      incomeLevel: string;
+      lifeStage: string;
+      lifestyle: string;
+      engagementLevel: string;
+      platform: string;
+    };
     title: string;
     trackingAndAnalytics: {
       performanceTracking: boolean;
@@ -42,5 +56,6 @@ export default interface ICampaignHeroProps {
     updatedAt: Date;
     __v: number;
     _id: string;
+    recommendedInfluencers?: any[];
   };
 }
