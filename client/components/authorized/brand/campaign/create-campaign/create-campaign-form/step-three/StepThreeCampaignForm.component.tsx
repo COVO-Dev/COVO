@@ -1,21 +1,47 @@
-"use client"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+"use client";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import TagsInput from "@/components/ui/tags-input";
 import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import { setCampaignData, updateTrackingAndAnalytics } from "@/lib/store/campaign/campaign.slice";
+import {
+  setCampaignData,
+  updateTrackingAndAnalytics,
+} from "@/lib/store/campaign/campaign.slice";
 import useControlledField from "@/utils/useControlledField";
 
 export default function CampaignFormStepThree({ control }) {
   const dispatch = useAppDispatch();
   // const campaignData = useAppSelector((state) => state.campaign);
 
-  const metricsField = useControlledField("trackingAndAnalytics.metrics", control);
-  const reportFrequencyField = useControlledField("trackingAndAnalytics.reportFrequency", control);
-  const performanceTrackingField = useControlledField("trackingAndAnalytics.performanceTracking", control);
+  const metricsField = useControlledField(
+    "trackingAndAnalytics.metrics",
+    control
+  );
+  const reportFrequencyField = useControlledField(
+    "trackingAndAnalytics.reportFrequency",
+    control
+  );
+  const performanceTrackingField = useControlledField(
+    "trackingAndAnalytics.performanceTracking",
+    control
+  );
 
   const statusField = useControlledField("status", control);
 
@@ -49,19 +75,30 @@ export default function CampaignFormStepThree({ control }) {
       <FormField
         control={control}
         name="trackingAndAnalytics.reportFrequency"
-        render={() => (
+        render={(
+          { field } // Added { field } destructuring here
+        ) => (
           <FormItem>
             <FormLabel>Report Frequency</FormLabel>
-            <FormControl>
-              <Input
-                placeholder="Enter frequency"
-                {...reportFrequencyField}
-                onChange={(e) => {
-                  reportFrequencyField.onChange(e);
-                  // dispatch(updateTrackingAndAnalytics({ reportFrequency: e.target.value }));
-                }}
-              />
-            </FormControl>
+            <Select
+              onValueChange={field.onChange} // Use field.onChange
+              defaultValue={field.value} // Use field.value
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select frequency" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="Monthly">Monthly</SelectItem>
+                <SelectItem value="Quarterly">Quarterly</SelectItem>
+                <SelectItem value="Bi-annually">Bi-annually</SelectItem>
+                <SelectItem value="Annually">Annually</SelectItem>
+              </SelectContent>
+            </Select>
+            <FormDescription>
+              {` Select how often you'd like to receive reports. `}
+            </FormDescription>
             <FormMessage />
           </FormItem>
         )}
@@ -83,14 +120,16 @@ export default function CampaignFormStepThree({ control }) {
             </FormControl>
             <div className="space-y-1 leading-none">
               <FormLabel>Track performance</FormLabel>
-              <FormDescription>Allow COVO to track your campaign performance</FormDescription>
+              <FormDescription>
+                Allow COVO to track your campaign performance
+              </FormDescription>
               <FormMessage />
             </div>
           </FormItem>
         )}
       />
 
-      <FormField
+      {/* <FormField
         control={control}
         name="status"
         render={() => (
@@ -118,8 +157,7 @@ export default function CampaignFormStepThree({ control }) {
             <FormMessage />
           </FormItem>
         )}
-      />
-
+      /> */}
     </div>
   );
 }

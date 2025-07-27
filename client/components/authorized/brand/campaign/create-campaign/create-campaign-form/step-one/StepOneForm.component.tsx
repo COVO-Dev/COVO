@@ -1,7 +1,5 @@
 "use client";
-import React from "react";
-import { useController, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -22,20 +20,91 @@ import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { useAppSelector, useAppDispatch } from "@/lib/store/hooks";
-import { setCampaignData } from '@/lib/store/campaign/campaign.slice'
 import useControlledField from "@/utils/useControlledField";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function CampaignFormStepOne({ control }) {
-  const campaignData = useAppSelector(state => state.campaign);
-  const dispatch = useAppDispatch();
-
-  // Controlled fields using react-hook-form's useController
-  const titleField = useControlledField("title", control);
+  // Controlled fields whose values are needed by other components/hooks
   const startDateField = useControlledField("startDate", control);
-  const endDateField = useControlledField("endDate", control);
   const budgetRangeField = useControlledField("budgetRange", control);
-  const targetAudienceField = useControlledField("targetAudience", control);
+
+  // State for budget "Other" input visibility
+  const [showOtherBudgetInput, setShowOtherBudgetInput] = useState(false);
+
+  // Budget options
+  const budgetRangeOptions = [
+    "$0 - $500",
+    "$501 - $1,000",
+    "$1,001 - $5,000",
+    "$5,001 - $10,000",
+    "Over $10,000",
+  ];
+
+  // Effect for budget "Other" input visibility
+  useEffect(() => {
+    if (
+      budgetRangeField.value &&
+      !budgetRangeOptions.includes(budgetRangeField.value)
+    ) {
+      setShowOtherBudgetInput(true);
+    } else {
+      setShowOtherBudgetInput(false);
+    }
+  }, [budgetRangeField.value]);
+
+  // Options for target audience fields
+  const ageGroupOptions = [
+    "10–12",
+    "13–17",
+    "18–24",
+    "25–34",
+    "35–44",
+    "45–54",
+    "55–64",
+    "65–75",
+  ];
+
+  const genderOptions = ["Female", "Male", "Non-binary", "Prefer not to say"];
+
+  const incomeLevelOptions = ["Low", "Middle", "High"];
+
+  const lifeStageOptions = [
+    "Student",
+    "Young Professional",
+    "Parent",
+    "Retired",
+  ];
+
+  const lifestyleOptions = [
+    "Health-conscious",
+    "Fashion-forward",
+    "Tech-savvy",
+    "Eco-conscious",
+    "Luxury-oriented",
+    "Minimalist",
+  ];
+
+  const engagementLevelOptions = [
+    "Passive Viewer",
+    "Content Sharer",
+    "Commenter",
+    "Influencer/Creator",
+  ];
+
+  const platformOptions = [
+    "Instagram",
+    "TikTok",
+    "YouTube",
+    "Facebook",
+    "LinkedIn",
+    "X (formerly Twitter)",
+  ];
 
   // Function to disable past dates
   const isDateDisabled = (date: Date) => {
@@ -45,7 +114,7 @@ export default function CampaignFormStepOne({ control }) {
   };
 
   return (
-    <div className="flex flex-col gap-4" >
+    <div className="flex flex-col gap-4">
       {/* Title Field */}
       <FormField
         control={control}
@@ -54,15 +123,7 @@ export default function CampaignFormStepOne({ control }) {
           <FormItem>
             <FormLabel>Title</FormLabel>
             <FormControl>
-              <Input
-                placeholder="Title"
-                {...titleField}
-                // value={campaignData.title || ""}
-                onChange={(e) => {
-                  titleField.onChange(e);
-                  // dispatch(setCampaignData({ ...campaignData, title: e.target.value }));
-                }}
-              />
+              <Input placeholder="Title" {...field} />
             </FormControl>
             <FormDescription>Your campaign title</FormDescription>
             <FormMessage />
@@ -71,7 +132,6 @@ export default function CampaignFormStepOne({ control }) {
       />
 
       <div className="grid grid-cols-12 gap-4">
-
         {/* Start Date Field */}
         <div className="col-span-12 md:col-span-6">
           <FormField
@@ -86,12 +146,12 @@ export default function CampaignFormStepOne({ control }) {
                       <Button
                         variant="outline"
                         className={cn(
-                          "w-[240px] pl-3 text-left font-normal",
-                          !startDateField.value && "text-muted-foreground"
+                          " pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
                         )}
                       >
-                        {startDateField.value ? (
-                          format(startDateField.value, "PPP")
+                        {field.value ? (
+                          format(field.value, "PPP")
                         ) : (
                           <span>Pick a date</span>
                         )}
@@ -102,12 +162,8 @@ export default function CampaignFormStepOne({ control }) {
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={startDateField.value}
-                      // selected={new Date()}
-                      onSelect={(date) => {
-                        startDateField.onChange(date);
-                        // dispatch(setCampaignData({ ...campaignData, startDate: String(date) }));
-                      }}
+                      selected={field.value}
+                      onSelect={field.onChange}
                       disabled={isDateDisabled}
                       initialFocus
                     />
@@ -116,7 +172,8 @@ export default function CampaignFormStepOne({ control }) {
                 <FormDescription>Campaign start date</FormDescription>
                 <FormMessage />
               </FormItem>
-            )} />
+            )}
+          />
         </div>
 
         {/* End Date Field */}
@@ -134,11 +191,11 @@ export default function CampaignFormStepOne({ control }) {
                         variant="outline"
                         className={cn(
                           "w-[240px] pl-3 text-left font-normal",
-                          !endDateField.value && "text-muted-foreground"
+                          !field.value && "text-muted-foreground"
                         )}
                       >
-                        {endDateField.value ? (
-                          format(endDateField.value, "PPP")
+                        {field.value ? (
+                          format(field.value, "PPP")
                         ) : (
                           <span>Pick a date</span>
                         )}
@@ -149,14 +206,12 @@ export default function CampaignFormStepOne({ control }) {
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={endDateField.value}
-                      // selected={new Date(campaignData.endDate)}
-                      onSelect={(date) => {
-                        endDateField.onChange(date);
-                        // dispatch(setCampaignData({ ...campaignData, endDate: String(date) }));
-                      }}
+                      selected={field.value}
+                      onSelect={field.onChange}
                       disabled={(date) =>
-                        isDateDisabled(date) || (startDateField.value && date < (new Date(startDateField.value)))
+                        isDateDisabled(date) ||
+                        (startDateField.value &&
+                          date < new Date(startDateField.value))
                       }
                       initialFocus
                     />
@@ -178,19 +233,53 @@ export default function CampaignFormStepOne({ control }) {
           <FormItem>
             <FormLabel>Budget</FormLabel>
             <FormControl>
-              <Input
-                placeholder="Enter budget"
-                type="text"
-                // type="number"
-                {...budgetRangeField}
-                onChange={(e) => {
-                  // Form state for validation with Zod
-                  budgetRangeField.onChange(Number(e.target.value) || "");
-
-                  // redux slice
-                  // dispatch(setCampaignData({ ...campaignData, budgetRange: Number(e.target.value) }));
-                }}
-              />
+              <div className="flex gap-2">
+                <Select
+                  onValueChange={(value) => {
+                    if (value === "Other") {
+                      setShowOtherBudgetInput(true);
+                    } else {
+                      setShowOtherBudgetInput(false);
+                      field.onChange(value);
+                    }
+                  }}
+                  value={
+                    showOtherBudgetInput
+                      ? "Other"
+                      : budgetRangeOptions.includes(field.value)
+                      ? field.value
+                      : ""
+                  }
+                >
+                  <SelectTrigger
+                    className={showOtherBudgetInput ? "w-1/2" : "w-full"}
+                  >
+                    <SelectValue placeholder="Select budget range" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {budgetRangeOptions.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="Other">
+                      Other (free-text field)
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                {showOtherBudgetInput && (
+                  <Input
+                    placeholder="Enter custom budget"
+                    {...field}
+                    value={
+                      budgetRangeOptions.includes(field.value)
+                        ? ""
+                        : field.value || ""
+                    }
+                    className="w-1/2"
+                  />
+                )}
+              </div>
             </FormControl>
             <FormDescription>Campaign budget range</FormDescription>
             <FormMessage />
@@ -198,28 +287,192 @@ export default function CampaignFormStepOne({ control }) {
         )}
       />
 
-      {/* Target Audience Field */}
-      <FormField
-        control={control}
-        name="targetAudience"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Target Audience</FormLabel>
-            <FormControl>
-              <Input
-                placeholder="Describe your target audience"
-                {...targetAudienceField}
-                value={targetAudienceField.value || ""}
-                onChange={(e) => {
-                  targetAudienceField.onChange(e);
-                  // dispatch(setCampaignData({ ...campaignData, targetAudience: e.target.value }));
-                }}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      {/* Target Audience Section */}
+      <div className="border rounded-md p-4 space-y-4">
+        <h3 className="text-lg font-semibold">Target Audience</h3>
+
+        {/* Age Groups */}
+        <FormField
+          control={control}
+          name="targetAudience.ageGroups"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Age Groups</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select age group" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {ageGroupOptions.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Gender */}
+        <FormField
+          control={control}
+          name="targetAudience.gender"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Gender</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select gender" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {genderOptions.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Income Level */}
+        <FormField
+          control={control}
+          name="targetAudience.incomeLevel"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Income Level</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select income level" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {incomeLevelOptions.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Life Stage */}
+        <FormField
+          control={control}
+          name="targetAudience.lifeStage"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Life Stage</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select life stage" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {lifeStageOptions.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Lifestyle */}
+        <FormField
+          control={control}
+          name="targetAudience.lifestyle"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Lifestyle</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select lifestyle" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {lifestyleOptions.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Engagement Level */}
+        <FormField
+          control={control}
+          name="targetAudience.engagementLevel"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Engagement Level</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select engagement level" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {engagementLevelOptions.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Platform */}
+        <FormField
+          control={control}
+          name="targetAudience.platform"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Platform</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select platform" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {platformOptions.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
     </div>
   );
 }

@@ -1,6 +1,5 @@
 "use client";
 import {
-  Form,
   FormControl,
   FormDescription,
   FormField,
@@ -10,26 +9,64 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import TagsInput from "../../../../../../ui/tags-input";
-import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import { setCampaignData, updateCollaborationPreferences, updateTrackingAndAnalytics } from '@/lib/store/campaign/campaign.slice'
 import useControlledField from "@/utils/useControlledField";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MultiSelector, MultiSelectorContent, MultiSelectorInput, MultiSelectorItem, MultiSelectorList, MultiSelectorTrigger } from "@/components/ui/extension/multi-select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  MultiSelector,
+  MultiSelectorContent,
+  MultiSelectorInput,
+  MultiSelectorItem,
+  MultiSelectorList,
+  MultiSelectorTrigger,
+} from "@/components/ui/extension/multi-select";
+import { useState, useEffect } from "react";
+import { useFormContext } from "react-hook-form";
+import { ICampaign } from "@/lib/api/campaign/create-campaign/createCampaign.validation";
+import LocationSelector from "@/components/ui/location-input";
 
 export default function CampaignFormStepTwo({ control }) {
-  const dispatch = useAppDispatch();
-  const campaignData = useAppSelector((state) => state.campaign);
+  const form = useFormContext<ICampaign>(); // Get form context to use setValue
 
   // Controlled fields using react-hook-form
   const primaryGoalsField = useControlledField("primaryGoals", control);
-  const influencerTypeField = useControlledField("influencerType", control);
-  const geographicFocusField = useControlledField("geographicFocus", control);
 
-  const hasWorkedWithInfluencersField = useControlledField("collaborationPreferences.hasWorkedWithInfluencers", control);
-  const exclusiveCollaborationsField = useControlledField("collaborationPreferences.exclusiveCollaborations", control);
-  const typeCollaborationField = useControlledField("collaborationPreferences.type", control);
-  const stylesField = useControlledField("collaborationPreferences.styles", control);
+  const primaryGoalOptions = [
+    "Brand Awareness",
+    "Product Launch",
+    "Audience Engagement",
+    "Sales Conversion",
+    "User-Generated Content",
+    "Event Coverage",
+  ];
+
+  // State to manage visibility of the "Other" input field
+  const [showOtherInput, setShowOtherInput] = useState(false);
+
+  // Effect to initialize showOtherInput based on the current primaryGoals value
+  useEffect(() => {
+    // Check if the current value is not empty and not one of the predefined options
+    if (
+      primaryGoalsField.value &&
+      !primaryGoalOptions.includes(primaryGoalsField.value)
+    ) {
+      setShowOtherInput(true);
+    } else {
+      setShowOtherInput(false);
+    }
+  }, [primaryGoalsField.value]); // Re-run when primaryGoalsField.value changes
+
+  console.log(
+    form.watch("primaryGoals"),
+    "Form Values in Step Two",
+    showOtherInput,
+    form.getValues() // This will now work
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -42,14 +79,55 @@ export default function CampaignFormStepTwo({ control }) {
             <FormItem>
               <FormLabel>Primary Goals</FormLabel>
               <FormControl>
-                <TagsInput
-                  tags={primaryGoalsField.value || []}
-                  // placeholder="Add a goal and press enter"
-                  setTags={(tags) => {
-                    primaryGoalsField.onChange(tags);
-                    // dispatch(setCampaignData({ ...campaignData, primaryGoals: tags }));
-                  }}
-                />
+                <div className="flex flex-col md:flex-row gap-2">
+                  {" "}
+                  {/* Flex container for Select and Input */}
+                  <Select
+                    onValueChange={(value) => {
+                      if (value === "Other") {
+                        setShowOtherInput(true);
+                      } else {
+                        setShowOtherInput(false);
+                        field.onChange(value); // Set the selected value from dropdown
+                      }
+                    }}
+                    // Determine the selected value for the Select component
+                    value={
+                      showOtherInput
+                        ? "Other" // If other input is shown, Select should display "Other"
+                        : primaryGoalOptions.includes(field.value)
+                        ? field.value // If it's a predefined option
+                        : "" // If it's empty or not a predefined option, show placeholder
+                    }
+                  >
+                    <SelectTrigger>
+                      {" "}
+                      {/* Adjust width */}
+                      <SelectValue placeholder="Select a primary goal" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {primaryGoalOptions.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="Other">
+                        Other (with free text option)
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {showOtherInput && (
+                    <Input
+                      placeholder="Enter your primary goal"
+                      {...field}
+                      value={
+                        primaryGoalOptions.includes(field.value)
+                          ? "" // If current value is a predefined option, clear input
+                          : field.value || "" // Otherwise, show current value or empty string
+                      }
+                    />
+                  )}
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -62,16 +140,23 @@ export default function CampaignFormStepTwo({ control }) {
           {/* Influencer Type */}
           <FormField
             control={control}
-            name={influencerTypeField.name}
+            name="influencerType"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Influencer Type</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue
                         placeholder="Select tier"
-                        className={field.value ? "" : "text-muted-foreground text-gray-500"}
+                        className={
+                          field.value
+                            ? ""
+                            : "text-muted-foreground text-gray-500"
+                        }
                       />
                     </SelectTrigger>
                   </FormControl>
@@ -83,39 +168,46 @@ export default function CampaignFormStepTwo({ control }) {
                     <SelectItem value="Celebrity">{` Celebrity (1M+) `}</SelectItem>
                   </SelectContent>
                 </Select>
-                <FormDescription>Select a collaboration type from the drop-down menu</FormDescription>
+                <FormDescription>
+                  Select a collaboration type from the drop-down menu
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
-
-
         </div>
 
         <div className="col-span-12 md:col-span-6">
           {/* Geographic Focus */}
           <FormField
+            name="geographicFocus.country"
             control={control}
-            name="geographicFocus"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Geographic Focus</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Focus"
-                    {...geographicFocusField}
-                    value={geographicFocusField.value || ""}
-                    onChange={(e) => {
-                      geographicFocusField.onChange(e);
-                      // dispatch(setCampaignData({ ...campaignData, geographicFocus: e.target.value }));
+                  <LocationSelector
+                    onCountryChange={(country) => {
+                      // Use setValue from the context, not from control
+                      form.setValue(
+                        "geographicFocus.country",
+                        country?.name ?? ""
+                      );
+                      form.setValue("geographicFocus.city", "");
+                    }}
+                    onStateChange={(state) => {
+                      // Use setValue from the context, not from control
+                      form.setValue("geographicFocus.city", state?.name ?? "");
                     }}
                   />
                 </FormControl>
+                <FormDescription>{` 
+                  Select the country and state/city for your campaign's
+                  geographic focus.`}</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
-
         </div>
       </div>
       {/* Two checkboxes */}
@@ -129,18 +221,17 @@ export default function CampaignFormStepTwo({ control }) {
               <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                 <FormControl>
                   <Checkbox
-                    // checked={campaignData.collaborationPreferences.hasWorkedWithInfluencers || false}
-                    checked={hasWorkedWithInfluencersField.value || false}
-                    onCheckedChange={(checked) => {
-                      hasWorkedWithInfluencersField.onChange(checked);
-                      // dispatch(updateCollaborationPreferences({ hasWorkedWithInfluencers: checked }));
-                    }}
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
                   />
                 </FormControl>
                 <div className="space-y-1 leading-none">
-                  <FormLabel>Did you work with Influencers in the past?</FormLabel>
+                  <FormLabel>
+                    Did you work with Influencers in the past?
+                  </FormLabel>
                   <FormDescription>
-                    If you have any experience working with influencers in the past, please check this box
+                    If you have any experience working with influencers in the
+                    past, please check this box
                   </FormDescription>
                   <FormMessage />
                 </div>
@@ -158,12 +249,8 @@ export default function CampaignFormStepTwo({ control }) {
               <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                 <FormControl>
                   <Checkbox
-                    // checked={campaignData.collaborationPreferences.exclusiveCollaborations || false}
-                    checked={exclusiveCollaborationsField.value || false}
-                    onCheckedChange={(checked) => {
-                      exclusiveCollaborationsField.onChange(checked);
-                      // dispatch(updateCollaborationPreferences({ exclusiveCollaborations: checked }));
-                    }}
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
                   />
                 </FormControl>
                 <div className="space-y-1 leading-none">
@@ -184,30 +271,51 @@ export default function CampaignFormStepTwo({ control }) {
         <div className="col-span-12 md:col-span-6">
           <FormField
             control={control}
-            name={typeCollaborationField.name}
+            name="collaborationPreferences.type"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Collaboration Type</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue
                         placeholder="Select item"
-                        className={field.value ? "" : "text-muted-foreground text-gray-500"}
+                        className={
+                          field.value
+                            ? ""
+                            : "text-muted-foreground text-gray-500"
+                        }
                       />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="Paid Collaborations">Paid Collaborations</SelectItem>
-                    <SelectItem value="Gifting/PR Packages">Gifting/PR Packages</SelectItem>
-                    <SelectItem value="Affiliate/Commission-Based Deals">Affiliate/Commission-Based Deals</SelectItem>
-                    <SelectItem value="Long-Term Brand Partnerships">Long-Term Brand Partnerships</SelectItem>
-                    <SelectItem value="Event Hosting">Event Hosting</SelectItem>
-                    <SelectItem value="Product Reviews">Product Reviews</SelectItem>
-                    <SelectItem value="UGC-Only Content">UGC-Only Content</SelectItem>
+                    <SelectItem value="Paid Collaborations">
+                      Paid Collaborations
+                    </SelectItem>
+                    <SelectItem value="Gifting/PR Packages">
+                      Gifting/PR Packages
+                    </SelectItem>
+                    <SelectItem value="Affiliate/Commission-Based Deals">
+                      Affiliate/Commission-Based Deals
+                    </SelectItem>
+                    <SelectItem value="Long-Term Brand Partnerships">
+                      Long-Term Brand Partnerships
+                    </SelectItem>
+                    <SelectItem value= "Event Hosting">Event Hosting</SelectItem>
+                    <SelectItem value= "Product Reviews">
+                      Product Reviews
+                    </SelectItem>
+                    <SelectItem value="UGC-Only Content">
+                      UGC-Only Content
+                    </SelectItem>
                   </SelectContent>
                 </Select>
-                <FormDescription>Select a collaboration type from the drop-down menu</FormDescription>
+                <FormDescription>
+                  Select a collaboration type from the drop-down menu
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -237,7 +345,6 @@ export default function CampaignFormStepTwo({ control }) {
               </FormItem>
             )}
           /> */}
-
         </div>
 
         {/* Styles */}
@@ -260,15 +367,33 @@ export default function CampaignFormStepTwo({ control }) {
                     </MultiSelectorTrigger>
                     <MultiSelectorContent>
                       <MultiSelectorList>
-                        <MultiSelectorItem value="Reels">Reels</MultiSelectorItem>
-                        <MultiSelectorItem value="Stories">Stories</MultiSelectorItem>
-                        <MultiSelectorItem value="In-Feed Posts">In-Feed Posts</MultiSelectorItem>
-                        <MultiSelectorItem value="TikToks">TikToks</MultiSelectorItem>
-                        <MultiSelectorItem value="YouTube Videos">YouTube Videos</MultiSelectorItem>
-                        <MultiSelectorItem value="Blog or X Posts">Blog or X Posts</MultiSelectorItem>
-                        <MultiSelectorItem value="Live Streams">Live Streams</MultiSelectorItem>
-                        <MultiSelectorItem value="Podcasts" >Podcasts</MultiSelectorItem>
-                        <MultiSelectorItem value="Carousel Posts" >Carousel Posts</MultiSelectorItem>
+                        <MultiSelectorItem value="Reels">
+                          Reels
+                        </MultiSelectorItem>
+                        <MultiSelectorItem value="Stories">
+                          Stories
+                        </MultiSelectorItem>
+                        <MultiSelectorItem value="In-Feed Posts">
+                          In-Feed Posts
+                        </MultiSelectorItem>
+                        <MultiSelectorItem value="TikToks">
+                          TikToks
+                        </MultiSelectorItem>
+                        <MultiSelectorItem value="YouTube Videos">
+                          YouTube Videos
+                        </MultiSelectorItem>
+                        <MultiSelectorItem value="Blog or X Posts">
+                          Blog or X Posts
+                        </MultiSelectorItem>
+                        <MultiSelectorItem value="Live Streams">
+                          Live Streams
+                        </MultiSelectorItem>
+                        <MultiSelectorItem value="Podcasts">
+                          Podcasts
+                        </MultiSelectorItem>
+                        <MultiSelectorItem value="Carousel Posts">
+                          Carousel Posts
+                        </MultiSelectorItem>
                       </MultiSelectorList>
                     </MultiSelectorContent>
                   </MultiSelector>
@@ -278,12 +403,108 @@ export default function CampaignFormStepTwo({ control }) {
               </FormItem>
             )}
           />
-
-
         </div>
-
       </div>
 
+      {/* NEW: Fields moved from StepThreeCampaignForm */}
+      {/* <div className="col-span-6">
+        <FormField
+          control={control}
+          name="trackingAndAnalytics.metrics"
+          render={() => (
+            <FormItem>
+              <FormLabel>Metrics</FormLabel>
+              <FormControl>
+                <TagsInput
+                  tags={metricsField.value || []}
+                  setTags={(value) => {
+                    metricsField.onChange(value);
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div> */}
+
+      <FormField
+        control={control}
+        name="trackingAndAnalytics.reportFrequency"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Report Frequency</FormLabel>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select frequency" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="Monthly">Monthly</SelectItem>
+                <SelectItem value="Quarterly">Quarterly</SelectItem>
+                <SelectItem value="Bi-annually">Bi-annually</SelectItem>
+                <SelectItem value="Annually">Annually</SelectItem>
+              </SelectContent>
+            </Select>
+            <FormDescription>
+              {` Select how often you'd like to receive reports. `}
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={control}
+        name="trackingAndAnalytics.performanceTracking"
+        render={({ field }) => (
+          <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+            <FormControl>
+              <Checkbox
+                checked={field.value}
+                onCheckedChange={field.onChange}
+              />
+            </FormControl>
+            <div className="space-y-1 leading-none">
+              <FormLabel>Track performance</FormLabel>
+              <FormDescription>
+                Allow COVO to track your campaign performance
+              </FormDescription>
+              <FormMessage />
+            </div>
+          </FormItem>
+        )}
+      />
+
+      {/* <FormField
+        control={control}
+        name="status"
+        render={() => (
+          <FormItem>
+            <FormLabel>Status</FormLabel>
+            <Select
+              onValueChange={(value) => {
+                statusField.onChange(value);
+              }}
+              defaultValue={statusField.value}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+              </SelectContent>
+            </Select>
+            <FormDescription>Enter your campaign status</FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      /> */}
     </div>
   );
 }
