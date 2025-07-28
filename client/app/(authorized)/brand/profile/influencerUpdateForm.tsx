@@ -11,7 +11,8 @@ import { brandFormDataSchema } from "@/lib/api/update-data/brand/brandUpdateData
 import { useRouter } from "next/navigation";
 import undraw_fill_forms_npwp from "@/assets/svg/undraw_fill-forms_npwp.svg";
 import getCurrentUserData from "@/utils/getCurrentUserData";
-import { countries } from "@/app/(authorized)/brand/moreInfo/CountryDialCodes.json";
+import CountryDialCodesData from "@/app/(authorized)/brand/moreInfo/CountryDialCodes.json";
+const countries = CountryDialCodesData.countries;
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 type Inputs = z.infer<typeof brandFormDataSchema>;

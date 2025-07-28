@@ -17,6 +17,15 @@ import ShadcnTitle from "@/components/shared/page-title/PageTitle.component";
 import { useRouter } from "next/navigation";
 import ProfileCampaignSection from "@/components/shared/campaign-section/ProfileCampaignSection.component";
 import ViewInvitationsDialog from "@/components/authorized/influencer/profile/invitations/ViewInvitationsDialog.component";
+import { CovoScoreDisplay } from "@/components/shared/covo-score-display/CovoScoreDisplay.component";
+
+// Function to calculate age from year of birth
+const calculateAge = (yearOfBirth: string): number | null => {
+  if (!yearOfBirth) return null;
+  const birth = parseInt(yearOfBirth);
+  if (isNaN(birth)) return null;
+  return new Date().getFullYear() - birth;
+};
 
 export default function ProfilePage() {
   const profile = useAppSelector((state) => state.profile);
@@ -90,6 +99,39 @@ export default function ProfilePage() {
 
     if (token && influencerId) {
       fetchData(token, influencerId);
+            
+    async function fetchData(token) {
+      if (token) {
+        setIsLoading(true); // Set loading to true before fetching
+        try {
+          // const result = await getAppliedCampaignForInfluencerRoute(
+          //   token,
+          //   influencerId
+          // ); // Pass page and limit
+          const result = await getRegisteredCampaignForInfluencerRoute(
+            token,
+            influencerId
+          ); // Pass page and limit
+          console.log(result)
+          if (result.status === "success") {
+            setAppliedCampaigns(result.data.data || []);
+          } else {
+            // Handle "no campaigns found" as a normal case, not an error
+            if (result.message?.includes("No campaigns found")) {
+              setAppliedCampaigns([]);
+              console.log("ℹ️ No registered campaigns found for this influencer");
+            } else {
+              setError(result.message || "Failed to fetch data.");
+              console.error("API Error:", result);
+            }
+          }
+        } catch (err: any) {
+          setError(err.message || "An error occurred.");
+          console.error("Fetch Error:", err);
+        } finally {
+          setIsLoading(false);
+        }
+      }
     }
     check(profile.profilePicture);
   }, [token, influencerId, profile.profilePicture]);
@@ -127,9 +169,11 @@ export default function ProfilePage() {
               className=" w-full h-full rounded-lg"
             />
             <div className="flex justify-between items-center  gap-4">
-              <p className="text-lg w-[160px] text-center border-2 rounded-md text-white p-2 font-weight-[800] z-10 border-white/20 shadow-[0_0_10px_rgba(255,255,255,0.3)] backdrop-blur-sm">
-                Covo Score: 8.20
-              </p>
+              <CovoScoreDisplay
+                className="text-white z-10"
+                size="md"
+                showLabel={true}
+              />
               <UpdateProfile />
             </div>
           </div>

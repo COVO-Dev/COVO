@@ -5,6 +5,7 @@ import { signIn } from "next-auth/react";
 import { useState } from "react";
 import TermsCheckBoxes from "../terms-check-boxs/TermsCheckBoxes.component";
 import { useRouter } from "next/navigation";
+import { InfoIcon } from "lucide-react";
 
 export default function InfluencerSignUp() {
 	const [error, setError] = useState("");
@@ -28,11 +29,21 @@ export default function InfluencerSignUp() {
 
 	const router = useRouter();
 
+	const handleConsent = (field: string, value: boolean) => {
+		setConsentAndAgreements(prev => {
+			const updated = { ...prev, [field]: value };
+			if (field === 'termsAccepted') {
+				setPrivacyPolicy(value);
+			}
+			return updated;
+		});
+	};
+
 	const handleSignUp = async () => {
-		// Clear previous errors
+	
 		setError("");
 		
-		// Validate required fields
+		
 		if (!influencerData.firstName || !influencerData.lastName || 
 			!influencerData.email || !influencerData.password || 
 			!influencerData.username || !influencerData.yearOfBirth) {
@@ -40,7 +51,7 @@ export default function InfluencerSignUp() {
 			return;
 		}
 
-		// Validate year of birth
+		
 		const currentYear = new Date().getFullYear();
 		const birthYear = parseInt(influencerData.yearOfBirth);
 		if (isNaN(birthYear) || birthYear < 1900 || birthYear > currentYear - 13) {
@@ -67,7 +78,6 @@ export default function InfluencerSignUp() {
 			const response = await influencerRegisterRoute({
 				...influencerData,
 				consentAndAgreements,
-				privacyPolicy,
 			});
 
 			console.log("Full response:", response);
@@ -90,13 +100,25 @@ export default function InfluencerSignUp() {
 				}
 			}
 		} catch (error) {
-			console.error("Network or unexpected error:", error);
-			setError("Registration failed. Please try again.");
+			console.error("Registration error:", error);
+			setError("An error occurred during registration. Please try again.");
 		}
 	};
 
 	return (
 		<div className="w-auto flex-col">
+			{/* Follower Requirement Disclaimer */}
+			<div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-start">
+				<InfoIcon className="h-5 w-5 text-blue-500 mt-0.5 mr-3 flex-shrink-0" />
+				<div>
+					<h4 className="font-medium text-blue-800 mb-1">Minimum Follower Requirement</h4>
+					<p className="text-sm text-blue-700">
+						COVO requires all influencers to have at least 1,000 followers on their primary platform. 
+						We prioritize genuine engagement and consistent brand identity over follower count beyond this threshold.
+					</p>
+				</div>
+			</div>
+
 			<div className="w-auto flex justify-between">
 				<input
 					type="text"
@@ -162,21 +184,44 @@ export default function InfluencerSignUp() {
 				placeholder="Username"
 				className="mb-4 w-full p-3 rounded-md border border-custom-dark-desaturated-blue bg-white/50 placeholder-gray-500 focus:outline-none focus:border-blue-500"
 			/>
-			<input
-				type="number"
-				name="yearOfBirth"
-				value={influencerData.yearOfBirth}
-				onChange={(e) =>
-					setInfluencerData((prev) => ({
-						...prev,
-						yearOfBirth: e.target.value,
-					}))
-				}
-				placeholder="Year of Birth (e.g., 1995)"
-				min="1900"
-				max={new Date().getFullYear() - 13}
-				className="mb-4 w-full p-3 rounded-md border border-custom-dark-desaturated-blue bg-white/50 placeholder-gray-500 focus:outline-none focus:border-blue-500"
-			/>
+			<div className="mb-4">
+				<label htmlFor="yearOfBirth" className="sr-only">
+					Year of Birth
+				</label>
+				<select
+					id="yearOfBirth"
+					name="yearOfBirth"
+					value={influencerData.yearOfBirth}
+					onChange={(e) =>
+						setInfluencerData((prev) => ({
+							...prev,
+							yearOfBirth: e.target.value,
+						}))
+					}
+					className="w-full p-3 rounded-md border border-custom-dark-desaturated-blue bg-white/50 text-gray-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
+					aria-label="Select your year of birth"
+					aria-required="true"
+				>
+					<option value="" disabled className="text-gray-500">
+						Select Year of Birth
+					</option>
+					{(() => {
+						const currentYear = new Date().getFullYear();
+						const maxYear = currentYear - 13; // Ensure user is at least 13 years old
+						const years = [];
+
+						// Generate years from most recent (maxYear) to oldest (1900)
+						for (let year = maxYear; year >= 1900; year--) {
+							years.push(
+								<option key={year} value={year.toString()} className="text-gray-700">
+									{year}
+								</option>
+							);
+						}
+						return years;
+					})()}
+				</select>
+			</div>
 
 			{/* <input
         type="text"

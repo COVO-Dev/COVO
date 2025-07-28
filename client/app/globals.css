@@ -6,6 +6,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import custom animations */
+@import '../styles/animations.css';
+
 body {
   font-family: Arial, Helvetica, sans-serif;
 }
@@ -133,6 +136,19 @@ html {
   animation: shake 0.5s;
 }
 
+/* Animation delay utilities */
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animation-delay-400 {
+  animation-delay: 400ms;
+}
+
+.animation-delay-600 {
+  animation-delay: 600ms;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -164,4 +180,23 @@ textarea {
 .hydration-safe {
   /* This class can be used for components that need hydration protection */
   position: relative;
+}
+
+/* Custom scrollbar for policy pages */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
