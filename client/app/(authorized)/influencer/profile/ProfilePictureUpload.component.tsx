@@ -1,29 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { toast } from "@/hooks/use-toast";
-import { useForm, useWatch } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { CloudUpload, Paperclip } from "lucide-react";
-import {
-  FileInput,
-  FileUploader,
-  FileUploaderContent,
-  FileUploaderItem,
-} from "@/components/ui/extension/file-upload";
-import useControlledField from "@/utils/useControlledField";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+import { CloudUpload, X } from "lucide-react";
+
 import { influencerUploadPhotoRoute } from "@/lib/api/upload/influencer-upload-photo/influnecerUploadPhotoRoute";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { setProfileData } from "@/lib/store/profile/profile.slice";
@@ -34,91 +19,168 @@ import { userRemovePhotoRoute } from "@/lib/api/upload/user-remove-photo/userRem
 import { brandUploadPhotoRoute } from "@/lib/api/upload/brand-upload-photo/brandUploadPhotoRoute.route";
 import { brandRemovePhotoRoute } from "@/lib/api/upload/brand-remove-photo/brandRemovePhotoRoute";
 
-const formSchema = z.object({
-  file: z
-    .array(
-      z.instanceof(File).refine((file) => file.size <= 1024 * 1024 * 4, {
-        message: "Please make sure file size is less than or equal to 4MB",
-      })
-    )
-    .max(1, {
-      message: "Please add a maximum of one picture",
-    }),
-});
+interface ProfilePictureUploadProps {
+  token: string;
+  id: string;
+  userRole: string;
+}
 
-export default function ProfilePictureUpload({ token, id, userRole }) {
-  const { control, trigger, ...rest } = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-  });
-  const [files, setFiles] = useState<File[] | null>(null);
+export default function ProfilePictureUpload({ token, id, userRole }: ProfilePictureUploadProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const file = useControlledField("file", control);
-  const formData = useWatch({ control });
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const dispatch = useAppDispatch();
-  const profileData = useAppSelector((state) => state.profile);
+  const profileData = useAppSelector((state) => (state.profile as any));
   const { update, data: session } = useSession();
 
   const dropZoneConfig = {
     maxFiles: 1,
-    maxSize: 1024 * 1024 * 4,
+    maxSize: 1024 * 1024 * 5, // 5MB limit as requested
     multiple: false,
-    accept: { "image/*": [".png", ".gif", ".jpeg", ".jpg", ".svg"] },
+    accept: { "image/*": [".png", ".jpeg", ".jpg", ".webp"] }, // Updated file types
   };
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    const isValid = await trigger();
+  // Handle file selection and preview
+  const handleFileSelect = useCallback((files: File[]) => {
+    if (files && files.length > 0) {
+      const file = files[0];
+
+      // Validate file
+      if (file.size > dropZoneConfig.maxSize) {
+        toast({
+          title: "File Too Large",
+          description: `File size must be less than 5MB. Current size: ${(file.size / (1024 * 1024)).toFixed(1)}MB`,
+          variant: "destructive",
+          duration: 5000,
+        });
+        return;
+      }
+
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        toast({
+          title: "Invalid File Type",
+          description: "Please upload a JPG, JPEG, PNG, or WebP image.",
+          variant: "destructive",
+          duration: 5000,
+        });
+        return;
+      }
+
+      // Clear previous preview URL
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+
+      // Create new preview URL
+      const newPreviewUrl = URL.createObjectURL(file);
+      setPreviewUrl(newPreviewUrl);
+      setSelectedFile(file);
+    }
+  }, [previewUrl, dropZoneConfig.maxSize]);
+
+  // Clear file selection
+  const handleClearFile = useCallback(() => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setPreviewUrl(null);
+    setSelectedFile(null);
+  }, [previewUrl]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
+  async function handleUpload() {
+    if (!selectedFile) {
+      toast({
+        title: "No File Selected",
+        description: "Please select an image file to upload.",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
+      const formData = { file: [selectedFile] };
+
       if (userRole.toLowerCase() === 'influencer') {
         const result = await influencerUploadPhotoRoute(formData, token, id);
-        //   console.log(result);
         if (result.status === "success") {
           const { profilePicture, ...rest } = result.data.data.user;
-          // const urlCompatibleFileUrl = encodeURI(profilePicture);
-          // console.log(urlCompatibleFileUrl);
           await update({
             ...session,
             user: {
               ...session?.user,
-              // profilePicture: urlCompatibleFileUrl,
               profilePicture,
             },
           });
+
+          // Clear the preview after successful upload
+          handleClearFile();
+
           toast({
-            title: "Success!",
-            description: "Profile picture updated",
-            duration: 3000,
+            title: "Profile Picture Updated!",
+            description: "Your new profile picture has been uploaded successfully.",
+            duration: 4000,
+            className: "bg-green-50 border-green-200 text-green-800",
           });
         }
       } else if (userRole.toLowerCase() === 'brand') {
         const result = await brandUploadPhotoRoute(formData, token, id);
-        //   console.log(result);
         if (result.status === "success") {
           const { logo, ...rest } = result.data.data.user;
-          // const urlCompatibleFileUrl = encodeURI(profilePicture);
-          // console.log(urlCompatibleFileUrl);
           await update({
             ...session,
             user: {
               ...session?.user,
-              // profilePicture: urlCompatibleFileUrl,
               logo,
             },
           });
+
+          // Clear the preview after successful upload
+          handleClearFile();
+
           toast({
-            title: "Success!",
-            description: "Profile picture updated",
-            duration: 3000,
+            title: "Profile Picture Updated!",
+            description: "Your new profile picture has been uploaded successfully.",
+            duration: 4000,
+            className: "bg-green-50 border-green-200 text-green-800",
           });
         }
       }
 
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Profile picture upload error:", error);
+
+      let errorMessage = "Failed to upload profile picture. Please try again.";
+
+      // Handle specific error types
+      if (error?.message) {
+        const message = error.message.toLowerCase();
+        if (message.includes('file') && message.includes('size')) {
+          errorMessage = "File size is too large. Please choose an image under 5MB.";
+        } else if (message.includes('format') || message.includes('type')) {
+          errorMessage = "Invalid file format. Please upload a JPG, JPEG, PNG, or WebP image.";
+        } else if (message.includes('network') || message.includes('connection')) {
+          errorMessage = "Network error. Please check your connection and try again.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
       toast({
-        title: "Error",
-        // description: "Failed to submit the form. Please try again.",
-        description: error.message,
-        duration: 3000,
+        title: "Upload Failed",
+        description: errorMessage,
+        duration: 5000,
         variant: "destructive",
       });
     } finally {
@@ -159,10 +221,11 @@ export default function ProfilePictureUpload({ token, id, userRole }) {
           });
         }
         toast({
-          title: "Success!",
-          description: "Profile picture removed",
-          duration: 3000,
-        }); console.log(result, fileName);
+          title: "Profile Picture Removed",
+          description: "Your profile picture has been successfully removed.",
+          duration: 4000,
+          className: "bg-blue-50 border-blue-200 text-blue-800",
+        });
       } else {
         toast({
           title: "Error",
@@ -171,11 +234,18 @@ export default function ProfilePictureUpload({ token, id, userRole }) {
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Profile picture removal error:", error);
+
+      let errorMessage = "Failed to remove profile picture. Please try again.";
+      if (error?.message) {
+        errorMessage = error.message;
+      }
+
       toast({
-        title: "Error",
-        description: error.message,
-        duration: 3000,
+        title: "Removal Failed",
+        description: errorMessage,
+        duration: 5000,
         variant: "destructive",
       });
     } finally {
@@ -183,85 +253,115 @@ export default function ProfilePictureUpload({ token, id, userRole }) {
     }
   }
 
+  // Get current profile picture for fallback
+  const currentProfilePicture = userRole.toLowerCase() === 'influencer'
+    ? profileData.profilePicture || (session?.user as any)?.profilePicture
+    : profileData.logo || (session?.user as any)?.logo;
+
   return (
-    <Form {...rest} control={control} trigger={trigger}>
-      <form
-        onSubmit={rest.handleSubmit(onSubmit)}
-        className="space-y-8 max-w-3xl mx-auto py-10 flex flex-col items-center gap-y-2"
-        id="fileUpload"
-      >
-        <FormField
-          control={control}
-          name={file.name}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Select Photo</FormLabel>
-              <FormControl>
-                <FileUploader
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  dropzoneOptions={dropZoneConfig}
-                  className="relative bg-background rounded-lg p-2"
+    <div className="w-full max-w-lg mx-auto">
+      <div className="space-y-6 flex flex-col items-center">
+          {/* Image Preview Section */}
+          <div className="flex flex-col items-center space-y-4">
+            <div className="relative">
+              <Avatar className="w-24 h-24 sm:w-32 sm:h-32 border-4 border-white shadow-xl">
+                <AvatarImage
+                  src={previewUrl || currentProfilePicture || undefined}
+                  alt="Profile picture preview"
+                  className="object-cover"
+                />
+                <AvatarFallback className="bg-gradient-to-br from-gray-100 to-gray-200 text-gray-600 text-lg sm:text-2xl font-semibold">
+                  {session?.user?.name?.charAt(0)?.toUpperCase() || "U"}
+                </AvatarFallback>
+              </Avatar>
+
+              {/* Remove Preview Button */}
+              {previewUrl && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleClearFile}
+                  className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full"
                 >
-                  <FileInput
-                    id="fileInput"
-                    className="outline-dashed outline-1 outline-slate-500"
-                  >
-                    <div className="flex items-center justify-center flex-col p-8 w-full ">
-                      <CloudUpload className="text-gray-500 w-10 h-10" />
-                      <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
-                        <span className="font-semibold">Click to upload</span>
-                        &nbsp; or drag and drop
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        SVG, PNG, JPG, GIF, or JPEG
-                      </p>
-                    </div>
-                  </FileInput>
-                  <FileUploaderContent>
-                    {formData.file &&
-                      formData.file.length > 0 &&
-                      formData.file.map((file, i) => (
-                        <FileUploaderItem key={i} index={i}>
-                          <Paperclip className="h-4 w-4 stroke-current" />
-                          <span className="truncate max-w-[80%]">
-                            {file.name}
-                          </span>
-                        </FileUploaderItem>
-                      ))}
-                  </FileUploaderContent>
-                </FileUploader>
-              </FormControl>
-              <FormDescription>Select a file to upload.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                  <X className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
+
+            {previewUrl && (
+              <p className="text-sm text-green-600 font-medium text-center">
+                Ready to upload: {selectedFile?.name}
+              </p>
+            )}
+          </div>
+        <div className="w-full">
+          <div
+            className="relative bg-white/50 backdrop-blur-sm rounded-xl border-2 border-dashed border-gray-300 hover:border-black transition-all duration-300 w-full cursor-pointer"
+            onClick={() => document.getElementById('fileInput')?.click()}
+          >
+            <input
+              id="fileInput"
+              type="file"
+              accept=".jpg,.jpeg,.png,.webp"
+              onChange={(e) => {
+                const files = Array.from(e.target.files || []);
+                handleFileSelect(files);
+              }}
+              className="hidden"
+            />
+            <div className="flex items-center justify-center flex-col p-6 sm:p-8 w-full min-h-[160px] sm:min-h-[200px]">
+              <div className="bg-gray-100 rounded-full p-3 sm:p-4 mb-3 sm:mb-4">
+                <CloudUpload className="text-gray-600 w-6 h-6 sm:w-8 sm:h-8" />
+              </div>
+              <p className="mb-2 text-sm sm:text-base font-medium text-gray-900 text-center">
+                <span className="font-semibold">Click to upload</span>
+                &nbsp; or drag and drop
+              </p>
+              <p className="text-xs sm:text-sm text-gray-500 mb-1 text-center">
+                JPG, JPEG, PNG, or WebP
+              </p>
+              <p className="text-xs text-gray-400 text-center">
+                Maximum file size: 5MB
+              </p>
+            </div>
+          </div>
+          <p className="text-center text-xs sm:text-sm text-gray-500 mt-3">
+            Choose a clear, high-quality image for your profile picture.
+          </p>
+        </div>
 
         {isLoading ? (
-          <div className="flex justify-center">
-            <LoaderCircle className="animate-spin h-8 w-8" />
+          <div className="flex justify-center items-center py-6">
+            <div className="bg-black/10 backdrop-blur-sm rounded-full p-3 sm:p-4">
+              <LoaderCircle className="animate-spin h-5 w-5 sm:h-6 sm:w-6 text-black" />
+            </div>
+            <span className="ml-3 text-sm font-medium text-gray-700">Uploading...</span>
           </div>
         ) : (
-          <div className="flex flex-col md:w-[100%] md:flex-row justify-between gap-2 ">
+          <div className="flex flex-col sm:flex-row justify-center gap-3 w-full max-w-sm">
             <Button
-              type="submit"
-              disabled={!formData.file || formData.file.length < 1}
+              type="button"
+              onClick={handleUpload}
+              disabled={!selectedFile}
+              className="bg-black hover:bg-gray-800 text-white font-medium px-4 sm:px-6 py-2 sm:py-3 rounded-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm sm:text-base"
             >
-              Upload
+              <CloudUpload className="w-4 h-4 mr-2" />
+              Upload Picture
             </Button>
 
             <Button
-              disabled={userRole.toLowerCase() === 'influencer' && !profileData.profilePicture || userRole.toLowerCase() === 'brand' && !profileData.logo}
+              disabled={userRole.toLowerCase() === 'influencer' && !currentProfilePicture || userRole.toLowerCase() === 'brand' && !currentProfilePicture}
               type="button"
-              variant="destructive"
+              variant="outline"
               onClick={onRemovePhoto}
+              className="border-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 font-medium px-4 sm:px-6 py-2 sm:py-3 rounded-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm sm:text-base"
             >
-              Remove
+              Remove Current
             </Button>
           </div>
         )}
-      </form>
-    </Form>
+      </div>
+    </div>
   );
 }

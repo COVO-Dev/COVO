@@ -1,5 +1,3 @@
-"use server";
-
 import endpoints from "@/lib/api/endpoints";
 import { IAllCampaigns, getAllCampaignsSchema } from "./getAllCampaigns.validation";
 

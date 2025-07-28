@@ -6,6 +6,28 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom animations for COVO design system */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animation-delay-500 {
+  animation-delay: 0.5s;
+}
+
+.animation-delay-1000 {
+  animation-delay: 1s;
+}
+
 /* Import custom animations */
 @import '../styles/animations.css';
 

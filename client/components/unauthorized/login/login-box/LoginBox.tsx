@@ -58,19 +58,48 @@ export default function LoginBox() {
   };
 
   const handleLogin = async () => {
+    // Clear previous errors
+    setError("");
+    setValidationErrors({});
+
+    // Check for empty fields
+    if (!loginData.email.trim() || !loginData.password.trim()) {
+      setError("Please input email and password");
+      return;
+    }
+
+    // Validate email format
+    try {
+      emailSchema.parse(loginData.email);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        setValidationErrors({ email: error.errors[0]?.message || "Invalid email" });
+        return;
+      }
+    }
+
+    // Validate password
+    try {
+      passwordSchema.parse(loginData.password);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        setValidationErrors({ password: error.errors[0]?.message || "Invalid password" });
+        return;
+      }
+    }
+
     const response = await signIn("credentials", {
       redirect: false,
       email: loginData.email,
       password: loginData.password,
     });
+
     if (response?.error) {
       setError(response.error as string);
-      console.log(error)
     } else if (response?.ok) {
       router.refresh();
       setLoggedInSuccessfully(`log in successful`);
     }
-
   };
 
   return (
@@ -89,11 +118,18 @@ export default function LoginBox() {
       {validationErrors.email && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
           <p className="text-sm font-medium text-red-600 text-center">
-            Enter valid email
+            {validationErrors.email}
           </p>
         </div>
       )}
-      {error && !validationErrors.email && (
+      {validationErrors.password && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-sm font-medium text-red-600 text-center">
+            {validationErrors.password}
+          </p>
+        </div>
+      )}
+      {error && !validationErrors.email && !validationErrors.password && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
           <p className="text-sm font-medium text-red-600 text-center">
             {error}

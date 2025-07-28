@@ -1,38 +1,32 @@
-"use client"
+"use client";
+
+import { useMemo } from "react";
 import {
-  useEffect,
-  useMemo,
-  useState
-} from "react"
-import {
-  Button
-} from "@/components/ui/button"
-import {
-  Form,
   FormControl,
   FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import {
-  Input
-} from "@/components/ui/input"
-import {
-  Checkbox
-} from "@/components/ui/checkbox"
+} from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
 import useControlledField from "@/utils/useControlledField";
-import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import LocationSelector from "@/components/ui/location-input-custom"
-// import LocationSelector from "@/components/ui/location-input"
-import {
-  PhoneInput
-} from "@/components/ui/phone-input";
-import { Switch } from "@/components/ui/switch"
+import { Switch } from "@/components/ui/switch";
 
-export default function UpdateInformationStepTwo({ control, setValue, getValues, resetField }) {
+interface UpdateInformationStepTwoProps {
+  control: any;
+  setValue: any;
+  getValues: any;
+  resetField: any;
+}
+
+export default function UpdateInformationStepTwo({
+  control,
+  setValue,
+  getValues,
+  resetField
+}: UpdateInformationStepTwoProps) {
 
   const nicheData = [
     ["Fashion", "Fashion"],
@@ -122,212 +116,134 @@ export default function UpdateInformationStepTwo({ control, setValue, getValues,
   // console.log('formValues in stepOne: \n', getValues());
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="grid grid-cols-12 gap-4">
-        <div className="col-span-12 md:col-span-6 ">
-          <FormField
-            control={control}
-            name={primaryNiche.name}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Primary Niche</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select one niche" />
-                    </SelectTrigger>
-                  </FormControl>
-                  {nicheItems}
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="col-span-12 md:col-span-6 ">
-          <FormField
-            control={control}
-            name={secondaryNiche.name}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Secondary Niche</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select one niche" />
-                    </SelectTrigger>
-                  </FormControl>
-                  {nicheItems}
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-      </div>
-      <FormField
-        control={control}
-        name={contentSpecialisation.name}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Content Specialization</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select one specialization" />
-                </SelectTrigger>
-              </FormControl>
-              {specializationItems}
-            </Select>
-            <FormDescription>What do you want to focus on?</FormDescription>
-            <FormMessage />
-          </FormItem >
-        )
-        }
-      />
-
-      < div className="grid grid-cols-12 gap-4" >
-        <div className="col-span-12 md:col-span-6">
-          <FormField
-            control={control}
-            name={brandGifting.name}
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>Enable brand Gifting</FormLabel>
-                  <FormMessage />
-                </div>
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="col-span-12 md:col-span-6">
-          <FormField
-            control={control}
-            name={paidCollaborationsOnly.name}
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>Paid collaborations only</FormLabel>
-                  <FormMessage />
-                </div>
-              </FormItem>
-            )}
-          />
-        </div>
-      </div >
-
-      <div className="grid grid-cols-12 gap-4">
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <FormField
           control={control}
-          name={termsAccepted.name}
+          name={primaryNiche.name}
           render={({ field }) => (
-            <FormItem className="flex flex-col space-y-4 rounded-md border p-4 col-span-12">
-              <div className="flex flex-row items-start space-x-3 space-y-0">
+            <FormItem>
+              <FormLabel className="text-sm font-medium text-gray-700">
+                Primary Niche *
+              </FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={(checked: boolean) => {
-                      field.onChange(checked);
-                      setValue(marketingOptIn.name, checked);
-                      setValue(dataComplianceConsent.name, checked);
-                    }}
-                  />
+                  <SelectTrigger className="w-full px-4 py-3 rounded-xl border bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-300 border-gray-200 hover:border-gray-300">
+                    <SelectValue placeholder="Select your primary niche" />
+                  </SelectTrigger>
                 </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>Accept terms and conditions</FormLabel>
-                  <FormDescription>
-                    Accept all terms and conditions, opt in marketing and data
-                    compliance
-                  </FormDescription>
-                  <FormMessage />
-                </div>
-              </div>
+                {nicheItems}
+              </Select>
+              <FormMessage className="text-red-600 text-sm mt-1" />
+            </FormItem>
+          )}
+        />
 
-              <div className="ml-[2em] flex flex-row items-start space-x-3 space-y-0">
+        <FormField
+          control={control}
+          name={secondaryNiche.name}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-sm font-medium text-gray-700">
+                Secondary Niche
+              </FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <Checkbox
-                    checked={getValues(marketingOptIn.name)}
-                    onCheckedChange={(checked: boolean) => {
-                      setValue(marketingOptIn.name, checked);
-                      if (checked) {
-                        field.onChange(checked);
-                      }
-                    }}
-                  />
+                  <SelectTrigger className="w-full px-4 py-3 rounded-xl border bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-300 border-gray-200 hover:border-gray-300">
+                    <SelectValue placeholder="Select secondary niche (optional)" />
+                  </SelectTrigger>
                 </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>Marketing Opt-In</FormLabel>
-                  <FormDescription>
-                    Opt-in to receive marketing emails.
-                  </FormDescription>
-                  <FormMessage />
-                </div>
-              </div>
-
-              <div className="ml-[2em] flex flex-row items-start space-x-3 space-y-0">
-                <FormControl>
-                  <Checkbox
-                    checked={getValues(dataComplianceConsent.name)}
-                    onCheckedChange={(checked: boolean) => {
-                      setValue(dataComplianceConsent.name, checked);
-                      if (checked) {
-                        field.onChange(checked);
-                      }
-                    }}
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>Data Compliance</FormLabel>
-                  <FormDescription>
-                    Agree to data compliance policies.
-                  </FormDescription>
-                  <FormMessage />
-                </div>
-              </div>
+                {nicheItems}
+              </Select>
+              <FormMessage className="text-red-600 text-sm mt-1" />
             </FormItem>
           )}
         />
       </div>
 
+      {/* Content Specialization */}
       <FormField
         control={control}
-        name={isActive.name}
+        name={contentSpecialisation.name}
         render={({ field }) => (
-          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-            <div className="space-y-0.5">
-              <FormLabel>Deactivate Account</FormLabel>
-              <FormDescription>{` Your status will be 'Inactive' to other users `}</FormDescription>
-            </div>
-            <FormControl>
-              <Switch
-                checked={!isActive.value}
-                onCheckedChange={(checked) => {
-                  setValue(isActive.name, !checked);
-                }}
-                aria-readonly
-              />
-            </FormControl>
+          <FormItem>
+            <FormLabel className="text-sm font-medium text-gray-700">
+              Content Specialization *
+            </FormLabel>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormControl>
+                <SelectTrigger className="w-full px-4 py-3 rounded-xl border bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-300 border-gray-200 hover:border-gray-300">
+                  <SelectValue placeholder="Select your content specialization" />
+                </SelectTrigger>
+              </FormControl>
+              {specializationItems}
+            </Select>
+            <FormDescription className="text-gray-500 text-sm mt-1">
+              What type of content do you want to focus on?
+            </FormDescription>
+            <FormMessage className="text-red-600 text-sm mt-1" />
           </FormItem>
         )}
       />
 
+      {/* Collaboration Preferences */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          Collaboration Preferences
+        </h3>
 
-    </div >
-  )
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField
+            control={control}
+            name={brandGifting.name}
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-xl border border-gray-200 p-4 hover:border-gray-300 transition-all duration-300">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    className="mt-1"
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel className="text-sm font-medium text-gray-700">
+                    Enable Brand Gifting
+                  </FormLabel>
+                  <FormDescription className="text-gray-500 text-sm">
+                    Accept products in exchange for content
+                  </FormDescription>
+                  <FormMessage className="text-red-600 text-sm" />
+                </div>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={control}
+            name={paidCollaborationsOnly.name}
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-xl border border-gray-200 p-4 hover:border-gray-300 transition-all duration-300">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    className="mt-1"
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel className="text-sm font-medium text-gray-700">
+                    Paid Collaborations Only
+                  </FormLabel>
+                  <FormDescription className="text-gray-500 text-sm">
+                    Only accept paid collaboration opportunities
+                  </FormDescription>
+                  <FormMessage className="text-red-600 text-sm" />
+                </div>
+              </FormItem>
+            )}
+          />
+        </div>
+      </div>
+    </div>
+  );
 }
