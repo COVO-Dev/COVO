@@ -65,6 +65,7 @@ export interface IBrand extends IUser {
 		billingInfo: string;
 	};
 	bio: string;
+	companySize?: string;
 	campaigns: string[];
 	createdAt: string;
 	updatedAt: string;

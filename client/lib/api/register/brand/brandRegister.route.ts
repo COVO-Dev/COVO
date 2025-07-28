@@ -1,5 +1,3 @@
-"use server";
-
 import endpoints from "../../endpoints";
 import {
 	brandRegisterSchema,
