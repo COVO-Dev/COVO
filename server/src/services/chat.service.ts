@@ -2,25 +2,57 @@ import { ChatRoom } from "../models/chat.model";
 import { uploadFileToAws } from "./upload.service";
 import { Message } from "../models/message.model";
 import { IChat, IMessage, IUser, ServiceResponse } from "../types/index";
-import { Schema, Types } from "mongoose";
+import mongoose, { Schema, Types } from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 import { HttpError } from "../middleware/errors";
 
 export class ChatService {
+
+  private async assertChatIsActive(chatId: string) {
+    const chatRoom = await ChatRoom.findById(chatId);
+    if (!chatRoom) throw new HttpError(404, "Chat not found");
+    if (["readOnly", "cancelled", "blocked"].includes(chatRoom.status)) {
+      throw new HttpError(403, "This chat is closed. You cannot send messages.");
+    }
+    return chatRoom;
+  }
+
   /**
    * Create a new chat room
    * @param participants the participants in the chat room
    * @returns A promise that resolves with the created chat room
    */
   public async createChatRoom(
-    // participants: IUser[]
-    participants: Schema.Types.ObjectId[]
+    participants: mongoose.Types.ObjectId[],
+    title: string,
+    contextType: "campaign" | "pitch" | "offer",
+    contextRef: mongoose.Types.ObjectId
   ): Promise<ServiceResponse<IChat>> {
     try {
-      if (!participants || participants.length === 0) {
-        throw new Error("Participants array is empty");
+      if (!participants.length || !contextType || !contextRef) {
+        throw new Error("Missing required fields");
       }
-      const chatRoom = new ChatRoom({ participants });
+
+      const existingChat = await ChatRoom.findOne({
+        participants: { $all: participants },
+        contextType,
+        contextRef,
+      });
+
+      if (existingChat) {
+        return {
+          status_code: 200,
+          message: "Chat room already exists",
+          data: existingChat,
+        };
+      }
+
+      const chatRoom = new ChatRoom({
+        participants: { $all: participants },
+        title,
+        contextType,
+        contextRef,
+      });
       const newChat = await chatRoom.save();
 
       return {
@@ -51,6 +83,9 @@ export class ChatService {
       if (!chatId || !senderId || !content) {
         throw new Error("Missing required fields");
       }
+
+      await this.assertChatIsActive(chatId);
+
       const newMessage = new Message({
         chatId,
         sender: senderId,
@@ -96,6 +131,8 @@ export class ChatService {
       if (!chatId || !senderId) {
         throw new HttpError(400, "Chat ID and Sender ID are required.");
       }
+
+      await this.assertChatIsActive(chatId);
 
       const hasContent = content && content.trim().length > 0;
       const hasMedia = mediaFiles && mediaFiles.length > 0;
@@ -338,21 +375,34 @@ export class ChatService {
    * @param userId the user id
    */
   // chat.service.ts
-public async markMessagesAsRead(chatId: string, userId: string): Promise<void> {
-  try {
-    await Message.updateMany(
-      {
-        chatId,
-        readBy: { $ne: userId },
-        sender: { $ne: userId },
-      },
-      {
-        $addToSet: { readBy: userId },
-      }
-    );
-  } catch (err) {
-    throw new Error(`Failed to mark messages as read: ${err.message}`);
+  public async markMessagesAsRead(chatId: string, userId: string): Promise<void> {
+    try {
+      await Message.updateMany(
+        {
+          chatId,
+          readBy: { $ne: userId },
+          sender: { $ne: userId },
+        },
+        {
+          $addToSet: { readBy: userId },
+        }
+      );
+    } catch (err) {
+      throw new Error(`Failed to mark messages as read: ${err.message}`);
+    }
   }
-}
 
+  public async archiveChat(chatId: string, reason?: string): Promise<void> {
+    await ChatRoom.findByIdAndUpdate(chatId, {
+      status: "read-only",
+      closedReason: reason || "archived",
+    });
+  }
+
+  public async closeChat(chatId: string, reason?: string): Promise<void> {
+    await ChatRoom.findByIdAndUpdate(chatId, {
+      status: "closed",
+      closedReason: reason || "blocked",
+    });
+  }
 }

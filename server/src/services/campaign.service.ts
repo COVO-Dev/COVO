@@ -13,13 +13,34 @@ import {
   InvalidInput,
   HttpError,
 } from "../middleware/errors";
-import mongoose from "mongoose";
+import mongoose, { Types, Schema } from "mongoose";
 import { isValidObjectId } from "../utils/valid";
 import { CampaignValidationSchema } from "../schema/auth.schema";
 import { ZodSchema } from "zod";
 import { Influencer } from "../models/influencers.models";
+import { ChatService } from "./chat.service";
+import { ChatRoom } from "../models/chat.model";
+import { Message } from "../models/message.model";
+
+const ObjectId = mongoose.Types.ObjectId;
 
 export class CampaignProvider {
+
+  private chatService = new ChatService();
+
+  private async createCampaignChat(
+    brandId: string,
+    influencerId: string,
+    campaign: ICampaign & { _id: string }
+  ): Promise<void> {
+    await this.chatService.createChatRoom(
+      [new mongoose.Types.ObjectId(brandId), new mongoose.Types.ObjectId(influencerId)],
+      `Campaign: ${campaign.title}`,
+      'campaign',
+      new mongoose.Types.ObjectId(campaign._id)
+    );
+  }
+
 
   private isFollowerCountValidForType(followers: number): string {
     if (followers >= 1000 && followers < 10000) return 'Nano';
@@ -44,6 +65,7 @@ export class CampaignProvider {
       throw new HttpError(400, errorMessages);
     }
   }
+
 
   /**
    * Get all campaigns
@@ -362,6 +384,8 @@ export class CampaignProvider {
         throw new ResourceNotFound("Campaign not found for this brand");
       }
 
+      await this.createCampaignChat(brandId, influencerId.toString(), { ...campaign.toObject(), _id: campaign._id.toString() });
+
       return {
         status_code: 200,
         message: "Influencer added to campaign successfully",
@@ -395,6 +419,38 @@ export class CampaignProvider {
       if (!isValidObjectId(campaignId.toString()))
         throw new BadRequest("Invalid campaign ID");
 
+      // Handle chat room changes based on status
+      if (payload.status === "completed") {
+        await ChatRoom.updateMany(
+          { contextRef: campaignId, contextType: "campaign" },
+          { $set: { status: "readOnly" } }
+        );
+
+        // Optional: notify users
+        await Message.create({
+          chatId: null, // skip this if you don’t have the chatId here
+          content: "📌 This campaign has ended. You can no longer send messages.",
+          sender: null,
+          read: true,
+          system: true,
+        });
+      }
+
+      if (payload.status === "inactive") {
+        await ChatRoom.updateMany(
+          { contextRef: campaignId, contextType: "campaign" },
+          { $set: { status: "cancelled" } }
+        );
+
+        await Message.create({
+          chatId: null, // same note as above
+          content: "❌ This campaign was cancelled early. Chat is now closed.",
+          sender: null,
+          read: true,
+          system: true,
+        });
+      }
+
       const campaign = await Campaign.findOneAndUpdate(
         { _id: campaignId, brandId: brandId },
         { $set: payload },
@@ -411,12 +467,17 @@ export class CampaignProvider {
         data: campaign,
       };
     } catch (error) {
-      if (error instanceof ResourceNotFound || error instanceof BadRequest || error instanceof InvalidInput) {
+      if (
+        error instanceof ResourceNotFound ||
+        error instanceof BadRequest ||
+        error instanceof InvalidInput
+      ) {
         throw error;
       }
       throw new Error(`Error updating campaign: ${error.message}`);
     }
   }
+
 
   /**
    * Delete a campaign
