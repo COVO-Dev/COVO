@@ -12,9 +12,11 @@ import { useSession } from "next-auth/react";
 import UpdateProfilePicture from "./updateProfilePicture";
 import userCheckPhotoRoute from "@/lib/api/upload/user-check-photo/userCheckPhotoRoute";
 import { getRegisteredCampaignForInfluencerRoute } from "@/lib/api/campaign/get-registered-campaign-influencer/getRegisteredCampaignForInfluencerRoute";
+import { getCampaignInvitationsRoute } from "@/lib/api/campaign/get-invitations/GetInvitations.route"; // New import
 import ShadcnTitle from "@/components/shared/page-title/PageTitle.component";
 import { useRouter } from "next/navigation";
 import ProfileCampaignSection from "@/components/shared/campaign-section/ProfileCampaignSection.component";
+import ViewInvitationsDialog from "@/components/authorized/influencer/profile/invitations/ViewInvitationsDialog.component";
 import { CovoScoreDisplay } from "@/components/shared/covo-score-display/CovoScoreDisplay.component";
 
 // Function to calculate age from year of birth
@@ -27,31 +29,66 @@ const calculateAge = (yearOfBirth: string): number | null => {
 
 export default function ProfilePage() {
   const profile = useAppSelector((state) => state.profile);
-  const [isLoading, setIsLoading] = useState(false); // Add loading state
+  const [isLoading, setIsLoading] = useState(false);
   const [appliedCampaigns, setAppliedCampaigns] = useState([]);
-
+  const [receivedInvitations, setReceivedInvitations] = useState([]); // New state for invitations
   const { data: session, update } = useSession();
-  const [error, setError] = useState<string | null>(null); // Add error state
+  const [error, setError] = useState<string | null>(null);
   const token = session?.user?.access_token;
   const influencerId = session?.user?._id;
   const router = useRouter();
 
   console.log("profile object redux: \n", profile);
 
+  // Function to fetch all necessary data
+  const fetchData = async (token: string, influencerId: string) => {
+    setIsLoading(true);
+    try {
+      const [registeredResult, invitationsResult] = await Promise.all([
+        getRegisteredCampaignForInfluencerRoute(token, influencerId),
+        getCampaignInvitationsRoute(token, influencerId),
+      ]);
+
+      if (
+        registeredResult.status === "success" &&
+        registeredResult.data?.data
+      ) {
+        setAppliedCampaigns(registeredResult.data.data);
+      } else {
+        setError(
+          registeredResult.message || "Failed to fetch registered campaigns."
+        );
+        console.error("API Error (Registered Campaigns):", registeredResult);
+      }
+
+      if (invitationsResult.status === "success" && invitationsResult.data) {
+        setReceivedInvitations(invitationsResult.data);
+      } else {
+        setError(invitationsResult.message || "Failed to fetch invitations.");
+        console.error("API Error (Invitations):", invitationsResult);
+      }
+    } catch (err: any) {
+      setError(err.message || "An error occurred.");
+      console.error("Fetch Error:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     const check = async (fileName) => {
       setIsLoading(true);
       try {
         if (fileName && token) {
-          const result = await userCheckPhotoRoute(fileName, token)
+          const result = await userCheckPhotoRoute(fileName, token);
           if (!result.success) {
             update({
               ...session,
               user: {
                 ...session?.user,
-                profilePicture: null
-              }
-            })
+                profilePicture: null,
+              },
+            });
           }
           console.log(result);
         }
@@ -60,6 +97,9 @@ export default function ProfilePage() {
       }
     };
 
+    if (token && influencerId) {
+      fetchData(token, influencerId);
+            
     async function fetchData(token) {
       if (token) {
         setIsLoading(true); // Set loading to true before fetching
@@ -93,19 +133,28 @@ export default function ProfilePage() {
         }
       }
     }
-    fetchData(token); // Fetch based on current page
     check(profile.profilePicture);
   }, [token, influencerId, profile.profilePicture]);
 
   const handleFallbackClick = () => {
-    router.push('/influencer/campaign')
-  }
+    router.push("/influencer/campaign");
+  };
 
   const handleCampaignClick = (brandId: string, campaignId: string) => {
-    router.push(`/influencer/campaign/apply/${brandId}?campaignId=${campaignId}`)
-  }
+    router.push(
+      `/influencer/campaign/apply/${brandId}?campaignId=${campaignId}`
+    );
+  };
+
+  // Callback function to re-fetch data
+  const refreshInvitations = () => {
+    if (token && influencerId) {
+      fetchData(token, influencerId);
+    }
+  };
 
   console.log(appliedCampaigns);
+  console.log("Received Invitations:", receivedInvitations); // Log new state
 
   return (
     <div className="w-full h-full bg-sidebar">
@@ -131,14 +180,15 @@ export default function ProfilePage() {
           <div className="relative w-[10rem] h-[10rem] max-h-[10rem] mt-[200px]">
             {profile.profilePicture ? (
               <>
-                {!isLoading ?
+                {!isLoading ? (
                   <Image
                     src={profile.profilePicture}
                     alt="Profile Picture"
                     layout="fill"
                     className="rounded-full border-8 border-gray-300"
                     style={{ objectFit: "cover", objectPosition: "center" }}
-                  /> :
+                  />
+                ) : (
                   <div
                     className="rounded-full z-10  w-[10rem] h-[10rem] flex items-center
                 justify-center font-bold text-xl bg-slate-200 border-8
@@ -146,7 +196,7 @@ export default function ProfilePage() {
                   >
                     <Loader2 className="animate-spin w-20 h-20" />
                   </div>
-                }
+                )}
               </>
             ) : (
               <div
@@ -157,13 +207,17 @@ export default function ProfilePage() {
                 {profile.firstName.slice(0, 2).toLocaleUpperCase()}
               </div>
             )}
-            <UpdateProfilePicture token={token} id={influencerId} userRole={profile.role} />
+            <UpdateProfilePicture
+              token={token}
+              id={influencerId}
+              userRole={profile.role}
+            />
           </div>
         </div>
 
         <div className="w-full h-auto flex flex-col justify-center items-center text-center max-w-[800px] px-4 mt-[90px] gap-4">
           <h2 className="text-3xl font-bold">{`${profile.firstName} ${profile.lastName}`}</h2>
-          
+
           {/* Display age if yearOfBirth is available */}
           {profile.yearOfBirth && (
             <p className="text-lg text-gray-600 font-medium">
@@ -210,6 +264,13 @@ export default function ProfilePage() {
 
           <p className="text-gray-600 font-bold">About Me</p>
           <p className="text-gray-600">{profile.personalBio}</p>
+          {/* Add the new ViewInvitationsDialog here */}
+          <ViewInvitationsDialog
+            invitations={receivedInvitations}
+            token={token as string}
+            influencerId={influencerId as string}
+            onInvitationAction={refreshInvitations}
+          />
         </div>
       </div>
       <div className="p-5 border-b-[1px] border-sidebar-border">
@@ -220,13 +281,6 @@ export default function ProfilePage() {
               key={platform}
               className="bg-sidebar-border max-w-[480px] flex justify-center items-center p-5 gap-8 rounded-md m-2"
             >
-              {/* <Image
-								src={profile.platforms[platform]?.imageURL}
-								alt="Social Media"
-								width={40}
-								height={40}
-								className="flex justify-center items-center"
-							/> */}
               <Separator orientation="vertical" className=" h-6 bg-black/50" />
               <p>{profile.platforms[platform]?.metrics.followers} followers</p>
               <Separator orientation="vertical" className=" h-6 bg-black/50" />

@@ -6,13 +6,14 @@ import ICampaignApplication from "./editCampaign.validation";
 export async function editCampaignDataRoute(
   token: string,
   campaignId: string,
-  addedInfluencer: ICampaignApplication
+  brandId: string,
+  payload: { influencerId: string }
 ) {
   try {
     // Construct the endpoint URL
     const updateUrlBrandId = endpoints.editCampaign.replace(
       ":brandId",
-      addedInfluencer.brandId
+      brandId
     );
     const updateUrl = updateUrlBrandId.replace(":campaignId", campaignId);
 
@@ -24,7 +25,7 @@ export async function editCampaignDataRoute(
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(addedInfluencer),
+      body: JSON.stringify(payload),
     });
 
     // Handle API errors and non-JSON responses

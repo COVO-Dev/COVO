@@ -9,11 +9,11 @@ interface InfluencerCardContainerProps {
 }
 
 export default function RegisteredInfluencerContainer({ influencers, className, handleClick }: InfluencerCardContainerProps) {
-  console.log(influencers)
+  console.log(influencers, 'influencers in RegisteredInfluencerContainer');
   return (
     <div className={`space-y-4 p-[1em] ${className || ''}`}>
       <ShadcnTitle>Registered Influencers</ShadcnTitle>
-      {influencers.length > 0 ? ( // Conditional rendering based on influencers being not null
+      {influencers && influencers.length > 0 ? ( // Conditional rendering based on influencers being not null
         influencers.map((influencer) => (
           <RegisteredInfluencerCard
             key={influencer._id}
