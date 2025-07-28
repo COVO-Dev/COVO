@@ -52,14 +52,14 @@ async function runFacebookCronJob() {
 
                 if (isTokenExpiringSoon(tokenExpiry)) {
                     console.log(`🔄 Refreshing Facebook token for ${influencerId}`);
-                    await refreshFacebookAccessToken(influencerId);
+                    await refreshFacebookAccessToken(influencerId.toString());
                 }
 
-                const stillConnected = await isFacebookConnected(influencerId);
+                const stillConnected = await isFacebookConnected(influencerId.toString());
                 if (!stillConnected) continue;
 
                 console.log(`📊 Updating metrics for ${influencerId}`);
-                await updateFacebookMetrics(influencerId);
+                await updateFacebookMetrics(influencerId.toString());
             } catch (err) {
                 console.error(`❌ Facebook error for ${influencerId}:`, err.message);
             }

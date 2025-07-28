@@ -5,17 +5,41 @@ import { IChat, IMessage, IUser, ServiceResponse } from "../types/index";
 import mongoose, { Schema, Types } from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 import { HttpError } from "../middleware/errors";
+import { BlockedUser } from "../models/blockedUser.model";
+import { asyncHandler } from "../middleware/helper";
 
 export class ChatService {
 
   private async assertChatIsActive(chatId: string) {
     const chatRoom = await ChatRoom.findById(chatId);
     if (!chatRoom) throw new HttpError(404, "Chat not found");
-    if (["readOnly", "cancelled", "blocked"].includes(chatRoom.status)) {
+    if (["readOnly", "cancelled", "blocked", "archived"].includes(chatRoom.status)) {
       throw new HttpError(403, "This chat is closed. You cannot send messages.");
     }
     return chatRoom;
   }
+
+  public async deleteChatsForCampaign(campaignId: string): Promise<void> {
+    await ChatRoom.deleteMany({
+      contextType: "campaign",
+      contextRef: campaignId,
+    });
+  }
+
+  public async archiveChatsForCampaign(campaignId: string): Promise<void> {
+    await ChatRoom.updateMany(
+      {
+        contextType: "campaign",
+        contextRef: campaignId,
+      },
+      {
+        status: "archived",
+        closedReason: "Campaign deleted",
+        isArchived: true,
+      }
+    );
+  }
+
 
   /**
    * Create a new chat room
@@ -31,6 +55,10 @@ export class ChatService {
     try {
       if (!participants.length || !contextType || !contextRef) {
         throw new Error("Missing required fields");
+      }
+
+      if (await this.isBlocked(participants[0].toString(), participants[1].toString())) {
+        throw new HttpError(403, "One of the users has blocked the other.");
       }
 
       const existingChat = await ChatRoom.findOne({
@@ -83,8 +111,12 @@ export class ChatService {
       if (!chatId || !senderId || !content) {
         throw new Error("Missing required fields");
       }
+      const chatRoom = await this.assertChatIsActive(chatId);
+      const otherParticipant = chatRoom.participants.find(id => id.toString() !== senderId);
+      if (await this.isBlocked(senderId, otherParticipant?.toString())) {
+        throw new HttpError(403, "You are blocked from messaging this user.");
+      }
 
-      await this.assertChatIsActive(chatId);
 
       const newMessage = new Message({
         chatId,
@@ -132,7 +164,12 @@ export class ChatService {
         throw new HttpError(400, "Chat ID and Sender ID are required.");
       }
 
-      await this.assertChatIsActive(chatId);
+      const chatRoom = await this.assertChatIsActive(chatId);
+      const otherParticipant = chatRoom.participants.find(id => id.toString() !== senderId);
+      if (await this.isBlocked(senderId, otherParticipant?.toString())) {
+        throw new HttpError(403, "You are blocked from messaging this user.");
+      }
+
 
       const hasContent = content && content.trim().length > 0;
       const hasMedia = mediaFiles && mediaFiles.length > 0;
@@ -334,7 +371,7 @@ export class ChatService {
       // const chatroom = await ChatRoom.find({ participants: userId })
       //   .populate("participants")
       //   .populate("lastMessage");
-      const chatroom = await ChatRoom.find({ participants: userId }).populate([
+      const chatroom = await ChatRoom.find({ participants: userId, status: { $ne: "archived" } }).populate([
         {
           path: "participants",
           select: "_id firstName lastName role",
@@ -394,10 +431,18 @@ export class ChatService {
 
   public async archiveChat(chatId: string, reason?: string): Promise<void> {
     await ChatRoom.findByIdAndUpdate(chatId, {
-      status: "read-only",
-      closedReason: reason || "archived",
+      status: "archived",
+      closedReason: reason || "User archived chat",
     });
   }
+
+  public async unarchiveChat(chatId: string) {
+    await ChatRoom.findByIdAndUpdate(chatId, {
+      status: "active",
+      $unset: { closedReason: 1 },
+    });
+  }
+
 
   public async closeChat(chatId: string, reason?: string): Promise<void> {
     await ChatRoom.findByIdAndUpdate(chatId, {
@@ -405,4 +450,96 @@ export class ChatService {
       closedReason: reason || "blocked",
     });
   }
+
+  public async blockChat(chatId: string) {
+    await ChatRoom.findByIdAndUpdate(chatId, {
+      status: "blocked",
+      closedReason: "User was blocked",
+    });
+  }
+
+  public async isBlocked(userA: string, userB: string): Promise<boolean> {
+    const block = await BlockedUser.findOne({
+      $or: [
+        { blocker: userA, blocked: userB },
+        { blocker: userB, blocked: userA },
+      ],
+    });
+    return !!block;
+  }
+
+  public async blockUser(
+    blockerId: string,
+    blockedId: string,
+    reason?: string
+  ): Promise<ServiceResponse<{ blocked: boolean }>> {
+    const alreadyBlocked = await BlockedUser.findOne({
+      blocker: blockerId,
+      blocked: blockedId,
+    });
+
+    if (alreadyBlocked) {
+      return {
+        status_code: 409,
+        message: "User is already blocked",
+        data: { blocked: true },
+      };
+    }
+
+    await BlockedUser.create({ blocker: blockerId, blocked: blockedId, reason });
+
+    await ChatRoom.updateMany(
+      {
+        participants: { $all: [blockerId, blockedId] },
+      },
+      {
+        status: "blocked",
+        closedReason: "User block",
+      }
+    );
+
+    return {
+      status_code: 200,
+      message: "User blocked and chat disabled successfully",
+      data: { blocked: true },
+    };
+  }
+
+  public async unblockUser(
+    blockerId: string,
+    blockedId: string
+  ): Promise<ServiceResponse<{ unblocked: boolean }>> {
+    const block = await BlockedUser.findOneAndDelete({
+      blocker: blockerId,
+      blocked: blockedId,
+    });
+
+    if (!block) {
+      return {
+        status_code: 404,
+        message: "User was not blocked",
+        data: { unblocked: false },
+      };
+    }
+
+    await ChatRoom.updateMany(
+      {
+        participants: { $all: [blockerId, blockedId] },
+        status: "blocked",
+        closedReason: "User block",
+      },
+      {
+        status: "active",
+        closedReason: null,
+      }
+    );
+
+    return {
+      status_code: 200,
+      message: "User unblocked successfully",
+      data: { unblocked: true },
+    };
+  }
 }
+
+

@@ -2,9 +2,8 @@
 
 import React from "react";
 // import { IInfluencer } from './influencer.model';
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
 	Instagram,
 	Youtube,
@@ -15,12 +14,8 @@ import {
 	MessageSquare,
 	Share2,
 	Eye,
-	UserRound,
-	User,
 	Mail,
 } from "lucide-react";
-import Image from "next/image";
-import COVO_LOGOGRAM_BLACK_2 from "@/assets/images/COVO_LOGOGRAM_BLACK_2.png";
 
 // Function to calculate age from year of birth
 const calculateAge = (yearOfBirth: string): number | null => {
@@ -42,7 +37,7 @@ const InfluencerDetails = ({ influencerData }) => {
 		username,
 		email,
 		yearOfBirth,
-		selectedPlatforms,
+		selectedPlatforms = [],
 		totalMetrics,
 		contentAndAudience,
 		location,
@@ -105,10 +100,11 @@ const InfluencerDetails = ({ influencerData }) => {
 				<section className=" lg:w-3/4 ">
 					<div className="space-y-4">
 						{/* Selected Platforms */}
-						<div className="border rounded-md p-4 bg-white dark:bg-gray-800 shadow-sm">
+						{ 
+						selectedPlatforms && Object.keys(selectedPlatforms).length > 0 && <div className="border rounded-md p-4 bg-white dark:bg-gray-800 shadow-sm">
 							<h3 className="text-lg font-semibold mb-2">Selected Platforms</h3>
 							<div className="flex flex-wrap gap-2">
-								{selectedPlatforms.map((platform) => (
+								{selectedPlatforms?.map((platform) => (
 									<Badge
 										key={platform}
 										variant="outline"
@@ -119,7 +115,7 @@ const InfluencerDetails = ({ influencerData }) => {
 									</Badge>
 								))}
 							</div>
-						</div>
+						</div> }
 
 						{/* Total Metrics */}
 						<div className="border rounded-md p-4 bg-white dark:bg-gray-800 shadow-sm">

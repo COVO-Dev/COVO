@@ -130,6 +130,18 @@ export interface IApplication {
 	lastEditedAt?: Date;
 }
 
+export interface IInvitation extends Document {
+	campaignId: mongoose.Types.ObjectId;
+	influencerId: mongoose.Types.ObjectId;
+	brandId: mongoose.Types.ObjectId;
+	sender: mongoose.Types.ObjectId;
+	receiver: mongoose.Types.ObjectId;
+	offer?: any; // Changed to any to match Schema.Types.Mixed
+	appliedAt?: Date;
+	status: "pending" | "accepted" | "rejected";
+	message?: string;
+}
+
 export interface IRecommendedInfluencer {
 	influencer: IInfluencer;
 	recommendationScore?: number;
@@ -524,8 +536,7 @@ export interface IYoutubeMetrics {
 }
 
 export interface IFacebookMetrics {
-	influencerId: string;
-
+	influencerId: mongoose.Types.ObjectId;
 	metrics: {
 		followers: number;
 		impressions: number;
