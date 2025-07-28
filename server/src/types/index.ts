@@ -123,15 +123,27 @@ export interface ICampaign {
 }
 
 export interface IApplication {
-	influencerId: mongoose.Types.ObjectId;
-	message?: string;
-	offer?: string | number;
-	appliedAt?: Date;
-	lastEditedAt?: Date;
+    influencerId: mongoose.Types.ObjectId;
+    message?: string;
+    offer?: string | number;
+    appliedAt?: Date;
+    lastEditedAt?: Date;
+}
+
+export interface IInvitation extends Document {
+    campaignId: mongoose.Types.ObjectId;
+    influencerId: mongoose.Types.ObjectId;
+    brandId: mongoose.Types.ObjectId;
+    sender: mongoose.Types.ObjectId;
+    receiver: mongoose.Types.ObjectId;
+    offer?: any; // Changed to any to match Schema.Types.Mixed
+    appliedAt?: Date;
+    status: "pending" | "accepted" | "rejected";
+    message?: string;
 }
 
 export interface IRecommendedInfluencer {
-	influencer: IInfluencer;
+    influencer: IInfluencer;
 	recommendationScore?: number;
 	note?: string;
 	[key: string]: any;
@@ -519,8 +531,7 @@ export interface IYoutubeMetrics {
 }
 
 export interface IFacebookMetrics {
-	influencerId: string;
-
+    // influencerId: mongoose.Types.ObjectId;
 	metrics: {
 		followers: number;
 		impressions: number;
