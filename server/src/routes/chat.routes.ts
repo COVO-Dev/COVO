@@ -9,9 +9,10 @@ const chatRoute = express.Router();
 
 // Routes for chat functionality
 chatRoute.post('/chatrooms', authMiddleware, chatController.createChatRoom);
-chatRoute.post('/messages', authMiddleware,  chatController.sendMessage);
+chatRoute.post('/messages', authMiddleware, chatController.sendMessage);
 chatRoute.post('/upload', authMiddleware, upload.array('mediaFiles'), chatController.uploadMedia);
 chatRoute.get('/messages/:chatId', authMiddleware, chatController.getMessages);
 chatRoute.get('/chatrooms/:userId', authMiddleware, chatController.getChatRoomsForUser);
+chatRoute.post("/chat/block", authMiddleware, chatController.blockUser);
 
 export { chatRoute, chatController };

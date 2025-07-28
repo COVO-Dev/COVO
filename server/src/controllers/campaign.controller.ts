@@ -98,6 +98,7 @@ export class CampaignController {
    */
   public deleteCampaign = asyncHandler(async (req: Request, res: Response) => {
     const { brandId, id: campaignId } = req.params;
+    let { archiveChat } = req.query;
 
     const userData = getUserData(req);
 
@@ -111,9 +112,12 @@ export class CampaignController {
       );
     }
 
+    const archiveFlag = archiveChat === "true";
+
     const { message, data } = await campaignService.deleteCampaign(
       brandId,
-      campaignId
+      campaignId,
+      archiveFlag
     );
     sendJsonResponse(res, 200, message, data);
   });
@@ -180,17 +184,6 @@ export class CampaignController {
           campaignId,
           influencerId
         );
-
-      const brandIDObject = new mongoose.Types.ObjectId(brandId);
-      const influencerIDObject = new mongoose.Types.ObjectId(influencerId);
-
-      const { data: chatData } = await chatService.createChatRoom([
-        // brandId,
-        // influencerId,
-        brandIDObject,
-        influencerIDObject,
-      ]);
-      console.log("acceptInfluencer controller: chatData", chatData);
 
       sendJsonResponse(
         res,
@@ -520,27 +513,6 @@ export class CampaignController {
         campaignId,
         brandId
       );
-
-      const brandIDObject = new mongoose.Types.ObjectId(brandId);
-      const influencerIDObject = new mongoose.Types.ObjectId(influencerId);
-
-      const { data: chatData } = await chatService.createChatRoom([
-        // brandId,
-        // influencerId,
-        brandIDObject,
-        influencerIDObject,
-      ]);
-
-      // // Create a chat room between the brand and influencer
-      // const { data: chatData } = await chatService.createChatRoom([
-      //   // brandId,
-      //   // influencerId,
-      //   new Schema.ObjectId(brandId),
-      //   new Schema.ObjectId(influencerId),
-      // ]);
-
-      console.log("acceptCampaignInvitation controller: chatData", chatData);
-
       sendJsonResponse(
         res,
         200,

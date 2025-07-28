@@ -115,7 +115,7 @@ export interface ICampaign {
 		metrics: string[];
 		reportFrequency: string;
 	};
-	status: "active" | "completed" | "pending";
+	status: "active" | "inactive" | "pending" | "ongoing" | "completed";
 	isDeleted: boolean;
 	applications: IApplication[];
 	// recommendedInfluencers: IRecommendedInfluencer[];
@@ -228,7 +228,12 @@ export interface IDeactivation {
 
 export interface IChat {
 	participants: mongoose.Types.ObjectId[];
+	title?: string;
+	contextType: 'campaign' | 'pitch' | 'offer';
+	contextRef: mongoose.Types.ObjectId; // Reference to campaignId or offerId
+	status: 'active' | 'readOnly' | 'cancelled' | 'blocked';
 	lastMessage: mongoose.Types.ObjectId | null;
+
 }
 
 export interface IMessage {
