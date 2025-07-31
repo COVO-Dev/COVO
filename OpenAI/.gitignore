@@ -38,3 +38,8 @@ logs/
 # OS
 .DS_Store
 Thumbs.db
+# test
+test*
+tset*
+# Venv
+venv/

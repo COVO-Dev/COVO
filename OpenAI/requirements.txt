@@ -1,0 +1,36 @@
+openai>=1.0.0
+pymongo>=4.0.0
+fastapi>=0.104.0
+uvicorn>=0.24.0
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+python-dotenv>=1.0.0
+motor>=3.3.0
+python-multipart>=0.0.6
+# Added for rate limiting
+fastapi-limiter>=0.1.5
+redis>=4.5.1
+# Added for input validation
+email-validator>=2.0.0
+# Added for vector database
+pgvector>=0.2.0
+psycopg2-binary>=2.9.5
+# Added for authentication
+python-jose>=3.3.0
+passlib>=1.7.4
+python-multipart>=0.0.6
+# Added for feedback loop and machine learning
+scikit-learn>=1.2.2
+numpy>=1.24.3
+
+# Added for semantic search and NLP
+sentence-transformers>=2.2.0
+transformers>=4.21.0
+torch>=1.13.0
+pandas>=1.5.0
+matplotlib>=3.6.0
+seaborn>=0.12.0
+
+# Additional ML dependencies
+scipy>=1.9.0
+joblib>=1.2.0

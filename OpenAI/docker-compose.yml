@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  recommendation-service:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - MONGODB_URI=${MONGODB_URI}
+      - MODEL_NAME=${MODEL_NAME:-gpt-4o-mini}
+      - MAX_TOKENS=${MAX_TOKENS:-1000}
+      - TEMPERATURE=${TEMPERATURE:-0.7}
+      - REDIS_HOST=redis
+      - VECTOR_DB_HOST=postgres
+      - VECTOR_DB_USER=postgres
+      - VECTOR_DB_PASSWORD=postgres
+      - VECTOR_DB_NAME=vector_db
+      - AUTH_SECRET_KEY=${AUTH_SECRET_KEY:-your-secret-key-for-jwt-tokens}
+    volumes:
+      - .:/app
+    depends_on:
+      - mongodb
+      - redis
+      - postgres
+    restart: unless-stopped
+    networks:
+      - covo-network
+
+  mongodb:
+    image: mongo:7.0
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USERNAME:-admin}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD:-password}
+    volumes:
+      - mongodb_data:/data/db
+    restart: unless-stopped
+    networks:
+      - covo-network
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - covo-network
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=vector_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - covo-network
+    command: ["postgres", "-c", "shared_preload_libraries=vector"]
+
+volumes:
+  mongodb_data:
+  redis_data:
+  postgres_data:
+
+networks:
+  covo-network:
+    driver: bridge
