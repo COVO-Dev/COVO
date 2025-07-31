@@ -40,5 +40,6 @@ logs/
 Thumbs.db
 # test
 test*
+tset*
 # Venv
 venv/
