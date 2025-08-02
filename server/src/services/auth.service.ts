@@ -92,6 +92,14 @@ export class AuthProvider {
 			}
 
 			const hashedPassword = await hash_password(password);
+			let referralCode: string;
+			let exists: boolean = true;
+
+			while (exists) {
+				referralCode = `${firstName}${lastName}`.toLowerCase().replace(/\s+/g, '') + Math.random().toString(36).substring(2, 6);
+				exists = (await Influencer.exists({ referralCode })) !== null;
+			}
+
 			const newInfluencer = new Influencer({
 				firstName: firstName,
 				lastName: lastName,
@@ -105,6 +113,8 @@ export class AuthProvider {
 					marketingOptIn: consentAndAgreements.marketingOptIn,
 					dataComplianceConsent: consentAndAgreements.dataComplianceConsent,
 				},
+				referralCode,
+
 			});
 
 			const createUser = await newInfluencer.save();
@@ -177,7 +187,7 @@ export class AuthProvider {
 			!consentAndAgreements ||
 			!consentAndAgreements.termsAccepted ||
 			!consentAndAgreements.dataComplianceConsent ||
-			!privacyPolicy 
+			!privacyPolicy
 		) {
 			throw new HttpError(
 				400,
@@ -477,7 +487,7 @@ export class AuthProvider {
 			if (!newPassword || newPassword !== confirmPassword) {
 				throw new HttpError(400, "Passwords do not match or are missing.");
 			}
-			
+
 			user.password = await hash_password(newPassword);
 			user.resetPasswordToken = undefined;
 			user.resetPasswordExpires = undefined;

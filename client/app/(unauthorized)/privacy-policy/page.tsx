@@ -1,6 +1,6 @@
-import PrivacyPolicyPage from "@/components/shared/privacy-policy/PrivacyPolicy.page";
+import PrivacyPolicy from "@/components/unauthorized/privacy-policy/PrivacyPolicy.component";
 
-export default function Profile() {
-  return <PrivacyPolicyPage />;
+export default function PrivacyPolicyPage() {
+  return <PrivacyPolicy />;
 }
 

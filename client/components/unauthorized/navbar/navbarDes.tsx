@@ -1,15 +1,9 @@
 import { NavbarButton } from "./navbar-button";
 import { NavbarItems } from "@/types";
 import Link from "next/link";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { LogOut, UserCog, UserRoundPlus } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React from "react";
 
 interface NavbarProps {
@@ -18,93 +12,83 @@ interface NavbarProps {
 
 export function NavbarDes(props: NavbarProps) {
 	const pathname = usePathname();
+	const router = useRouter();
+
+	// Custom handler for anchor links to ensure proper URL display
+	const handleAnchorClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string, sectionId: string) => {
+		e.preventDefault();
+
+		
+		if (pathname === '/Home') {
+			const section = document.getElementById(sectionId);
+			if (section) {
+			
+				window.history.pushState({}, '', href);
+				
+				section.scrollIntoView({ behavior: 'smooth' });
+			}
+		} else {
+			
+			router.push(href);
+		}
+	};
 
 	return (
-		/* navbar */
-		<aside className="w-full fixed z-50 bg-custom-light-grayish-blue2/70 hidden lg:block">
-			<div className="h-[100px] flex justify-between items-center mx-[70px]">
+	
+		<nav className="w-full fixed z-50 bg-white border-b border-gray-100 hidden lg:block">
+			<div className="h-[100px] flex justify-between items-center px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
 				{/* logo */}
-				<Image
-					src="/images/COVO_LOGOGRAM_BLACK.png"
-					alt="logo"
-					className=" opacity-[0.8]"
-					width={200}
-					height={100}
-					priority
-				/>
+				<Link href="/" className="flex items-center">
+					<Image
+						src="/images/COVO_LOGOGRAM_BLACK.png"
+						alt="COVO"
+						className="h-25 w-auto transition-transform duration-200 hover:scale-105"
+						width={250}
+						height={60}
+						priority
+					/>
+				</Link>
 
 				{/* links of the pages */}
-				<div className="flex flex-row gap-1 ">
-					{props.navbarItems.links.map((link, index) => (
-						<Link key={index} href={link.href}>
-							<NavbarButton
-								variant={"none"}
-								className={`w-full ${
-									pathname === link.href ? "text-custom-dark-gray" : ""
+				<div className="flex items-center space-x-6 xl:space-x-8">
+					{props.navbarItems.links.map((link, index) => {
+						const isAnchorLink = link.href.startsWith('/#');
+						const sectionId = isAnchorLink ? link.href.substring(2) : '';
+
+						return (
+							<Link
+								key={index}
+								href={link.href}
+								onClick={isAnchorLink ? (e) => handleAnchorClick(e, link.href, sectionId) : undefined}
+								className={`text-gray-700 hover:text-gray-900 font-semibold text-base xl:text-lg transition-all duration-200 hover:scale-105 whitespace-nowrap ${
+									pathname === link.href || (isAnchorLink && pathname === "/Home") ? "text-gray-900 font-bold" : ""
 								}`}
-								icon={link.icon}
 							>
 								{link.label}
-							</NavbarButton>
-						</Link>
-					))}
+							</Link>
+						);
+					})}
 				</div>
 
-				{/* user profile */}
-				<div className=" px-3 bg-custom-dark">
-					<Popover>
-						<PopoverTrigger asChild>
-							<Button
-								variant="none"
-								className="h-auto w-auto flex justify-center items-center scale-[2]"
-							>
-								<UserCog size={80} />
-							</Button>
-						</PopoverTrigger>
-
-						<PopoverContent className="mb-2 w-56 p-3 rounded-sm mr-[80px] ">
-							<div className="space-y-1 text-black">
-								<Link href="/login">
-									<NavbarButton
-										size="sm"
-										className="group w-full hover:bg-custom-dark-gray"
-									>
-										<div className="flex justify-between ">
-											<LogOut
-												className="group-hover:text-custom-light-apricot text-black mt-[5px]"
-												size={20}
-											/>
-											<p
-												className={`text-black group-hover:text-custom-light-apricot pl-2`}
-											>
-												Log In
-											</p>
-										</div>
-									</NavbarButton>
-								</Link>
-								<Link href="/signup">
-									<NavbarButton
-										size="sm"
-										className="group w-full hover:bg-custom-dark-gray"
-									>
-										<div className="flex justify-between ">
-											<UserRoundPlus
-												className="group-hover:text-custom-light-apricot text-black mt-[5px]"
-												size={20}
-											/>
-											<p
-												className={`text-black group-hover:text-custom-light-apricot pl-2`}
-											>
-												Sign Up
-											</p>
-										</div>
-									</NavbarButton>
-								</Link>
-							</div>
-						</PopoverContent>
-					</Popover>
+				{/* auth buttons */}
+				<div className="flex items-center space-x-2 xl:space-x-3">
+					<Link href="/login">
+						<Button
+							variant="outline"
+							className="text-gray-700 hover:text-gray-900 font-normal text-sm border-gray-300 px-3 xl:px-4 py-2 h-9 transition-all duration-200 hover:scale-105"
+						>
+							Log In
+						</Button>
+					</Link>
+					<Link href="/signup">
+						<Button
+							className="bg-black hover:bg-gray-800 text-white font-normal text-sm px-3 xl:px-4 py-2 h-9 rounded-md transition-all duration-200 hover:scale-105 hover:shadow-lg"
+						>
+							Sign Up
+						</Button>
+					</Link>
 				</div>
 			</div>
-		</aside>
+		</nav>
 	);
 }

@@ -7,6 +7,7 @@ import { CovoSurveySchema } from "../schema/auth.schema";
 import { ICovoSurvey } from "../types";
 import { ServiceResponse } from "../types";
 import { UserRole } from "../types/enum";
+import { calculateContentQualityScore } from "./campaignAnalytics.service";
 
 
 declare global {
@@ -101,6 +102,8 @@ export class CovoSurveyService {
             await Influencer.findByIdAndUpdate(influencerId, {
                 $set: { "covoScore.overall": avg.toFixed(2) }
             });
+
+            await calculateContentQualityScore(influencerId.toString(), campaignId.toString());
         }
 
         if (type === "creator_feedback") {

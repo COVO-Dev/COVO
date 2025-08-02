@@ -28,6 +28,7 @@
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.3",
     "bull": "^4.16.5",
+    "cheerio": "^1.1.0",
     "class-validator": "^0.14.1",
     "connect-redis": "^8.0.1",
     "cookie-parser": "^1.4.7",
@@ -38,6 +39,7 @@
     "express-session": "^1.18.1",
     "firebase-admin": "^13.0.1",
     "gender-detection": "^0.1.0",
+    "geoip-lite": "^1.4.10",
     "googleapis": "^144.0.0",
     "handlebars": "^4.7.8",
     "ioredis": "^5.4.2",
@@ -55,6 +57,7 @@
     "reflect-metadata": "^0.1.13",
     "socket.io": "^4.8.1",
     "typeorm": "0.3.20",
+    "ua-parser-js": "^2.0.4",
     "ws": "^8.18.0",
     "zod": "^3.24.1"
   },

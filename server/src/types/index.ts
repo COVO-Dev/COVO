@@ -59,6 +59,7 @@ export interface IInfluencer extends IUser {
 		city: string;
 	};
 	gender: string;
+	referralCode?: string;
 	payoutPreference: "direct_bank" | "wallet";
 	referralSource?: string;
 }
@@ -114,7 +115,7 @@ export interface ICampaign {
 		metrics: string[];
 		reportFrequency: string;
 	};
-	status: "active" | "completed" | "pending";
+	status: "active" | "inactive" | "pending" | "ongoing" | "completed";
 	isDeleted: boolean;
 	applications: IApplication[];
 	// recommendedInfluencers: IRecommendedInfluencer[];
@@ -127,6 +128,18 @@ export interface IApplication {
 	offer?: string | number;
 	appliedAt?: Date;
 	lastEditedAt?: Date;
+}
+
+export interface IInvitation extends Document {
+	campaignId: mongoose.Types.ObjectId;
+	influencerId: mongoose.Types.ObjectId;
+	brandId: mongoose.Types.ObjectId;
+	sender: mongoose.Types.ObjectId;
+	receiver: mongoose.Types.ObjectId;
+	offer?: any; // Changed to any to match Schema.Types.Mixed
+	appliedAt?: Date;
+	status: "pending" | "accepted" | "rejected";
+	message?: string;
 }
 
 export interface IRecommendedInfluencer {
@@ -215,7 +228,12 @@ export interface IDeactivation {
 
 export interface IChat {
 	participants: mongoose.Types.ObjectId[];
+	title?: string;
+	contextType: 'campaign' | 'pitch' | 'offer';
+	contextRef: mongoose.Types.ObjectId; // Reference to campaignId or offerId
+	status: 'active' | 'readOnly' | 'cancelled' | 'blocked';
 	lastMessage: mongoose.Types.ObjectId | null;
+
 }
 
 export interface IMessage {
@@ -518,8 +536,7 @@ export interface IYoutubeMetrics {
 }
 
 export interface IFacebookMetrics {
-	influencerId: string;
-
+	influencerId: mongoose.Types.ObjectId;
 	metrics: {
 		followers: number;
 		impressions: number;
@@ -534,6 +551,7 @@ export interface IFacebookMetrics {
 
 	accessToken: string;
 	refreshToken?: string;
+	pageAccessToken: string;
 	tokenExpiry: Date;
 	connected: boolean;
 	lastConnected: Date;

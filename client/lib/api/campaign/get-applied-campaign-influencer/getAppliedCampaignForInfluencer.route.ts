@@ -1,5 +1,3 @@
-"use server";
-
 import endpoints from "@/lib/api/endpoints";
 
 export async function getAppliedCampaignForInfluencerRoute(
