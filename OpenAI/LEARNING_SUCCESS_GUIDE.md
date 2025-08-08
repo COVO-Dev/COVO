@@ -24,7 +24,7 @@ result = smart_openai_client.generate_smart_recommendations(
 3. **📊 Enhances Scores** - Boosts influencers with proven track records
 4. **🎯 Returns Improved Results** - Better recommendations every time
 
----
+----
 
 ## 📈 **Learning Accuracy Timeline**
 
