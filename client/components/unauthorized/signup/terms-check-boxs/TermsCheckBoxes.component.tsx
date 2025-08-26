@@ -3,11 +3,9 @@ import { ICheckBoxesProps } from "./TermsCheckBoxes.model";
 import Link from "next/link";
 
 export default function TermsCheckBoxes({
-  consentAndAgreements,
-  setConsentAndAgreements,
-  privacyPolicy,
-  privacyPolicyChange,
-  onErrorClear,
+	consentAndAgreements,
+	setConsentAndAgreements,
+	onErrorClear,
 }: ICheckBoxesProps) {
 	return (
 		<div className="flex flex-col gap-2 mb-4">
@@ -26,7 +24,6 @@ export default function TermsCheckBoxes({
 							dataComplianceConsent: checked,
 							marketingOptIn: checked,
 						});
-						privacyPolicyChange?.(checked);
 						onErrorClear?.();
 					}}
 				/>
@@ -34,7 +31,7 @@ export default function TermsCheckBoxes({
 					htmlFor="acceptAll"
 					className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 				>
-					Accept all terms and policies
+					Accept terms and conditions
 				</label>
 			</div>
 			<div className="ml-4 flex flex-col gap-2">
@@ -54,14 +51,7 @@ export default function TermsCheckBoxes({
 						htmlFor="termsAccepted"
 						className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 					>
-						I agree to the{" "}
-						<Link href="/terms-and-conditions" target="_blank" className="text-blue-600 hover:text-blue-800 underline">
-							Terms and Conditions
-						</Link>
-						{" "}and{" "}
-						<Link href="/privacy-policy" target="_blank" className="text-blue-600 hover:text-blue-800 underline">
-							Privacy Policy
-						</Link>
+						Accept terms and conditions
 					</label>
 				</div>
 				<div className="flex items-center space-x-2">
@@ -80,28 +70,7 @@ export default function TermsCheckBoxes({
 						htmlFor="dataComplianceConsent"
 						className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 					>
-						I consent to data processing as described in the{" "}
-						<Link href="/privacy-policy" target="_blank" className="text-blue-600 hover:text-blue-800 underline">
-							Privacy Policy
-						</Link>
-					</label>
-				</div>
-				<div className="flex items-center space-x-2">
-					<Checkbox
-						id="privacyPolicy"
-						checked={privacyPolicy}
-						onCheckedChange={(e) => {
-							if (privacyPolicyChange) {
-								privacyPolicyChange(Boolean(e));
-							}
-							onErrorClear?.();
-						}}
-					/>
-					<label
-						htmlFor="privacyPolicy"
-						className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-					>
-						Privacy Policy
+						Accept data compliance consent
 					</label>
 				</div>
 				<div className="flex items-center space-x-2">

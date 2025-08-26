@@ -18,6 +18,7 @@ export async function influencerRegisterRoute(influencerRegisterData: Iinfluence
 			: influencerRegisterData.consentAndAgreements.termsAccepted
 	};
 
+	console.log(endpoints.influencerRegister, "Fetch ServerURL");
 	const response = await fetch(endpoints.influencerRegister, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },

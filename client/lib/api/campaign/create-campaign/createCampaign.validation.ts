@@ -9,8 +9,7 @@ const collaborationPreferencesSchema = z.object({
 
 const trackingAndAnalyticsSchema = z.object({
   // metrics: z.array(z.string()).min(1, "At least one character for a metric is required").min(1, "At least one metric is required"),
-  // reportFrequency: z.string().min(1, "Report frequency is required"),
-  reportFrequency: z.string().optional(),
+  reportFrequency: z.string().min(1, "Report frequency is required"),
   performanceTracking: z.boolean(),
 })
 
