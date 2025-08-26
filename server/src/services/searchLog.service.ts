@@ -17,7 +17,6 @@ export class SearchLogService {
                 age,
                 gender,
                 ageRange,
-                covoScore,
                 interestCategories,
                 primaryNiche,
                 secondaryNiche,
@@ -30,12 +29,6 @@ export class SearchLogService {
             if (location) {
                 if (location.country) influencerQuery["location.country"] = location.country;
                 if (location.city) influencerQuery["location.city"] = location.city;
-            }
-
-            if (covoScore) {
-                if (covoScore.overall !== undefined && covoScore.overall !== null) {
-                    influencerQuery["covoScore.overall"] = { $gte: covoScore.overall };
-                }
             }
 
             if (age) {

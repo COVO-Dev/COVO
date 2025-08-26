@@ -6,14 +6,13 @@ import ICampaignApplication from "./editCampaign.validation";
 export async function rejectInfluencerForCampaignRoute(
   token: string,
   campaignId: string,
-  brandId: string,
-  payload: { influencerId: string }
+  addedInfluencer: ICampaignApplication
 ) {
   try {
     // Construct the endpoint URL
     const updateUrlBrandId = endpoints.rejectInfluencerForCampaign.replace(
       ":brandId",
-      brandId
+      addedInfluencer.brandId
     );
     const updateUrl = updateUrlBrandId.replace(":campaignId", campaignId);
 
@@ -25,7 +24,7 @@ export async function rejectInfluencerForCampaignRoute(
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(addedInfluencer),
     });
 
     // Handle API errors and non-JSON responses

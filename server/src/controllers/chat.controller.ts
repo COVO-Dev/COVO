@@ -35,12 +35,9 @@ export class ChatController {
    */
 
   public createChatRoom = asyncHandler(async (req: Request, res: Response) => {
-    const { participants, title, contextType, contextRef } = req.body;
+    const { participants } = req.body;
     const { status_code, message, data } = await chatService.createChatRoom(
-      participants,
-      title,
-      contextType,
-      contextRef
+      participants
     );
     sendJsonResponse(res, status_code, message, data);
   });
@@ -57,7 +54,7 @@ export class ChatController {
       return res.status(401).json({ message: "User not authenticated" });
     }
 
-    if (senderId !== userData.userId) {
+    if (senderId !== userData.userId ) {
       throw new Error(`User is not authorised to perform this action`);
     }
 
@@ -82,11 +79,11 @@ export class ChatController {
     const userData = getUserData(req);
     console.log('Body:', req.body, 'Files:', req.files, 'Message content:', messageContent);
 
-    if (!userData) {
+    if(!userData) {
       throw new Error('User not authenticated');
     }
 
-    if (senderId !== userData.userId) {
+    if(senderId !== userData.userId) {
       throw new Error('User is not authorized to perform this action');
     }
 
@@ -186,52 +183,4 @@ export class ChatController {
       );
     }
   );
-  /**
-   * Block a user completely from chat
-   */
-  public blockUser = asyncHandler(async (req: Request, res: Response) => {
-    const userData = getUserData(req); // Assuming this is your auth token
-    const { blockedId, reason } = req.body;
-
-    if (!userData || !userData.userId) {
-      throw new BadRequest("You are not authenticated");
-    }
-
-    if (!blockedId) {
-      throw new BadRequest("Missing 'blockedId' in request body");
-    }
-
-    const blockerId = userData.userId;
-
-    const { status_code, message, data } = await chatService.blockUser(blockerId, blockedId, reason);
-
-    sendJsonResponse(res, status_code, message, data);
-  });
-
-  /**
- * Unblock a previously blocked user
- */
-  public unblockUser = asyncHandler(async (req: Request, res: Response) => {
-    const userData = getUserData(req);
-    const { blockedId } = req.body;
-
-    if (!userData || !userData.userId) {
-      throw new BadRequest("You are not authenticated");
-    }
-
-    if (!blockedId) {
-      throw new BadRequest("Missing 'blockedId' in request body");
-    }
-
-    const blockerId = userData.userId;
-
-    const { status_code, message, data } = await chatService.unblockUser(
-      blockerId,
-      blockedId
-    );
-
-    sendJsonResponse(res, status_code, message, data);
-  });
-
-
 }

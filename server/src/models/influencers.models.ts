@@ -37,7 +37,6 @@ const InfluencerSchema: Schema = new Schema(
       country: { type: String },
       city: { type: String },
     },
-    referralCode: { type: String, unique: true },
     referralSource: { type: String },
     payoutPreference: {
       type: String,

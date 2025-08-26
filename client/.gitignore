@@ -40,5 +40,3 @@ yarn-error.log*
 next-env.d.ts
 
 text.txt
-package-lock.json
-yarn.lock

@@ -2,85 +2,25 @@ import { ChatRoom } from "../models/chat.model";
 import { uploadFileToAws } from "./upload.service";
 import { Message } from "../models/message.model";
 import { IChat, IMessage, IUser, ServiceResponse } from "../types/index";
-import mongoose, { Schema, Types } from "mongoose";
+import { Schema, Types } from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 import { HttpError } from "../middleware/errors";
-import { BlockedUser } from "../models/blockedUser.model";
-import { asyncHandler } from "../middleware/helper";
 
 export class ChatService {
-
-  private async assertChatIsActive(chatId: string) {
-    const chatRoom = await ChatRoom.findById(chatId);
-    if (!chatRoom) throw new HttpError(404, "Chat not found");
-    if (["readOnly", "cancelled", "blocked", "archived"].includes(chatRoom.status)) {
-      throw new HttpError(403, "This chat is closed. You cannot send messages.");
-    }
-    return chatRoom;
-  }
-
-  public async deleteChatsForCampaign(campaignId: string): Promise<void> {
-    await ChatRoom.deleteMany({
-      contextType: "campaign",
-      contextRef: campaignId,
-    });
-  }
-
-  public async archiveChatsForCampaign(campaignId: string): Promise<void> {
-    await ChatRoom.updateMany(
-      {
-        contextType: "campaign",
-        contextRef: campaignId,
-      },
-      {
-        status: "archived",
-        closedReason: "Campaign deleted",
-        isArchived: true,
-      }
-    );
-  }
-
-
   /**
    * Create a new chat room
    * @param participants the participants in the chat room
    * @returns A promise that resolves with the created chat room
    */
   public async createChatRoom(
-    participants: mongoose.Types.ObjectId[],
-    title: string,
-    contextType: "campaign" | "pitch" | "offer",
-    contextRef: mongoose.Types.ObjectId
+    // participants: IUser[]
+    participants: Schema.Types.ObjectId[]
   ): Promise<ServiceResponse<IChat>> {
     try {
-      if (!participants.length || !contextType || !contextRef) {
-        throw new Error("Missing required fields");
+      if (!participants || participants.length === 0) {
+        throw new Error("Participants array is empty");
       }
-
-      if (await this.isBlocked(participants[0].toString(), participants[1].toString())) {
-        throw new HttpError(403, "One of the users has blocked the other.");
-      }
-
-      const existingChat = await ChatRoom.findOne({
-        participants: { $all: participants },
-        contextType,
-        contextRef,
-      });
-
-      if (existingChat) {
-        return {
-          status_code: 200,
-          message: "Chat room already exists",
-          data: existingChat,
-        };
-      }
-
-      const chatRoom = new ChatRoom({
-        participants: { $all: participants },
-        title,
-        contextType,
-        contextRef,
-      });
+      const chatRoom = new ChatRoom({ participants });
       const newChat = await chatRoom.save();
 
       return {
@@ -111,13 +51,6 @@ export class ChatService {
       if (!chatId || !senderId || !content) {
         throw new Error("Missing required fields");
       }
-      const chatRoom = await this.assertChatIsActive(chatId);
-      const otherParticipant = chatRoom.participants.find(id => id.toString() !== senderId);
-      if (await this.isBlocked(senderId, otherParticipant?.toString())) {
-        throw new HttpError(403, "You are blocked from messaging this user.");
-      }
-
-
       const newMessage = new Message({
         chatId,
         sender: senderId,
@@ -163,13 +96,6 @@ export class ChatService {
       if (!chatId || !senderId) {
         throw new HttpError(400, "Chat ID and Sender ID are required.");
       }
-
-      const chatRoom = await this.assertChatIsActive(chatId);
-      const otherParticipant = chatRoom.participants.find(id => id.toString() !== senderId);
-      if (await this.isBlocked(senderId, otherParticipant?.toString())) {
-        throw new HttpError(403, "You are blocked from messaging this user.");
-      }
-
 
       const hasContent = content && content.trim().length > 0;
       const hasMedia = mediaFiles && mediaFiles.length > 0;
@@ -371,7 +297,7 @@ export class ChatService {
       // const chatroom = await ChatRoom.find({ participants: userId })
       //   .populate("participants")
       //   .populate("lastMessage");
-      const chatroom = await ChatRoom.find({ participants: userId, status: { $ne: "archived" } }).populate([
+      const chatroom = await ChatRoom.find({ participants: userId }).populate([
         {
           path: "participants",
           select: "_id firstName lastName role",
@@ -412,134 +338,21 @@ export class ChatService {
    * @param userId the user id
    */
   // chat.service.ts
-  public async markMessagesAsRead(chatId: string, userId: string): Promise<void> {
-    try {
-      await Message.updateMany(
-        {
-          chatId,
-          readBy: { $ne: userId },
-          sender: { $ne: userId },
-        },
-        {
-          $addToSet: { readBy: userId },
-        }
-      );
-    } catch (err) {
-      throw new Error(`Failed to mark messages as read: ${err.message}`);
-    }
-  }
-
-  public async archiveChat(chatId: string, reason?: string): Promise<void> {
-    await ChatRoom.findByIdAndUpdate(chatId, {
-      status: "archived",
-      closedReason: reason || "User archived chat",
-    });
-  }
-
-  public async unarchiveChat(chatId: string) {
-    await ChatRoom.findByIdAndUpdate(chatId, {
-      status: "active",
-      $unset: { closedReason: 1 },
-    });
-  }
-
-
-  public async closeChat(chatId: string, reason?: string): Promise<void> {
-    await ChatRoom.findByIdAndUpdate(chatId, {
-      status: "closed",
-      closedReason: reason || "blocked",
-    });
-  }
-
-  public async blockChat(chatId: string) {
-    await ChatRoom.findByIdAndUpdate(chatId, {
-      status: "blocked",
-      closedReason: "User was blocked",
-    });
-  }
-
-  public async isBlocked(userA: string, userB: string): Promise<boolean> {
-    const block = await BlockedUser.findOne({
-      $or: [
-        { blocker: userA, blocked: userB },
-        { blocker: userB, blocked: userA },
-      ],
-    });
-    return !!block;
-  }
-
-  public async blockUser(
-    blockerId: string,
-    blockedId: string,
-    reason?: string
-  ): Promise<ServiceResponse<{ blocked: boolean }>> {
-    const alreadyBlocked = await BlockedUser.findOne({
-      blocker: blockerId,
-      blocked: blockedId,
-    });
-
-    if (alreadyBlocked) {
-      return {
-        status_code: 409,
-        message: "User is already blocked",
-        data: { blocked: true },
-      };
-    }
-
-    await BlockedUser.create({ blocker: blockerId, blocked: blockedId, reason });
-
-    await ChatRoom.updateMany(
+public async markMessagesAsRead(chatId: string, userId: string): Promise<void> {
+  try {
+    await Message.updateMany(
       {
-        participants: { $all: [blockerId, blockedId] },
+        chatId,
+        readBy: { $ne: userId },
+        sender: { $ne: userId },
       },
       {
-        status: "blocked",
-        closedReason: "User block",
+        $addToSet: { readBy: userId },
       }
     );
-
-    return {
-      status_code: 200,
-      message: "User blocked and chat disabled successfully",
-      data: { blocked: true },
-    };
-  }
-
-  public async unblockUser(
-    blockerId: string,
-    blockedId: string
-  ): Promise<ServiceResponse<{ unblocked: boolean }>> {
-    const block = await BlockedUser.findOneAndDelete({
-      blocker: blockerId,
-      blocked: blockedId,
-    });
-
-    if (!block) {
-      return {
-        status_code: 404,
-        message: "User was not blocked",
-        data: { unblocked: false },
-      };
-    }
-
-    await ChatRoom.updateMany(
-      {
-        participants: { $all: [blockerId, blockedId] },
-        status: "blocked",
-        closedReason: "User block",
-      },
-      {
-        status: "active",
-        closedReason: null,
-      }
-    );
-
-    return {
-      status_code: 200,
-      message: "User unblocked successfully",
-      data: { unblocked: true },
-    };
+  } catch (err) {
+    throw new Error(`Failed to mark messages as read: ${err.message}`);
   }
 }
 
-
+}
