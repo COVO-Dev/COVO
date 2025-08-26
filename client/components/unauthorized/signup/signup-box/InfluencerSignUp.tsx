@@ -15,6 +15,7 @@ export default function InfluencerSignUp() {
 		marketingOptIn: false,
 		dataComplianceConsent: false,
 	});
+	const [privacyPolicy, setPrivacyPolicy] = useState(false);
 	const [influencerData, setInfluencerData] = useState({
 		firstName: "",
 		lastName: "",
@@ -65,6 +66,11 @@ export default function InfluencerSignUp() {
 
 		if (!consentAndAgreements.dataComplianceConsent) {
 			setError("Please accept the data compliance consent");
+			return;
+		}
+
+		if (!privacyPolicy) {
+			setError("Please accept the privacy policy");
 			return;
 		}
 
@@ -231,6 +237,14 @@ export default function InfluencerSignUp() {
 			<TermsCheckBoxes
 				consentAndAgreements={consentAndAgreements}
 				setConsentAndAgreements={setConsentAndAgreements}
+				privacyPolicy={privacyPolicy}
+				privacyPolicyChange={(checked) => {
+					setPrivacyPolicy(checked);
+					if (checked) {
+						setError(""); // Clear error when privacy policy is accepted
+					}
+				}}
+				onErrorClear={() => setError("")}
 			/>
 
 			{error && (
