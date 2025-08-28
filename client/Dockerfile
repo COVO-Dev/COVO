@@ -1,7 +1,7 @@
 # Client (Next.js) multi-stage Dockerfile
 
 # Build stage
-FROM node:20-alpine3.2 AS builder
+FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Copy package manifest and yarn lock for proper caching
@@ -13,7 +13,7 @@ COPY . .
 RUN yarn build
 
 # Production stage
-FROM node:20-alpine3.2 AS runner
+FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
