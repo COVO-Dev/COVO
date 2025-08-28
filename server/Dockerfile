@@ -1,7 +1,7 @@
 # Server (TypeScript Node) multi-stage Dockerfile
 
 # Builder stage: install deps and compile TypeScript to build/
-FROM node:20-alpine3.2 AS builder
+FROM node:20-alpine AS builder
 WORKDIR /usr/src/app
 
 # Copy package files and tsconfig
@@ -15,7 +15,7 @@ COPY . .
 RUN npm run build
 
 # Production stage: install only production deps and copy compiled output
-FROM node:20-alpine3.2 AS runner
+FROM node:20-alpine AS runner
 WORKDIR /usr/src/app
 ENV NODE_ENV=production
 
