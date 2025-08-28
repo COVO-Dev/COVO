@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "cheerio": "^1.1.0",
+    "geoip-lite": "^1.4.10",
+    "ua-parser-js": "^2.0.4"
+  },
+  "devDependencies": {
+    "@types/cheerio": "^0.22.35",
+    "@types/geoip-lite": "^1.4.4",
+    "@types/ua-parser-js": "^0.7.39"
+  }
+}
