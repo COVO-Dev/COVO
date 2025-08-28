@@ -68,7 +68,7 @@ jobs:
     name: 🚀 Deploy
     needs: [build-client, build-server]
     runs-on: ubuntu-latest
-    if: github.ref_name == 'staging' || github.ref_name == 'main'
+    if: github.event_name == 'push' && (github.ref_name == 'staging' || github.ref_name == 'main')
 
     steps:
       - name: 🚀 Deploy via SSH

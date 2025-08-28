@@ -97,10 +97,7 @@ export default function ProfilePage() {
       }
     };
 
-    if (token && influencerId) {
-      fetchData(token, influencerId);
-            
-    async function fetchData(token) {
+    const fetchData = async (token) => {
       if (token) {
         setIsLoading(true); // Set loading to true before fetching
         try {
@@ -132,9 +129,14 @@ export default function ProfilePage() {
           setIsLoading(false);
         }
       }
+    };
+
+    if (token && influencerId) {
+      fetchData(token);
     }
+    
     check(profile.profilePicture);
-  }, [token, influencerId, profile.profilePicture]);
+  }, [token, influencerId, profile.profilePicture, session, update]);
 
   const handleFallbackClick = () => {
     router.push("/influencer/campaign");
