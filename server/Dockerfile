@@ -1,10 +1,36 @@
-FROM python:3.12-slim
+# Server (TypeScript Node) multi-stage Dockerfile
 
-WORKDIR /app
+# Builder stage: install deps and compile TypeScript to build/
+FROM node:20-alpine3.2 AS builder
+WORKDIR /usr/src/app
 
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy package files and tsconfig
+COPY package*.json tsconfig.json ./
 
-COPY matching ./matching
+# Install all deps (dev + prod) for build
+RUN npm ci
 
-CMD ["uvicorn", "matching.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Copy source and build
+COPY . .
+RUN npm run build
+
+# Production stage: install only production deps and copy compiled output
+FROM node:20-alpine3.2 AS runner
+WORKDIR /usr/src/app
+ENV NODE_ENV=production
+
+# Copy package manifest and install production dependencies only
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copy compiled build output from builder
+COPY --from=builder /usr/src/app/build ./build
+
+# Copy any runtime files required (example client_secret.json)
+# If you rely on other files in src at runtime, adjust accordingly
+COPY --from=builder /usr/src/app/src/client_secret.json ./src/client_secret.json
+
+EXPOSE 8000
+
+# Run the compiled server
+CMD ["node", "build/index.js"]
