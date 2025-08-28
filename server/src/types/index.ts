@@ -830,3 +830,17 @@ export interface IWalletTransaction extends Document {
 	updatedAt: Date;
 }
 
+export interface IInvitation extends Document {
+	campaignId: mongoose.Types.ObjectId;
+	influencerId: mongoose.Types.ObjectId;
+	brandId: mongoose.Types.ObjectId;
+	sender: mongoose.Types.ObjectId;
+	receiver: mongoose.Types.ObjectId;
+	status: "pending" | "accepted" | "rejected";
+	offer?: any;
+	appliedAt?: Date;
+	message?: string;
+	createdAt?: Date;
+	updatedAt?: Date;
+}
+
