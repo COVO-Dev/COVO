@@ -9,7 +9,7 @@ export const getFacebookMetrics = async (url: string) => {
     if (!postId) throw new Error('Invalid Facebook post URL');
 
     const facebookAuth = await Facebook.findOne({ connected: true }).sort({ lastConnected: -1 });
-    const pageAccessToken = facebookAuth?.pageAccessToken;
+    const pageAccessToken = facebookAuth?.accessToken; // Changed from pageAccessToken
     try {
         if (!pageAccessToken) throw new Error('Missing Facebook Page Access Token');
 
