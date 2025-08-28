@@ -31,6 +31,7 @@ import { subscriptionRoute } from "./routes/subscription.routes";
 import subscriptionService from "./services/subscription.service";
 import { checkExpiredSubscriptions } from "./utils/subscription.utils";
 import { paymentRouter } from "./routes/payment.routes";
+import healthRoute from "./routes/health.route";
 import "./cron/scheduler.cron"
 
 dotenv.config();
@@ -120,6 +121,9 @@ app.use(express.urlencoded({ extended: true }));
 // Influencer routes
 app.use("/api/auth", authRoute);
 app.use("/api", userRoute);
+
+// Health check route (no auth required for Docker health checks)
+app.use("/api", healthRoute);
 
 // Brand routes
 app.use("/api", brandRoute);
