@@ -1,0 +1,214 @@
+{
+  "info": {
+    "name": "COVO API - Browser/Test Collection",
+    "_postman_id": "covo-api-collection-0001",
+    "description": "Collection of backend endpoints for COVO project (import into Postman). Set variable baseUrl (default http://localhost:8000/api) and authToken when testing protected routes.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000/api",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {"name":"Register Influencer","request":{"method":"POST","header":[],"body":{"mode":"raw","raw":"{ \"email\": \"test@example.com\", \"password\": \"secret\" }","options":{"raw":{"language":"json"}}},"url":{"raw":"{{baseUrl}}/register/influencer"}},"response":[]},
+        {"name":"Register Brand","request":{"method":"POST","header":[],"body":{"mode":"raw","raw":"{ \"email\": \"brand@example.com\", \"password\": \"secret\" }","options":{"raw":{"language":"json"}}},"url":{"raw":"{{baseUrl}}/register/brand"}},"response":[]},
+        {"name":"Register Admin","request":{"method":"POST","header":[],"body":{"mode":"raw","raw":"{ \"email\": \"admin@example.com\", \"password\": \"secret\" }","options":{"raw":{"language":"json"}}},"url":{"raw":"{{baseUrl}}/register/admin"}},"response":[]},
+        {"name":"Login","request":{"method":"POST","header":[],"body":{"mode":"raw","raw":"{ \"email\": \"user@example.com\", \"password\": \"secret\" }","options":{"raw":{"language":"json"}}},"url":{"raw":"{{baseUrl}}/login"}},"response":[]} ,
+        {"name":"Forgot Password","request":{"method":"POST","header":[],"body":{"mode":"raw","raw":"{ \"email\": \"user@example.com\" }","options":{"raw":{"language":"json"}}},"url":{"raw":"{{baseUrl}}/forgot-password"}},"response":[]},
+        {"name":"Reset Password","request":{"method":"POST","header":[],"body":{"mode":"raw","raw":"{ \"token\": \"...\", \"password\": \"newpass\" }","options":{"raw":{"language":"json"}}},"url":{"raw":"{{baseUrl}}/reset-password"}},"response":[]}
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {"name":"Health (simple)","request":{"method":"GET","header":[],"url":{"raw":"{{baseUrl}}/health"}},"response":[]},
+        {"name":"Health (detailed)","request":{"method":"GET","header":[],"url":{"raw":"{{baseUrl}}/health/detailed"}},"response":[]}
+      ]
+    },
+    {
+      "name": "OAuth / Social",
+      "item": [
+        {"name":"Facebook - auth redirect","request":{"method":"GET","header":[],"url":{"raw":"{{baseUrl}}/auth/facebook"}},"response":[]},
+        {"name":"Facebook - oauth start","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/oauth/authorize/facebook"}},"response":[]},
+        {"name":"Facebook - callback","request":{"method":"GET","header":[],"url":{"raw":"{{baseUrl}}/oauth/facebook/callback"}},"response":[]},
+        {"name":"Instagram - auth start","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/auth/authorize/instagram"}},"response":[]},
+        {"name":"Instagram - callback","request":{"method":"GET","header":[],"url":{"raw":"{{baseUrl}}/oauth/instagram/callback"}},"response":[]},
+        {"name":"Twitter - auth start","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/oauth/authorize/twitter"}},"response":[]},
+        {"name":"Twitter - callback","request":{"method":"GET","header":[],"url":{"raw":"{{baseUrl}}/auth/twitter/callback"}},"response":[]},
+        {"name":"YouTube - auth start","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/oauth/authorize/youtube"}},"response":[]},
+        {"name":"YouTube - callback","request":{"method":"GET","header":[],"url":{"raw":"{{baseUrl}}/oauth/callback"}},"response":[]}
+      ]
+    },
+    {
+      "name": "Brands",
+      "item": [
+        {"name":"Get all brands","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/brands"}},"response":[]},
+        {"name":"Search brands","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/brands/search"}},"response":[]},
+        {"name":"Get brand details","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/brand/:id"}},"response":[]},
+        {"name":"Update brand (PUT)","request":{"method":"PUT","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"body":{"mode":"raw","raw":"{ \"name\": \"New Brand\" }","options":{"raw":{"language":"json"}}},"url":{"raw":"{{baseUrl}}/brand/:id"}},"response":[]},
+        {"name":"Patch brand","request":{"method":"PATCH","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"body":{"mode":"raw","raw":"{ \"website\": \"https://example.com\" }","options":{"raw":{"language":"json"}}},"url":{"raw":"{{baseUrl}}/brand/:id"}},"response":[]}
+      ]
+    },
+    {
+      "name": "Influencers",
+      "item": [
+        {"name":"Search influencers","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/influencer/search"}},"response":[]},
+        {"name":"Get influencer details","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/influencer/:id"}},"response":[]},
+        {"name":"Update influencer (PUT)","request":{"method":"PUT","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"body":{"mode":"raw","raw":"{ \"bio\": \"Updated\" }","options":{"raw":{"language":"json"}}},"url":{"raw":"{{baseUrl}}/influencer/:id"}},"response":[]},
+        {"name":"Patch influencer","request":{"method":"PATCH","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"body":{"mode":"raw","raw":"{ \"skill\": \"photography\" }","options":{"raw":{"language":"json"}}},"url":{"raw":"{{baseUrl}}/influencer/:id"}},"response":[]},
+        {"name":"Update payout preference","request":{"method":"PATCH","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"body":{"mode":"raw","raw":"{ \"method\": \"bank\" }","options":{"raw":{"language":"json"}}},"url":{"raw":"{{baseUrl}}/influencer/:id/payout-preference"}},"response":[]}
+      ]
+    },
+    {
+      "name": "Campaigns",
+      "item": [
+        {"name":"Get campaigns","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/campaigns"}},"response":[]},
+        {"name":"Create campaign","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"body":{"mode":"raw","raw":"{ \"title\": \"New Campaign\" }","options":{"raw":{"language":"json"}}},"url":{"raw":"{{baseUrl}}/:brandId/campaigns"}},"response":[]},
+        {"name":"Get brand campaigns","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/:brandId/campaigns"}},"response":[]},
+        {"name":"Get campaign by id","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/:brandId/campaign/:id"}},"response":[]},
+        {"name":"Update campaign","request":{"method":"PUT","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"body":{"mode":"raw","raw":"{ \"status\": \"active\" }","options":{"raw":{"language":"json"}}},"url":{"raw":"{{baseUrl}}/:brandId/campaign/:id"}},"response":[]},
+        {"name":"Reject influencer","request":{"method":"PUT","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/:brandId/campaign/:id/reject"}},"response":[]},
+        {"name":"Accept influencer","request":{"method":"PUT","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/:brandId/campaign/:id/accept"}},"response":[]},
+        {"name":"Edit application","request":{"method":"PUT","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/influencer/:influencerId/campaign/:id"}},"response":[]},
+        {"name":"Get applications","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/influencer/:influencerId/campaign/:id/applications"}},"response":[]},
+        {"name":"Apply to campaign","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"body":{"mode":"raw","raw":"{ \"pitch\": \"I can help\" }","options":{"raw":{"language":"json"}}},"url":{"raw":"{{baseUrl}}/:influencerId/campaign/:id/apply"}},"response":[]},
+        {"name":"Delete campaign","request":{"method":"DELETE","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/:brandId/campaign/:id"}},"response":[]}
+      ]
+    },
+    {
+      "name": "Campaign Analytics & Milestones",
+      "item": [
+        {"name":"Get campaign analytics","request":{"method":"GET","header":[],"url":{"raw":"{{baseUrl}}/campaign/:campaignId/analytics"}},"response":[]},
+        {"name":"Create milestone","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"body":{"mode":"raw","raw":"{ \"campaignId\": \"...\" }","options":{"raw":{"language":"json"}}},"url":{"raw":"{{baseUrl}}/milestones"}},"response":[]},
+        {"name":"Update milestone","request":{"method":"PUT","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/milestones/:id"}},"response":[]},
+        {"name":"Delete milestone","request":{"method":"DELETE","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/milestones/:id"}},"response":[]},
+        {"name":"Get milestone","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/milestones/:campaignId/:influencerId?"}},"response":[]},
+        {"name":"Influencer check milestone","request":{"method":"PUT","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/milestones/influencer-check/:milestoneId/:influencerId"}},"response":[]},
+        {"name":"Brand check milestone","request":{"method":"PUT","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/milestones/brand-check/:milestoneId"}},"response":[]}
+      ]
+    },
+    {
+      "name": "Click/Referral",
+      "item": [
+        {"name":"Handle referral click","request":{"method":"POST","header":[],"body":{"mode":"raw","raw":"{ \"some\": \"data\" }","options":{"raw":{"language":"json"}}},"url":{"raw":"{{baseUrl}}/ref/:referralCode"}},"response":[]}
+      ]
+    },
+    {
+      "name": "Metrics",
+      "item": [
+        {"name":"Extract metrics","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"body":{"mode":"raw","raw":"{ \"url\": \"https://post.url\" }","options":{"raw":{"language":"json"}}},"url":{"raw":"{{baseUrl}}/metrics/extract"}},"response":[]},
+        {"name":"Download referral report","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/metrics/download/:campaignId"}},"response":[]}
+      ]
+    },
+    {
+      "name": "Platform Analytics",
+      "item": [
+        {"name":"Facebook analytics","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/facebook/analytics"}},"response":[]},
+        {"name":"Instagram analytics","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/instagram/analytics"}},"response":[]},
+        {"name":"Twitter analytics","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/twitter/analytics"}},"response":[]},
+        {"name":"YouTube analytics","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/youtube/analytics"}},"response":[]}
+      ]
+    },
+    {
+      "name": "Upload / Files",
+      "item": [
+        {"name":"Upload profile (form-data)","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"body":{"mode":"formdata","formdata":[{"key":"file","type":"file","src":""}]},"url":{"raw":"{{baseUrl}}/upload/:influencerId/profile"}},"response":[]},
+        {"name":"Upload brand logo","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"body":{"mode":"formdata","formdata":[{"key":"file","type":"file","src":""}]},"url":{"raw":"{{baseUrl}}/upload/:brandId/logo"}},"response":[]},
+        {"name":"Upload content file","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"body":{"mode":"formdata","formdata":[{"key":"file","type":"file","src":""}]},"url":{"raw":"{{baseUrl}}/upload/:influencerId/content"}},"response":[]},
+        {"name":"Get file URL","request":{"method":"GET","header":[],"url":{"raw":"{{baseUrl}}/file/:fileName"}},"response":[]},
+        {"name":"Delete file","request":{"method":"DELETE","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/file/:fileName"}},"response":[]}
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {"name":"Create notification","request":{"method":"POST","header":[],"body":{"mode":"raw","raw":"{ \"title\": \"Hi\" }","options":{"raw":{"language":"json"}}},"url":{"raw":"{{baseUrl}}/notifications/:senderId"}},"response":[]},
+        {"name":"Get notifications","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/notifications/:recipientId"}},"response":[]},
+        {"name":"Delete notification","request":{"method":"DELETE","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/notifications/:recipientId/:notificationId"}},"response":[]},
+        {"name":"Mark as read","request":{"method":"PATCH","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/notifications/:recipientId/:notificationId/read"}},"response":[]},
+        {"name":"Get unread","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/notifications/:recipientId/unread"}},"response":[]}
+      ]
+    },
+    {
+      "name": "Notification Settings",
+      "item": [
+        {"name":"Get settings","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/notification-settings/:recipientId"}},"response":[]},
+        {"name":"Update settings","request":{"method":"PUT","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/notification-settings/:recipientId"}},"response":[]},
+        {"name":"Reset settings","request":{"method":"PUT","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/notification-settings/:recipientId/reset"}},"response":[]}
+      ]
+    },
+    {
+      "name": "Chat",
+      "item": [
+        {"name":"Create chatroom","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/chatrooms"}},"response":[]},
+        {"name":"Send message","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"body":{"mode":"raw","raw":"{ \"chatId\": \"...\", \"text\": \"Hello\" }","options":{"raw":{"language":"json"}}},"url":{"raw":"{{baseUrl}}/messages"}},"response":[]},
+        {"name":"Upload chat media","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"body":{"mode":"formdata","formdata":[{"key":"mediaFiles","type":"file","src":""}]},"url":{"raw":"{{baseUrl}}/upload"}},"response":[]},
+        {"name":"Get messages","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/messages/:chatId"}},"response":[]},
+        {"name":"Get chatrooms","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/chatrooms/:userId"}},"response":[]}
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {"name":"Get users by admin","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/admin/:adminId/users"}},"response":[]},
+        {"name":"Update user by admin","request":{"method":"PUT","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/admin/:adminId/users/:id"}},"response":[]},
+        {"name":"Delete user by admin","request":{"method":"DELETE","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/admin/:adminId/users/:id"}},"response":[]},
+        {"name":"Get platform data","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/admin/:adminId/platform"}},"response":[]}
+      ]
+    },
+    {
+      "name": "Account Deactivation",
+      "item": [
+        {"name":"Deactivate user","request":{"method":"PUT","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/deactivate/:userId"}},"response":[]},
+        {"name":"Reactivate user","request":{"method":"PUT","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/reactivate/:userId"}},"response":[]},
+        {"name":"Disconnect social account","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/disconnect"}},"response":[]}
+      ]
+    },
+    {
+      "name": "Survey",
+      "item": [
+        {"name":"Submit survey","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/submit-survey"}},"response":[]},
+        {"name":"Survey history","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/survey-history"}},"response":[]}
+      ]
+    },
+    {
+      "name": "Search Log",
+      "item": [
+        {"name":"Search influencers (log)","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"body":{"mode":"raw","raw":"{ \"query\": \"photographer\" }","options":{"raw":{"language":"json"}}},"url":{"raw":"{{baseUrl}}/search-influencers"}},"response":[]}
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {"name":"Payment webhook","request":{"method":"POST","header":[],"body":{"mode":"raw","raw":"{ \"event\": \"charge.success\" }","options":{"raw":{"language":"json"}}},"url":{"raw":"{{baseUrl}}/payment/webhook"}},"response":[]},
+        {"name":"Initiate payment","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"body":{"mode":"raw","raw":"{ \"amount\": 1000 }","options":{"raw":{"language":"json"}}},"url":{"raw":"{{baseUrl}}/payment/initiate"}},"response":[]},
+        {"name":"Get wallet","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/payment/wallet"}},"response":[]},
+        {"name":"Withdraw","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"body":{"mode":"raw","raw":"{ \"amount\": 500 }","options":{"raw":{"language":"json"}}},"url":{"raw":"{{baseUrl}}/payment/wallet/withdraw"}},"response":[]},
+        {"name":"Export brand transactions","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/payment/export/transactions/brand"}},"response":[]}
+      ]
+    },
+    {
+      "name": "Subscription",
+      "item": [
+        {"name":"Get plans","request":{"method":"GET","header":[],"url":{"raw":"{{baseUrl}}/subscription/plans"}},"response":[]},
+        {"name":"Subscribe","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"body":{"mode":"raw","raw":"{ \"plan\": \"COVO Pro\" }","options":{"raw":{"language":"json"}}},"url":{"raw":"{{baseUrl}}/subscription/subscribe"}},"response":[]},
+        {"name":"Verify payment","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"body":{"mode":"raw","raw":"{ \"reference\": \"...\" }","options":{"raw":{"language":"json"}}},"url":{"raw":"{{baseUrl}}/subscription/verify-payment"}},"response":[]},
+        {"name":"Get subscription history","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/subscription/history"}},"response":[]},
+        {"name":"Get current subscription","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/subscription/current"}},"response":[]},
+        {"name":"Change plan","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"body":{"mode":"raw","raw":"{ \"plan\": \"COVO Elite\" }","options":{"raw":{"language":"json"}}},"url":{"raw":"{{baseUrl}}/subscription/change-plan"}},"response":[]},
+        {"name":"Cancel subscription","request":{"method":"DELETE","header":[{"key":"Authorization","value":"Bearer {{authToken}}","type":"text"}],"url":{"raw":"{{baseUrl}}/subscription/:subscriptionId/cancel"}},"response":[]}
+      ]
+    }
+  ]
+}
