@@ -26,7 +26,7 @@ export const extractMetrics = asyncHandler(async (req: Request, res: Response) =
 export const downloadReferralReport = asyncHandler(async (req: Request, res: Response) => {
     const { campaignId } = req.params;
 
-    const records = await CampaignPerformances.find({ campaign: campaignId })
+    const records = await CampaignPerformances.find({ campaignId }) // Changed from campaign
         .populate('influencerId', 'firstName lastName')
         .lean();
 
