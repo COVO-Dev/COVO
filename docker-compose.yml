@@ -1,0 +1,116 @@
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: covo-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: covo_main
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongo-init:/docker-entrypoint-initdb.d
+    networks:
+      - covo-network
+
+  # MongoDB for Metrics (separate database)
+  mongodb-metrics:
+    image: mongo:7.0
+    container_name: covo-mongodb-metrics
+    restart: unless-stopped
+    ports:
+      - "27018:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: covo_metrics
+    volumes:
+      - mongodb_metrics_data:/data/db
+    networks:
+      - covo-network
+
+  # Redis for session storage and caching (temporarily disabled due to Docker Hub connection issues)
+  # redis:
+  #   image: redis:latest
+  #   container_name: covo-redis
+  #   restart: unless-stopped
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_data:/data
+  #   networks:
+  #     - covo-network
+
+  # Backend Server
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: covo-server
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=production
+      - PORT=8000
+      - MONGODB_MAIN_URL=mongodb://admin:password123@mongodb:27017/covo_main?authSource=admin
+      - MONGODB_METRICS_URL=mongodb://admin:password123@mongodb-metrics:27017/covo_metrics?authSource=admin
+      # - REDIS_URL=redis://redis:6379
+      # - REDIS_HOST=redis
+      # - REDIS_PORT=6379
+      - JWT_SECRET=your-jwt-secret-change-this
+      - SECRET_TOKEN=your-secret-token-change-this
+      - SESSION_SECRET=your-session-secret-change-this
+      - FRONTEND_URL=http://localhost:3000
+      - BASE_URL=http://localhost:8000
+    depends_on:
+      - mongodb
+      - mongodb-metrics
+    volumes:
+      - ./server/src/client_secret.json:/usr/src/app/src/client_secret.json:ro
+    networks:
+      - covo-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8000/api/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend Client
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: covo-client
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_FRONTEND_URL=http://localhost:3000
+    depends_on:
+      - server
+    networks:
+      - covo-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health", "||", "exit", "1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  mongodb_data:
+    driver: local
+  mongodb_metrics_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  covo-network:
+    driver: bridge
