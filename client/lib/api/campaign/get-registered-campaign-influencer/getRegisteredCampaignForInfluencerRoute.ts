@@ -67,12 +67,8 @@ export async function getRegisteredCampaignForInfluencerRoute(
 
     // Check if responseData is empty
     if (!responseData || (typeof responseData === 'object' && Object.keys(responseData).length === 0)) {
-      console.log("ℹ️ Server returned empty response - likely no campaigns found");
-      return {
-        status: "success",
-        data: { data: [] },
-        message: "No campaigns found for this influencer"
-      };
+      console.error("Server returned empty or null response");
+      throw new Error("Server returned empty response - backend may not be running");
     }
 
     return { status: "success", data: responseData };

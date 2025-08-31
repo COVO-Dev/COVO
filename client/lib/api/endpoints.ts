@@ -21,7 +21,6 @@ const endpoints = {
   // Search URLs
   searchInfluencer: "/influencer/search",
   getInfluencerDetails: "/influencer/:influencerId",
-  getBrandDetails: "/brand/:id",
 
   // Campaign URLs
   createCampaign: "/:brandId/campaigns",

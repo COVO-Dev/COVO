@@ -7,7 +7,6 @@ import { useAppSelector } from "@/lib/store/hooks";
 import UpdateProfile from "@/app/(authorized)/brand/profile/updateProfile";
 import UpdateProfilePicture from "@/app/(authorized)/influencer/profile/updateProfilePicture";
 import { Loader2 } from "lucide-react";
-import { CovoScoreDisplay } from "@/components/shared/covo-score-display/CovoScoreDisplay.component";
 
 export default function UserAvatar({ token, id, isLoading, user }) {
 	// Helper function to format company size display
@@ -31,11 +30,9 @@ export default function UserAvatar({ token, id, isLoading, user }) {
 						className=" w-full h-full rounded-lg"
 					/>
 					<div className="flex justify-between items-center  gap-4">
-						<CovoScoreDisplay
-							className="text-white z-10"
-							size="md"
-							showLabel={true}
-						/>
+						<p className="text-lg w-[160px] text-center border-2 rounded-md text-white p-2 font-weight-[800] z-10 border-white/20 shadow-[0_0_10px_rgba(255,255,255,0.3)] backdrop-blur-sm">
+							Covo Score: 8.20
+						</p>
 						<UpdateProfile />
 					</div>
 				</div>
