@@ -128,7 +128,8 @@ export default function ProfilePage() {
         }
       }
       check(profile.profilePicture);
-    }, [token, influencerId, profile.profilePicture]);
+    }
+  }, [token, influencerId, profile.profilePicture]);
 
   const handleFallbackClick = () => {
     router.push("/influencer/campaign");
