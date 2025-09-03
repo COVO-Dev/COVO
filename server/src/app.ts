@@ -31,54 +31,86 @@ import { subscriptionRoute } from "./routes/subscription.routes";
 import subscriptionService from "./services/subscription.service";
 import { checkExpiredSubscriptions } from "./utils/subscription.utils";
 import { paymentRouter } from "./routes/payment.routes";
+import { clickLogRouter } from "./routes/clickLog.routes";
+
+// Security imports
+import { 
+  securityHeaders, 
+  generalRateLimit, 
+  securityLogger, 
+  sanitizeInput, 
+  requestTimeout,
+  corsConfig 
+} from "./middleware/security";
+import { secureLog } from "./utils/secureLogger";
 
 import "./cron/scheduler.cron"
-import { clickLogRouter } from "./routes/clickLog.routes";
 
 dotenv.config();
 
 const app: Express = express();
-app.options("*", cors());
+
+// Trust proxy if behind reverse proxy (nginx, load balancer, etc.)
+if (config.TRUST_PROXY) {
+  app.set('trust proxy', 1);
+}
+
+// Security headers - should be first
+app.use(securityHeaders);
+
+// Request timeout
+app.use(requestTimeout(30000)); // 30 seconds
+
+// Security logging
+app.use(securityLogger);
+
+// Rate limiting
+app.use(generalRateLimit);
+
+// Input sanitization
+app.use(sanitizeInput);
+
+// CORS
+app.use(cors(corsConfig));
+
+// Handle preflight requests
+app.options("*", cors(corsConfig));
+
+// Cookie parser
 app.use(cookiesParser());
 
+// Redis connection for sessions and caching
 const redis = new Redis({
-  host: 'localhost',
-  port: 6379,
+  host: config.REDIS_HOST || 'redis',
+  port: Number(config.REDIS_PORT) || 6379,
+  password: config.REDIS_PASSWORD,
+  maxRetriesPerRequest: 3,
 });
 
 redis.on('connect', () => {
-  console.log('Connected to Redis successfully');
+  secureLog('INFO', `Connected to Redis successfully at ${config.REDIS_HOST}:${config.REDIS_PORT}`);
 });
 
+redis.on('error', (err) => {
+  secureLog('ERROR', 'Redis connection error', { error: err.message });
+});
 
+// Session store setup with in-memory store for now (can be improved later)
 app.use(session({
-  secret: process.env.SESSION_SECRET,
+  secret: config.NODE_ENV === 'production' ? config.PRODUCTION_SESSION_SECRET : config.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
+  rolling: true, // Reset expiration on activity
   cookie: {
-    secure: config.NODE_ENV === 'production',
+    secure: config.COOKIE_SECURE,
     httpOnly: true,
-    sameSite: config.NODE_ENV === 'production' ? 'strict' : 'lax',
-    maxAge: 60 * 60 * 1000
-  }
+    sameSite: config.COOKIE_SAME_SITE as any,
+    maxAge: config.COOKIE_MAX_AGE,
+  },
+  name: 'covo.sid', // Custom session name
 }));
 
-
-app.use(
-  cors({
-    origin: "http://127.0.0.1:3000",
-    credentials: false,
-    methods: ["GET", "PUT", "POST", "DELETE", "OPTIONS", "PATCH"],
-    allowedHeaders: [
-      "Origin",
-      "X-Requested-With",
-      "content-type",
-      "Authorization",
-    ],
-  })
-);
-
-
+// Secure Redis utility functions
 export const redisSave = async (key: string, value: any, expireTimeInMin?: number) => {
   if (expireTimeInMin === undefined || expireTimeInMin === 0) {
     expireTimeInMin = 60 * 60;
@@ -87,10 +119,13 @@ export const redisSave = async (key: string, value: any, expireTimeInMin?: numbe
   }
   try {
     const result = await redis.set(key, JSON.stringify(value), 'EX', expireTimeInMin);
-    console.log('Record saved:', result);
+    secureLog('DEBUG', 'Redis record saved', { key: key.substring(0, 20) + '...', ttl: expireTimeInMin });
     return result;
   } catch (err) {
-    console.error('Error saving record:', err);
+    secureLog('ERROR', 'Error saving Redis record', { 
+      key: key.substring(0, 20) + '...', 
+      error: err instanceof Error ? err.message : 'Unknown error' 
+    });
     throw err;
   }
 }
@@ -99,34 +134,41 @@ export const redisRetrieve = (key: string): Promise<any> => {
   return new Promise<any>((resolve, reject) => {
     redis.get(key, (err, result) => {
       if (err) {
-        console.error('Error retrieving record:', err);
+        secureLog('ERROR', 'Error retrieving Redis record', { 
+          key: key.substring(0, 20) + '...', 
+          error: err.message 
+        });
         reject(err);
       } else {
-        console.log('Return retrieved record:', result);
-        resolve(JSON.parse(result));
+        secureLog('DEBUG', 'Redis record retrieved', { key: key.substring(0, 20) + '...' });
+        resolve(result ? JSON.parse(result) : null);
       }
     });
   });
 }
 
-
+// Request logging middleware (remove sensitive session logging)
 app.use((req, res, next) => {
-  console.log("Session ID!!:", req.session.id);
-  console.log("Session Data!!:", req.session);
+  if (config.NODE_ENV === 'development') {
+    secureLog('DEBUG', 'Request received', {
+      method: req.method,
+      url: req.url,
+      ip: req.ip,
+      userAgent: req.get('User-Agent'),
+      sessionId: req.sessionID ? req.sessionID.substring(0, 8) + '...' : 'none',
+    });
+  }
   next();
 });
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Body parsing
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Influencer routes
+// API Routes
 app.use("/api/auth", authRoute);
 app.use("/api", userRoute);
-
-// Brand routes
 app.use("/api", brandRoute);
-
-// OTHERS
 app.use("/api", campaignRoute);
 app.use("/api", uploadRouter);
 app.use("/api", notificationRoute);
@@ -138,44 +180,53 @@ app.use("/api", searchLogRoute);
 app.use("/api", milestoneRouter);
 app.use("/api", surveyRouters);
 
-// Youtube routes (Google OAuth)
+// Platform integration routes
 app.use("/api", youtubeRoute);
 app.use("/api", youtubePlatformData);
-
-// Instagram routes
 app.use("/api", InstagramRoute);
 app.use("/api", instagramPlatformData);
-
-// Twitter routes
 app.use("/api", twitterRoutes);
 app.use("/api", twitterPlatformData);
-
-// Facebook routes
 app.use("/api", facebookRoute);
 app.use("/api", facebookPlatformData);
 
-// Subscription routes
+// Business routes
 app.use("/api/subscription", subscriptionRoute);
-
-// Payment routes
 app.use("/api/payment", paymentRouter);
-
-// Click Log routes
 app.use("/api", clickLogRouter);
 
-app.use(routeNotFound);
-app.use(errorHandler);
-
-
-app.get("/", (req: Request, res: Response) => {
-  res.json({
-    message: "I am the express API responding to Covo API request",
+// Health check endpoint
+app.get("/health", (req: Request, res: Response) => {
+  res.status(200).json({
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+    environment: config.NODE_ENV,
   });
 });
 
-app.get('/payment-success', (req, res) => {
-  res.send('🎉 Payment was successful!');
+// Root endpoint
+app.get("/", (req: Request, res: Response) => {
+  res.json({
+    message: "COVO API Server",
+    version: "1.0.0",
+    environment: config.NODE_ENV,
+    timestamp: new Date().toISOString(),
+  });
 });
 
+// Payment success endpoint
+app.get('/payment-success', (req, res) => {
+  res.json({
+    success: true,
+    message: '🎉 Payment was successful!',
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// Error handlers (must be last)
+app.use(routeNotFound);
+app.use(errorHandler);
 
 export default app;

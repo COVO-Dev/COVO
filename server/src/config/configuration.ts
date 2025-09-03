@@ -4,7 +4,7 @@ dotenv.config();
 
 export const config = {
 	port: process.env.PORT ?? 8000,
-	NODE_ENV: "development",
+	NODE_ENV: process.env.NODE_ENV || "development",
 	BASE_URL: process.env.BASE_URL,
 	"api-prefix": "api/",
 	POSTGRES_HOST: process.env.POSTGRES_HOST,
@@ -24,8 +24,8 @@ export const config = {
 	SMTP_FROM_USER: process.env.SMTP_FROM_USER,
 
 	REDIS_URL: process.env.REDIS_URL,
-	REDIS_HOST: process.env.REDIS_HOST,
-	REDIS_PORT: process.env.REDIS_PORT || 6379,
+	REDIS_HOST: process.env.REDIS_HOST || 'redis',
+	REDIS_PORT: process.env.REDIS_PORT || '6379',
 	REDIS_PASSWORD: process.env.REDIS_PASSWORD,
 
 	SECRET_TOKEN: process.env.SECRET_TOKEN,
@@ -73,4 +73,24 @@ export const config = {
 	PAYSTACK_PUBLIC_KEY: process.env.PAYSTACK_PUBLIC_KEY,
 	PAYSTACK_WEBHOOK_SECRET: process.env.PAYSTACK_WEBHOOK_SECRET,
 	PAYSTACK_BASE_URL: process.env.PAYSTACK_BASE_URL,
+
+	// Security Configuration
+	CORS_ORIGIN: process.env.CORS_ORIGIN || "http://localhost:3000",
+	ENABLE_HTTPS: process.env.ENABLE_HTTPS === 'true',
+	TRUST_PROXY: process.env.TRUST_PROXY === 'true',
+	SESSION_STORE_TTL: parseInt(process.env.SESSION_STORE_TTL || '86400'), // 24 hours
+	
+	// Rate limiting
+	RATE_LIMIT_WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutes
+	RATE_LIMIT_MAX_REQUESTS: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'),
+	AUTH_RATE_LIMIT_MAX: parseInt(process.env.AUTH_RATE_LIMIT_MAX || '5'),
+	
+	// JWT Configuration
+	JWT_ACCESS_EXPIRES_IN: process.env.JWT_ACCESS_EXPIRES_IN || '15m',
+	JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
+	
+	// Cookie settings
+	COOKIE_SECURE: process.env.NODE_ENV === 'production',
+	COOKIE_SAME_SITE: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+	COOKIE_MAX_AGE: parseInt(process.env.COOKIE_MAX_AGE || '3600000'), // 1 hour
 };

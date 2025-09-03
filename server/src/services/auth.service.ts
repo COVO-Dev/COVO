@@ -24,6 +24,8 @@ import { sendPasswordResetEmail, sendWelcomeEmail } from "./email_sending.servic
 import { ZodSchema } from "zod";
 import { generateResetToken } from "../utils/pkce";
 import crypto from 'crypto';
+import { generateTokenPair } from "../utils/jwtUtils";
+import { secureLog, logAuthEvent, logUserAction } from "../utils/secureLogger";
 
 export class AuthProvider {
 	/**
@@ -199,11 +201,13 @@ export class AuthProvider {
 			const existingUser = await User.findOne({ email });
 			if (existingUser) {
 				if (existingUser.isDeleted) {
+					logAuthEvent('REGISTRATION_FAILED_DELETED_ACCOUNT', { email });
 					throw new HttpError(
 						403,
 						"Account associated with this email has been deleted. Please contact support to restore your account."
 					);
 				}
+				logAuthEvent('REGISTRATION_FAILED_USER_EXISTS', { email });
 				throw new Conflict("User already exists");
 			}
 
@@ -226,30 +230,45 @@ export class AuthProvider {
 
 			const createUser = await newBrand.save();
 
+			logUserAction('BRAND_REGISTERED', createUser);
+
 			try {
 				await sendWelcomeEmail(email, firstName);
+				secureLog('INFO', 'Welcome email sent successfully', { email });
 			} catch (emailError) {
-				console.error("Failed to send welcome email:", emailError);
+				secureLog('ERROR', 'Failed to send welcome email', { 
+					email, 
+					error: emailError instanceof Error ? emailError.message : 'Unknown error' 
+				});
 				throw new HttpError(500, "Failed to send welcome email");
 			}
 
-			const access_token = jwt.sign(
-				{ id: createUser._id, role: UserRole.Brand },
-				config.SECRET_TOKEN,
-				{ expiresIn: "50d" }
-			);
+			// Generate secure token pair
+			const tokenPair = await generateTokenPair(createUser);
+
+			logAuthEvent('BRAND_LOGIN_SUCCESS', { 
+				userId: createUser._id.toString(),
+				email: createUser.email,
+			});
 
 			return {
 				status_code: 200,
 				message: "Brand registered successfully",
 				data: createUser,
-				access_token,
+				access_token: tokenPair.accessToken,
+				refresh_token: tokenPair.refreshToken,
+				expires_in: tokenPair.expiresIn,
 			};
 		} catch (error) {
-			console.log(error);
-			throw error instanceof HttpError
-				? error
-				: new HttpError(500, "Internal Server Error");
+			if (error instanceof HttpError) {
+				throw error;
+			}
+			
+			secureLog('ERROR', 'Brand registration failed', {
+				email,
+				error: error instanceof Error ? error.message : 'Unknown error',
+			});
+			throw new HttpError(500, "Internal Server Error");
 		}
 	}
 
