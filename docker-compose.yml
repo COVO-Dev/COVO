@@ -1,0 +1,136 @@
+services:
+  # MongoDB Database (when using local MongoDB)
+  # mongodb:
+  #   image: mongo:7.0
+  #   container_name: covo-mongodb
+  #   restart: unless-stopped
+  #   ports:
+  #     - "27017:27017"
+  #   environment:
+  #     MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+  #     MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+  #     MONGO_INITDB_DATABASE: covo_main
+  #   volumes:
+  #     - mongodb_data:/data/db
+  #     - ./mongo-init:/docker-entrypoint-initdb.d
+  #   networks:
+  #     - covo-network
+  #   healthcheck:
+  #     test: ["CMD", "mongosh", "--eval", "db.runCommand('ping').ok", "--quiet"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 40s
+
+  # MongoDB for Metrics (when using local MongoDB)
+  # mongodb-metrics:
+  #   image: mongo:7.0
+  #   container_name: covo-mongodb-metrics
+  #   restart: unless-stopped
+  #   ports:
+  #     - "27018:27017"
+  #   environment:
+  #     MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+  #     MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+  #     MONGO_INITDB_DATABASE: covo_metrics
+  #   volumes:
+  #     - mongodb_metrics_data:/data/db
+  #   networks:
+  #     - covo-network
+  #   healthcheck:
+  #     test: ["CMD", "mongosh", "--eval", "db.runCommand('ping').ok", "--quiet"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 40s
+
+  # Redis for session storage and caching
+  redis:
+    image: redis:7-alpine
+    container_name: covo-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+    volumes:
+      - redis_data:/data
+    networks:
+      - covo-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Backend Server
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: covo-server
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - server/.env
+    environment:
+      - REDIS_HOST=covo-redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@covo-redis:6379
+      - MONGODB_MAIN_URL=${MONGODB_MAIN_URL}
+      - MONGODB_METRICS_URL=${MONGODB_METRICS_URL}
+      - NODE_ENV=${NODE_ENV}
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./server/src/client_secret.json:/usr/src/app/src/client_secret.json:ro
+    networks:
+      - covo-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8000/api/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend Client
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: covo-client
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+      - NEXT_PUBLIC_FRONTEND_URL=${NEXT_PUBLIC_FRONTEND_URL}
+      - SERVER_URL=${SERVER_URL}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+    depends_on:
+      - server
+    networks:
+      - covo-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health", "||", "exit", "1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  mongodb_data:
+    driver: local
+  mongodb_metrics_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  covo-network:
+    driver: bridge
