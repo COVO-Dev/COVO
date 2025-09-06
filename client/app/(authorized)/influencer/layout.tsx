@@ -1,17 +1,12 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "../../globals.css";
-import { Roboto } from "next/font/google";
+import { roboto } from "@/lib/fonts";
 
 import { redirect } from "next/navigation";
 import getCurrentUserData from "@/utils/getCurrentUserData";
 import { Toaster } from "@/components/ui/toaster";
 import { SideBarLayout } from "@/components/authorized/influencer/side-bar/SideBar.component";
-
-const roboto = Roboto({
-	weight: ["100", "300", "400", "500", "700", "900"],
-	subsets: ["latin"],
-});
 
 const geistSans = localFont({
 	src: "../../fonts/GeistMonoVF.woff",
