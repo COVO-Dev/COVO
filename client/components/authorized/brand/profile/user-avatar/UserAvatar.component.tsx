@@ -61,7 +61,7 @@ export default function UserAvatar({ token, id, isLoading, user }) {
                 justify-center font-bold text-xl bg-slate-200 border-8
                 border-white/20 shadow-[0_0_10px_rgba(255,255,255,0.3)] backdrop-blur-sm"
 						>
-							{user.firstName.slice(0, 2).toLocaleUpperCase()}
+							{user?.firstName ? user.firstName.slice(0, 2).toLocaleUpperCase() : 'UN'}
 						</div>
 					)}
 					<UpdateProfilePicture token={token} id={id} userRole={user.role} />
@@ -77,16 +77,16 @@ export default function UserAvatar({ token, id, isLoading, user }) {
 			</div>
 
 			<div className="w-full h-auto flex flex-col justify-center items-center text-center max-w-[800px] px-4 mt-[90px] gap-4">
-				<h2 className="text-3xl font-bold">{`${user.firstName} ${user.lastName}`}</h2>
-				<p className="text-2xltext-gray-600">{user.industry}</p>
+				<h2 className="text-3xl font-bold">{`${user?.firstName || 'Unknown'} ${user?.lastName || ''}`}</h2>
+				<p className="text-2xltext-gray-600">{user?.industry || 'No industry'}</p>
 				<div className="bg-sidebar-border flex p-5 gap-8 rounded-md">
 					<p>
 						<span className="font-semibold mr-1">email:</span>
-						<span>{user.email}</span>
+						<span>{user?.email || 'No email'}</span>
 					</p>
 				</div>
-				{user.bio && <p className="text-gray-600 font-bold">About Me</p>}
-				<p className="text-gray-600">{user.bio}</p>
+				{user?.bio && <p className="text-gray-600 font-bold">About Me</p>}
+				<p className="text-gray-600">{user?.bio || ''}</p>
 			</div>
 		</div>
 	);

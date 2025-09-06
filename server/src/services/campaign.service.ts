@@ -187,8 +187,11 @@ export class CampaignProvider {
 
       const skip = (page - 1) * limit;
 
+      // Convert string brandId to ObjectId for proper MongoDB querying
+      const brandObjectId = new mongoose.Types.ObjectId(brandId);
+
       const campaigns = await Campaign.find({
-        brandId: brandId,
+        brandId: brandObjectId,
         status: "active",
       })
         .populate({
@@ -198,12 +201,13 @@ export class CampaignProvider {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
+        
       if (campaigns.length === 0) {
         throw new ResourceNotFound("No campaigns found for this brand");
       }
 
       const totalCampaigns = await Campaign.countDocuments({
-        brandId: brandId,
+        brandId: brandObjectId,
       });
       const totalPages = Math.ceil(totalCampaigns / limit);
 
@@ -248,9 +252,13 @@ export class CampaignProvider {
       if (!isValidObjectId(campaignId.toString()))
         throw new BadRequest("Invalid campaign ID");
 
+      // Convert string IDs to ObjectIds for proper MongoDB querying
+      const brandObjectId = new mongoose.Types.ObjectId(brandId);
+      const campaignObjectId = new mongoose.Types.ObjectId(campaignId);
+
       const campaign = await Campaign.findOne({
-        _id: campaignId,
-        brandId: brandId,
+        _id: campaignObjectId,
+        brandId: brandObjectId,
       }).populate([
         {
           path: "applications",
@@ -476,7 +484,7 @@ export class CampaignProvider {
       }
 
       const campaign = await Campaign.findOneAndUpdate(
-        { _id: campaignId, brandId: brandId },
+        { _id: new mongoose.Types.ObjectId(campaignId), brandId: new mongoose.Types.ObjectId(brandId) },
         { $set: payload },
         { new: true }
       ).populate("brandId influencerId");
@@ -524,8 +532,8 @@ export class CampaignProvider {
 
       const campaign = await Campaign.findOneAndUpdate(
         {
-          _id: campaignId,
-          brandId: brandId,
+          _id: new mongoose.Types.ObjectId(campaignId),
+          brandId: new mongoose.Types.ObjectId(brandId),
           is_deleted: { $ne: true },
         },
         {
