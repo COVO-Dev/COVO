@@ -12,7 +12,19 @@ const PORT = config.port;
 const MAIN_DB_URI = config.MAIN_DB_URI;
 const METRICS_DB_URI = config.METRICS_DB_URI;
 
-const metricsDB = mongoose.createConnection(METRICS_DB_URI);
+// MongoDB connection options
+const mongoOptions = {
+  serverSelectionTimeoutMS: 30000, // 30 seconds
+  socketTimeoutMS: 45000, // 45 seconds
+  bufferCommands: false,
+  maxPoolSize: 10,
+  minPoolSize: 2,
+  maxIdleTimeMS: 30000,
+  retryWrites: true,
+  retryReads: true,
+};
+
+const metricsDB = mongoose.createConnection(METRICS_DB_URI, mongoOptions);
 
 const server = createServer(app);
 const { io: ioObject, connectedClients, chatRooms } = startWebSocketServer();
@@ -438,15 +450,44 @@ const { io: ioObject, connectedClients, chatRooms } = startWebSocketServer();
 
 metricsDB.on("error", (err) => {
 	console.error("Metrics database connection error:", err);
-	process.exit(1);
 });
+
+metricsDB.on("disconnected", () => {
+	console.log("Metrics database disconnected");
+});
+
+metricsDB.on("reconnected", () => {
+	console.log("Metrics database reconnected");
+});
+
 metricsDB.once("open", () => {
 	console.log("Connected to metrics database 🚀");
 });
 
+// Add connection event handlers for main database
+mongoose.connection.on("error", (err) => {
+	console.error("Main database connection error:", err);
+});
+
+mongoose.connection.on("disconnected", () => {
+	console.log("Main database disconnected");
+});
+
+mongoose.connection.on("reconnected", () => {
+	console.log("Main database reconnected");
+});
+
+mongoose.connection.on("connecting", () => {
+	console.log("Connecting to main database...");
+});
+
+mongoose.connection.on("connected", () => {
+	console.log("Main database connection established");
+});
+
 
 mongoose
-	.connect(MAIN_DB_URI)
+	.connect(MAIN_DB_URI, mongoOptions)
 	.then(() => {
 		console.log("Connected to Main Database 🚀");
 		server.listen(PORT, () => {
