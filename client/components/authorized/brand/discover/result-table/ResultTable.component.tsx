@@ -58,8 +58,7 @@ export default function CardTable<TData, TValue>({
         }
     }
   });
-  console.log("cardTable component data:", data);
-
+  
   const goToPage = (page: number) => {
     console.log(`goToPage paginationInfo: ${ paginationInfo.totalPages }, page:${ page }`)
     if (page >= 1 && page <= paginationInfo.totalPages) {
