@@ -76,5 +76,13 @@ secrets/
 *.key
 *.crt
 
+# Additional security files
+.env.*
+!.env.example
+*.secrets
+.secrets/
+private/
+auth/
+
 SECURITY.md
 Covo/
