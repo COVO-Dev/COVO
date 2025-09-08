@@ -1,23 +1,11 @@
-import { Roboto } from "next/font/google";
-import { Limelight } from "next/font/google";
-import growth_analytics from "@/assets/svg/growth_analytics.svg"
-import job_hunt from "@/assets/svg/job_hunt.svg"
-import team_collaboration from "@/assets/svg/team_collaboration.svg"
-import transfer_money from "@/assets/svg/transfer_money.svg"
+import { roboto, limelight } from "@/lib/fonts";
+import growth_analytics from "@/assets/svg/growth_analytics.svg";
+import job_hunt from "@/assets/svg/job_hunt.svg";
+import team_collaboration from "@/assets/svg/team_collaboration.svg";
+import transfer_money from "@/assets/svg/transfer_money.svg";
 
-export const limelight = Limelight({
-	subsets: ["latin"],
-	weight: ["400"],
-	style: ["normal"],
-	display: "swap",
-});
-
-export const roboto = Roboto({
-	subsets: ["latin"],
-	weight: ["400", "700"],
-	style: ["normal", "italic"],
-	display: "swap",
-});
+// Export the centralized font configurations
+export { roboto, limelight };
 
 export const AboutArray = [
 	{

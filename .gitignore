@@ -1,0 +1,88 @@
+# Environment files
+.env
+.env.local
+.env.production
+.env.staging
+
+# Node modules
+node_modules/
+
+# Build outputs
+dist/
+build/
+.next/
+
+# Logs
+*.log
+logs/
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# nyc test coverage
+.nyc_output
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.test
+.env.local
+.env.production
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# Docker
+.dockerignore
+
+# MacOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Redis dump
+dump.rdb
+
+# Database data
+data/
+
+# Secrets and credentials
+client_secret.json
+secrets/
+*.pem
+*.key
+*.crt
+
+# Additional security files
+.env.*
+!.env.example
+*.secrets
+.secrets/
+private/
+auth/
+
+SECURITY.md
+Covo/

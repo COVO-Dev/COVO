@@ -25,7 +25,6 @@ export const authMiddleware: RequestHandler = asyncHandler( async (
     }
 
     const token = authHeader.split(' ')[1];
-    console.log('Received token:', token);
 
     if (!token) {
       return res.status(401).json({
@@ -43,8 +42,6 @@ export const authMiddleware: RequestHandler = asyncHandler( async (
     const decoded = jwt.verify(token, secretKey) as { id: string; role: UserRole[] };
 
     const { id } = decoded;
-    console.log('Decoded Payload:', decoded);
-    console.log('Token ID:', id);
 
     if (!id) {
       return res.status(401).json({
@@ -53,8 +50,6 @@ export const authMiddleware: RequestHandler = asyncHandler( async (
         message: 'Invalid token: Missing user ID.',
       });
     }
-
-    console.log(`Querying user with ID: ${id}`);
 
     // Try finding the user in the User model
     let user = await User.findById(new mongoose.Types.ObjectId(id));

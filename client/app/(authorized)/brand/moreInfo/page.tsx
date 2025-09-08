@@ -11,8 +11,9 @@ import { brandFormDataSchema } from "@/lib/api/update-data/brand/brandUpdateData
 import { useRouter } from "next/navigation";
 import undraw_fill_forms_npwp from "@/assets/svg/undraw_fill-forms_npwp.svg";
 import getCurrentUserData from "@/utils/getCurrentUserData";
-import CountryDialCodesData from './CountryDialCodes.json';
-const countries = CountryDialCodesData.countries;
+import countryData from './CountryDialCodes.json';
+
+const countries = countryData.countries;
 
 type Inputs = z.infer<typeof brandFormDataSchema>;
 

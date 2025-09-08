@@ -38,8 +38,6 @@ export default function InfluencerProfile({ influencerId }: string) {
     getInfluencerDetails(token)
   }, [token])
 
-  console.log("influencerData", influencerData);
-
   return (
     <div>
       {/* {isLoading ? (<div> Alas</div>) : (<InfluencerDetails influencerData={influencerData} />)} */}

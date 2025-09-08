@@ -154,6 +154,8 @@ export interface AuthServiceResponse<T> {
 	message: string;
 	data: T | T[];
 	access_token?: string;
+	refresh_token?: string;
+	expires_in?: number;
 }
 
 export interface ServiceResponse<T> {

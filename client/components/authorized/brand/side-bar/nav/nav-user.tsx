@@ -40,12 +40,12 @@ export function NavUser() {
 							<Avatar className="h-8 w-8 rounded-lg">
 								{/* <Image src={user?.avatar ?? undefined} alt={user.firstName} /> */}
 								<AvatarFallback className="rounded-lg">
-									{user.firstName.slice(0, 2).toLocaleUpperCase()}
+									{user?.firstName ? user.firstName.slice(0, 2).toLocaleUpperCase() : 'UN'}
 								</AvatarFallback>
 							</Avatar>
 							<div className="grid flex-1 text-left text-sm leading-tight">
-								<span className="truncate font-semibold">{`${user.firstName} ${user.lastName}`}</span>
-								<span className="truncate text-xs">{user.email}</span>
+								<span className="truncate font-semibold">{`${user?.firstName || 'Unknown'} ${user?.lastName || ''}`}</span>
+								<span className="truncate text-xs">{user?.email || 'No email'}</span>
 							</div>
 							<ChevronsUpDown className="ml-auto size-4" />
 						</SidebarMenuButton>
@@ -61,14 +61,14 @@ export function NavUser() {
 								<Avatar className="h-8 w-8 rounded-lg">
 									{/* <AvatarImage src={user.avatar} alt={user.firstName} /> */}
 									<AvatarFallback className="rounded-lg">
-										{user.firstName.slice(0, 2).toLocaleUpperCase()}
+										{user?.firstName ? user.firstName.slice(0, 2).toLocaleUpperCase() : 'UN'}
 									</AvatarFallback>
 								</Avatar>
 								<div className="grid flex-1 text-left text-sm leading-tight">
 									<span className="truncate font-semibold">
-										{`${user.firstName} ${user.lastName}`}
+										{`${user?.firstName || 'Unknown'} ${user?.lastName || ''}`}
 									</span>
-									<span className="truncate text-xs">{user.email}</span>
+									<span className="truncate text-xs">{user?.email || 'No email'}</span>
 								</div>
 							</div>
 						</DropdownMenuLabel>

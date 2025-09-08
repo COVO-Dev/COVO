@@ -30,6 +30,11 @@ const calculateAge = (yearOfBirth: string): number | null => {
 // }
 
 const InfluencerDetails = ({ influencerData }) => {
+	// Add null check for influencerData
+	if (!influencerData) {
+		return <div>No influencer data available.</div>;
+	}
+
 	const {
 		// profilePicture,
 		firstName,
@@ -78,15 +83,19 @@ const InfluencerDetails = ({ influencerData }) => {
 							// height={200}
 							className="rounded-full w-[10rem] h-[10rem] flex items-center justify-center font-bold text-xl bg-slate-200 border-8 border-white/20 shadow-[0_0_10px_rgba(255,255,255,0.3)] backdrop-blur-sm"
 						>
-							{firstName.slice(0, 1).toLocaleUpperCase() + lastName.slice(0, 1).toLocaleUpperCase()}
+							{firstName && lastName ? (
+								firstName.slice(0, 1).toLocaleUpperCase() + lastName.slice(0, 1).toLocaleUpperCase()
+							) : (
+								'??'
+							)}
 							{/* {firstName.toLocaleUpperCase()} */}
 						</div>
 					</Avatar>
 					<div className="text-center lg:text-left">
 						<h2 className="text-xl sm:text-2xl font-semibold">
-							{firstName} {lastName}
+							{firstName || 'Unknown'} {lastName || ''}
 						</h2>
-						<p className="text-sm text-muted-foreground">@{username}</p>
+						<p className="text-sm text-muted-foreground">@{username || 'unknown'}</p>
 						{/* Display age for brands */}
 						{yearOfBirth && (
 							<p className="text-sm text-muted-foreground font-medium">
