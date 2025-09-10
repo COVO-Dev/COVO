@@ -9,6 +9,3 @@ export interface NavbarItems {
 	}>;
 	extras?: ReactNode;
 }
-
-
-export * from "./types/covoScore.types";

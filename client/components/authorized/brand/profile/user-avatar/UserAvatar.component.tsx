@@ -7,17 +7,8 @@ import { useAppSelector } from "@/lib/store/hooks";
 import UpdateProfile from "@/app/(authorized)/brand/profile/updateProfile";
 import UpdateProfilePicture from "@/app/(authorized)/influencer/profile/updateProfilePicture";
 import { Loader2 } from "lucide-react";
-import { CovoScoreDisplay } from "@/components/shared/covo-score-display/CovoScoreDisplay.component";
 
 export default function UserAvatar({ token, id, isLoading, user }) {
-	// Helper function to format company size display
-	const formatCompanySize = (size: string) => {
-		if (!size) return null;
-		// If the size already contains "employees", return as is
-		if (size.includes('employees')) return size;
-		// Otherwise, add "employees" suffix
-		return `${size} employees`;
-	};
 
 	return (
 		<div className="flex flex-wrap justify-center items-center border-b-[1px] border-sidebar-border pb-2">
@@ -31,11 +22,9 @@ export default function UserAvatar({ token, id, isLoading, user }) {
 						className=" w-full h-full rounded-lg"
 					/>
 					<div className="flex justify-between items-center  gap-4">
-						<CovoScoreDisplay
-							className="text-white z-10"
-							size="md"
-							showLabel={true}
-						/>
+						<p className="text-lg w-[160px] text-center border-2 rounded-md text-white p-2 font-weight-[800] z-10 border-white/20 shadow-[0_0_10px_rgba(255,255,255,0.3)] backdrop-blur-sm">
+							Covo Score: 8.20
+						</p>
 						<UpdateProfile />
 					</div>
 				</div>
@@ -87,42 +76,17 @@ export default function UserAvatar({ token, id, isLoading, user }) {
 				</div> */}
 			</div>
 
-			<div className="w-full h-auto flex flex-col justify-center items-center text-center max-w-[800px] px-4 mt-[90px] gap-6">
-				<h2 className="text-3xl font-bold text-gray-900">{`${user.firstName} ${user.lastName}`}</h2>
-				<p className="text-xl text-gray-600 font-medium">{user.industry}</p>
-
-				{/* Company Metrics Card */}
-				<div className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl p-6 shadow-lg w-full max-w-lg">
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-						<div className="flex items-center justify-center gap-2">
-							<span className="font-semibold text-gray-700">Email:</span>
-							<span className="text-gray-600">{user.email}</span>
-						</div>
-						{user.companySize && (
-							<div className="flex items-center justify-center gap-2">
-								<span className="font-semibold text-gray-700">Company Size:</span>
-								<span className="text-gray-600">{formatCompanySize(user.companySize)}</span>
-							</div>
-						)}
-					</div>
+			<div className="w-full h-auto flex flex-col justify-center items-center text-center max-w-[800px] px-4 mt-[90px] gap-4">
+				<h2 className="text-3xl font-bold">{`${user.firstName} ${user.lastName}`}</h2>
+				<p className="text-2xltext-gray-600">{user.industry}</p>
+				<div className="bg-sidebar-border flex p-5 gap-8 rounded-md">
+					<p>
+						<span className="font-semibold mr-1">email:</span>
+						<span>{user.email}</span>
+					</p>
 				</div>
-
-				{/* Bio Section */}
-				{user.bio ? (
-					<div className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl p-6 shadow-lg w-full">
-						<h3 className="text-lg font-bold text-gray-900 mb-4">About Our Brand</h3>
-						<p className="text-gray-700 leading-relaxed text-left whitespace-pre-wrap">
-							{user.bio}
-						</p>
-					</div>
-				) : (
-					<div className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-xl p-6 shadow-sm w-full">
-						<h3 className="text-lg font-medium text-gray-500 mb-2">About Our Brand</h3>
-						<p className="text-gray-400 italic">
-							No brand description available. Update your profile to add a compelling brand story.
-						</p>
-					</div>
-				)}
+				{user.bio && <p className="text-gray-600 font-bold">About Me</p>}
+				<p className="text-gray-600">{user.bio}</p>
 			</div>
 		</div>
 	);
